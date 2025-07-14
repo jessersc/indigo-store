@@ -109,12 +109,17 @@
       }
 
       currentPage = page;
-      const totalPages = Math.ceil(list.length / itemsPerPage);
+      const validItems = list.filter(p => p.ItemID && p.Product);
+      const totalPages = Math.ceil(validItems.length / itemsPerPage);
       const start = (page - 1) * itemsPerPage;
       const end = start + itemsPerPage;
-      const currentItems = list.slice(start, end);
+      const currentItems = validItems.slice(start, end);
+
 
       currentItems.forEach(p => {
+         
+        if (!p.ItemID || !p.Product) return;
+
         const usd = parseFloat(p.USD).toFixed(2);
         const bs = p.Bs;
         const card = document.createElement("div");
