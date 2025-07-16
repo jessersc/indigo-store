@@ -84,12 +84,12 @@
   </header>
 
   <main class="p-4 max-w-7xl mx-auto">
-   
+    <!-- Search Results Info -->
     <div id="search-info" class="mb-4 text-sm text-gray-600 hidden"></div>
     
-    
+    <!-- Skeleton Loading -->
     <div id="skeleton-loader" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-     
+      <!-- Skeleton cards will be inserted here -->
     </div>
 
     <section id="product-list" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 hidden"></section>
@@ -165,9 +165,9 @@
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         
         const data = await res.json();
-        console.log("API Response:", data); 
+        console.log("API Response:", data); // Debug log
         
-        
+        // Handle different possible response structures
         if (Array.isArray(data)) {
           products = data;
         } else if (data.data && Array.isArray(data.data)) {
@@ -189,7 +189,7 @@
         
         renderProducts(currentFilteredProducts, currentPage);
         
-       
+        // Show success message briefly
         showSearchInfo(`${products.length} productos cargados`);
         setTimeout(() => hideSearchInfo(), 3000);
         
@@ -252,7 +252,7 @@
         `;
         container.appendChild(card);
 
-        
+        // Lazy load images
         const img = card.querySelector("img.lazy-load");
         if (img.dataset.src) {
           img.onload = () => img.classList.add("loaded");
@@ -264,9 +264,9 @@
         }
       });
 
-      
+      // Pagination
       if (totalPages > 1) {
-        
+        // Previous button
         if (page > 1) {
           const prevBtn = document.createElement("button");
           prevBtn.textContent = "← Anterior";
@@ -275,7 +275,7 @@
           pagination.appendChild(prevBtn);
         }
 
-        
+        // Page numbers
         const startPage = Math.max(1, page - 2);
         const endPage = Math.min(totalPages, page + 2);
 
@@ -292,7 +292,7 @@
           pagination.appendChild(btn);
         }
 
-        
+        // Next button
         if (page < totalPages) {
           const nextBtn = document.createElement("button");
           nextBtn.textContent = "Siguiente →";
@@ -355,7 +355,7 @@
       const filtered = products.filter(p => {
         if (!p) return false;
         
-      
+        // Check all possible property names that might contain searchable text
         const searchableFields = [
           p.Product, p.product, p.ProductName, p.productName,
           p.Category, p.category, p.CategoryName, p.categoryName,
@@ -445,10 +445,10 @@
             
             <div class="flex gap-3 mt-6">
               <a href="https://www.whatsapp.com/catalog/584128503608/?app_absent=0" target="_blank" class="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition text-center text-sm font-medium">
-                 Consultar por WhatsApp
+                💬 Consultar por WhatsApp
               </a>
               <a href="https://www.instagram.com/indig0.store" target="_blank" class="flex-1 bg-pink-500 text-white py-2 px-4 rounded-lg hover:bg-pink-600 transition text-center text-sm font-medium">
-                 Ver en Instagram
+                📱 Ver en Instagram
               </a>
             </div>
           </div>
@@ -493,6 +493,7 @@
       document.body.appendChild(overlay);
     }
 
+    // Scroll to top functionality
     window.addEventListener("scroll", () => {
       const btn = document.getElementById("scrollTop");
       if (window.scrollY > 300) {
@@ -506,16 +507,16 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
-  
+    // Initialize everything
     window.addEventListener("DOMContentLoaded", () => {
       loadProducts();
       setupSearch();
       
-      
+      // Auto-refresh every 5 minutes
       setInterval(loadProducts, 300000);
     });
 
-  
+    // Handle escape key for closing popups
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         const imagePopup = document.getElementById('image-popup');
