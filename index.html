@@ -47,7 +47,7 @@
   </style>
 </head>
 <body class="bg-white text-gray-900 relative">
-  <!-- Loading Overlay -->
+  
   <div id="loading-overlay" class="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50">
     <div class="text-center">
       <div class="spinner mx-auto mb-4"></div>
@@ -84,12 +84,10 @@
   </header>
 
   <main class="p-4 max-w-7xl mx-auto">
-   
+
     <div id="search-info" class="mb-4 text-sm text-gray-600 hidden"></div>
     
-    
     <div id="skeleton-loader" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-     
     </div>
 
     <section id="product-list" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 hidden"></section>
@@ -165,8 +163,7 @@
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         
         const data = await res.json();
-        console.log("API Response:", data); 
-        
+        console.log("API Response:", data); // Debug log
         
         if (Array.isArray(data)) {
           products = data;
@@ -189,7 +186,6 @@
         
         renderProducts(currentFilteredProducts, currentPage);
         
-       
         showSearchInfo(`${products.length} productos cargados`);
         setTimeout(() => hideSearchInfo(), 3000);
         
@@ -252,7 +248,6 @@
         `;
         container.appendChild(card);
 
-        
         const img = card.querySelector("img.lazy-load");
         if (img.dataset.src) {
           img.onload = () => img.classList.add("loaded");
@@ -264,9 +259,8 @@
         }
       });
 
-      
       if (totalPages > 1) {
-        
+
         if (page > 1) {
           const prevBtn = document.createElement("button");
           prevBtn.textContent = "← Anterior";
@@ -275,7 +269,6 @@
           pagination.appendChild(prevBtn);
         }
 
-        
         const startPage = Math.max(1, page - 2);
         const endPage = Math.min(totalPages, page + 2);
 
@@ -292,7 +285,6 @@
           pagination.appendChild(btn);
         }
 
-        
         if (page < totalPages) {
           const nextBtn = document.createElement("button");
           nextBtn.textContent = "Siguiente →";
@@ -445,10 +437,10 @@
             
             <div class="flex gap-3 mt-6">
               <a href="https://www.whatsapp.com/catalog/584128503608/?app_absent=0" target="_blank" class="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition text-center text-sm font-medium">
-                 Consultar por WhatsApp
+                💬 Consultar por WhatsApp
               </a>
               <a href="https://www.instagram.com/indig0.store" target="_blank" class="flex-1 bg-pink-500 text-white py-2 px-4 rounded-lg hover:bg-pink-600 transition text-center text-sm font-medium">
-                 Ver en Instagram
+                📱 Ver en Instagram
               </a>
             </div>
           </div>
@@ -506,16 +498,14 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
-  
+
     window.addEventListener("DOMContentLoaded", () => {
       loadProducts();
       setupSearch();
       
-      
       setInterval(loadProducts, 300000);
     });
 
-  
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         const imagePopup = document.getElementById('image-popup');
