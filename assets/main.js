@@ -46,7 +46,7 @@ function navigateToHome() {
   showHomePage();
 }
 
-// Page display functions
+// page display functions
 function hideAllPages() {
   document.getElementById('main-content').classList.add('hidden');
   document.getElementById('search-results').classList.add('hidden');
@@ -255,7 +255,9 @@ function addToCart(product) {
 // mi bb
 function setupSearch() {
   const searchInput = document.getElementById("search");
+  const searchMobileInput = document.getElementById("search-mobile");
   const searchResults = document.getElementById("search-results");
+  const mobileSearchResults = document.getElementById("mobile-search-results");
   const mainContent = document.getElementById("main-content");
   const searchProducts = document.getElementById("search-products");
   const noResults = document.getElementById("no-results");
@@ -263,58 +265,93 @@ function setupSearch() {
   const searchLoading = document.getElementById("search-loading");
 
   function clearSearch() {
-    searchInput.value = "";
+    if (searchInput) searchInput.value = "";
+    if (searchMobileInput) searchMobileInput.value = "";
     searchResults.classList.add("hidden");
+    if (mobileSearchResults) mobileSearchResults.innerHTML = "";
     handleRouting(); // return - volver
     searchProducts.innerHTML = "";
     noResults.classList.add("hidden");
   }
 
-  function renderSearchResults(products) {
-    searchProducts.innerHTML = "";
-    
-    if (!products.length) {
-      noResults.classList.remove("hidden");
-      return;
-    } else {
-      noResults.classList.add("hidden");
-    }
-
-    products.forEach(product => {
-      if (product.Product && product.Image) {
-        searchProducts.appendChild(renderCard(product));
+  function renderSearchResults(products, isMobile) {
+    if (isMobile && mobileSearchResults) {
+      mobileSearchResults.innerHTML = "";
+      if (!products.length) {
+        mobileSearchResults.innerHTML = '<p class="text-center text-gray-500 mt-8 text-lg">No se encontraron productos.</p>';
+        return;
       }
+      products.forEach(product => {
+        if (product.Product && product.Image) {
+          mobileSearchResults.appendChild(renderCard(product));
+        }
+      });
+    } else {
+      searchProducts.innerHTML = "";
+      if (!products.length) {
+        noResults.classList.remove("hidden");
+        return;
+      } else {
+        noResults.classList.add("hidden");
+      }
+      products.forEach(product => {
+        if (product.Product && product.Image) {
+          searchProducts.appendChild(renderCard(product));
+        }
+      });
+    }
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      clearTimeout(searchTimeout);
+      const term = e.target.value.trim().toLowerCase();
+      if (!term) {
+        clearSearch();
+        return;
+      }
+      searchLoading.classList.remove("hidden");
+      searchTimeout = setTimeout(() => {
+        const filtered = allProducts.filter(product => {
+          const matches = [product.Product, product.Description, product.Category, product.Collection].some(field =>
+            (field || "").toLowerCase().includes(term)
+          );
+          return matches;
+        });
+        hideAllPages();
+        searchResults.classList.remove("hidden");
+        renderSearchResults(filtered, false);
+        searchLoading.classList.add("hidden");
+      }, 300);
     });
   }
 
-  searchInput.addEventListener("input", (e) => {
-    clearTimeout(searchTimeout);
-    const term = e.target.value.trim().toLowerCase();
-    
-    if (!term) {
-      clearSearch();
-      return;
-    }
+  if (searchMobileInput) {
+    searchMobileInput.addEventListener("input", (e) => {
+      clearTimeout(searchTimeout);
+      const term = e.target.value.trim().toLowerCase();
+      // Hide main search results when overlay is open
+      if (searchResults) searchResults.classList.add("hidden");
+      if (!term) {
+        if (mobileSearchResults) mobileSearchResults.innerHTML = "";
+        return;
+      }
+      if (mobileSearchResults) mobileSearchResults.innerHTML = '<div class="w-full text-center py-4 text-pink-400">Buscando...</div>';
+      searchTimeout = setTimeout(() => {
+        const filtered = allProducts.filter(product => {
+          const matches = [product.Product, product.Description, product.Category, product.Collection].some(field =>
+            (field || "").toLowerCase().includes(term)
+          );
+          return matches;
+        });
+        renderSearchResults(filtered, true);
+      }, 300);
+    });
+  }
 
-    searchLoading.classList.remove("hidden");
-    
-    searchTimeout = setTimeout(() => {
-      const filtered = allProducts.filter(product => {
-        const matches = [product.Product, product.Description, product.Category, product.Collection].some(field =>
-          (field || "").toLowerCase().includes(term)
-        );
-        return matches;
-      });
-
-      hideAllPages();
-      searchResults.classList.remove("hidden");
-      
-      renderSearchResults(filtered);
-      searchLoading.classList.add("hidden");
-    }, 300);
-  });
-
-  clearSearchBtn.addEventListener("click", clearSearch);
+  if (clearSearchBtn) {
+    clearSearchBtn.addEventListener("click", clearSearch);
+  }
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !searchResults.classList.contains("hidden")) {
@@ -450,6 +487,13 @@ fetch(API_URL)
     if (newDrop) {
       newDrop.innerHTML = nuevos.map(p => renderProductMini(p)).join('');
     }
+    // Also render for mobile menu with data-id
+    const nuevosSubmenuMobile = document.getElementById('nuevos-submenu-mobile');
+    if (nuevosSubmenuMobile) {
+      nuevosSubmenuMobile.innerHTML = nuevos.map(p =>
+        `<a href="#" class="mobile-submenu-item" data-id="${p.ItemID}">${p.Product}</a>`
+      ).join('');
+    }
 
     // render categores
     const cats = uniqueValues(valid, "Category");
@@ -463,10 +507,15 @@ fetch(API_URL)
     renderDropdownLinks("col-dropdown", cols, "collection");
     renderTagButtons("collection-buttons", cols, "Collection", valid, "collection-products", true);
 
+    // Sync mobile menu with desktop menu
+    if (window.syncMobileMenus) window.syncMobileMenus();
+
     setupSearch();
     
     // initial routing
     handleRouting();
+    // Hide loading overlay
+    if (window.hideLoadingOverlay) window.hideLoadingOverlay();
   })
   .catch(err => {
     console.error("Error fetching or processing data:", err);
@@ -477,4 +526,64 @@ fetch(API_URL)
       <br>Por favor, verifica tu conexión a internet o intenta más tarde.
     `;
     document.querySelector('main').insertBefore(errorDiv, document.querySelector('main').firstChild);
+
+    // populate menus and search  static - FALLBACK
+    // nuevos
+    const nuevosSubmenu = document.getElementById('nuevos-submenu');
+    if (nuevosSubmenu) {
+      nuevosSubmenu.innerHTML = [
+        '<a href="#" class="mobile-submenu-item">Producto Nuevo 1</a>',
+        '<a href="#" class="mobile-submenu-item">Producto Nuevo 2</a>',
+        '<a href="#" class="mobile-submenu-item">Producto Nuevo 3</a>'
+      ].join('');
+    }
+    const newDrop = document.getElementById('new-dropdown');
+    if (newDrop) {
+      newDrop.innerHTML = [
+        '<div class="block hover:bg-gray-100 p-3 rounded-lg cursor-pointer transition-colors"><div class="flex gap-3 items-center"><div class="w-12 h-12 bg-gray-200 rounded-lg"></div><div class="flex-1"><p class="text-sm font-semibold text-gray-800 mb-1 leading-tight">Producto Nuevo 1</p></div></div></div>',
+        '<div class="block hover:bg-gray-100 p-3 rounded-lg cursor-pointer transition-colors"><div class="flex gap-3 items-center"><div class="w-12 h-12 bg-gray-200 rounded-lg"></div><div class="flex-1"><p class="text-sm font-semibold text-gray-800 mb-1 leading-tight">Producto Nuevo 2</p></div></div></div>',
+        '<div class="block hover:bg-gray-100 p-3 rounded-lg cursor-pointer transition-colors"><div class="flex gap-3 items-center"><div class="w-12 h-12 bg-gray-200 rounded-lg"></div><div class="flex-1"><p class="text-sm font-semibold text-gray-800 mb-1 leading-tight">Producto Nuevo 3</p></div></div></div>'
+      ].join('');
+    }
+    // categorias
+    const categoriasSubmenu = document.getElementById('categorias-submenu');
+    if (categoriasSubmenu) {
+      categoriasSubmenu.innerHTML = [
+        '<a href="#" class="mobile-submenu-item">Accesorios</a>',
+        '<a href="#" class="mobile-submenu-item">Ropa</a>',
+        '<a href="#" class="mobile-submenu-item">Belleza</a>'
+      ].join('');
+    }
+    const catDropdown = document.getElementById('cat-dropdown');
+    if (catDropdown) {
+      catDropdown.innerHTML = [
+        '<a href="#">Accesorios</a>',
+        '<a href="#">Ropa</a>',
+        '<a href="#">Belleza</a>'
+      ].join('');
+    }
+    // colecciones
+    const coleccionesSubmenu = document.getElementById('colecciones-submenu');
+    if (coleccionesSubmenu) {
+      coleccionesSubmenu.innerHTML = [
+        '<a href="#" class="mobile-submenu-item">Colección Primavera</a>',
+        '<a href="#" class="mobile-submenu-item">Colección Verano</a>',
+        '<a href="#" class="mobile-submenu-item">Edición Especial</a>'
+      ].join('');
+    }
+    const colDropdown = document.getElementById('col-dropdown');
+    if (colDropdown) {
+      colDropdown.innerHTML = [
+        '<a href="#">Colección Primavera</a>',
+        '<a href="#">Colección Verano</a>',
+        '<a href="#">Edición Especial</a>'
+      ].join('');
+    }
+    // sarch fall back keeps it hidden
+    const searchInput = document.getElementById('search');
+    const searchMobileInput = document.getElementById('search-mobile');
+    if (searchInput) searchInput.placeholder = 'Buscar producto (sin conexión)';
+    if (searchMobileInput) searchMobileInput.placeholder = 'Buscar producto (sin conexión)';
+    // if error not overloading
+    if (window.hideLoadingOverlay) window.hideLoadingOverlay();
   });

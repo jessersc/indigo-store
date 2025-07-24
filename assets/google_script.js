@@ -3,18 +3,17 @@ function doGet(e) {
   const data = sheet.getSheetByName('Sheet1');
   const values = data.getDataRange().getValues();
   
-  const products = values.slice(1).map(row => {
-    const usd = parseFloat(String(row[2]).replace(/[^0-9.]/g, "")) || 0; 
-    const bs = parseFloat(String(row[4]).replace(/[^0-9.]/g, "")) || 0;   
-
-    return {
-      ItemID: row[0],
-      Product: row[1] || "",
-      USD: usd.toFixed(2),     // verde con 2 decimales
-      Bs: Math.round(bs),      // rounded bolos
-      Image: row[5] || ""
-    };
-  });
+  const products = values.slice(1).map(row => ({
+    ItemID: row[0],
+    Product: row[1] || "",
+    USD: parseFloat(row[2]).toFixed(2), // verde con 2 decimales
+    Bs: Math.round(parseFloat(row[4])), // rounded bolos
+    Image: row[5],
+    Collection: row[6] || "",
+    Description: row[7] || "",
+    Category: row[8] || "",
+    Stock: row[9] || 0
+  }));
 
   return ContentService
     .createTextOutput(JSON.stringify(products))

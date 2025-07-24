@@ -20,38 +20,45 @@
 
 </head>
 <body>
-  <header class="header-kawaii p-4 sticky top-0 z-50">
-    <div class="flex flex-col lg:flex-row justify-between items-center gap-4 max-w-7xl mx-auto">
+  <!-- loading -->
+  <div id="loadingOverlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#ffd2e9;z-index:3000;display:flex;align-items:center;justify-content:center;transition:opacity 0.4s;">
+    <!-- From Uiverse.io by alexruix -->
+    <div class="loader">
+      <span class="loader-text">loading</span>
+      <span class="load"></span>
+    </div>
+  </div>
+  <header class="header-kawaii p-4 sticky top-0 z-50" id="main-header">
+    <div class="flex flex-row justify-between items-center max-w-7xl mx-auto">
+      <!-- icon mobile seachr -->
+      <button id="searchIconBtn" style="display:none;background:none;border:none;cursor:pointer;padding:8px;margin-right:8px;">
+        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="28" height="28" viewBox="0 0 50 50"><path d="M 21 3 C 11.622998 3 4 10.623005 4 20 C 4 29.376995 11.622998 37 21 37 C 24.712383 37 28.139151 35.791079 30.9375 33.765625 L 44.085938 46.914062 L 46.914062 44.085938 L 33.886719 31.058594 C 36.443536 28.083 38 24.223631 38 20 C 38 10.623005 30.377002 3 21 3 z M 21 5 C 29.296122 5 36 11.703883 36 20 C 36 28.296117 29.296122 35 21 35 C 12.703878 35 6 28.296117 6 20 C 6 11.703883 12.703878 5 21 5 z"></path></svg>
+      </button>
+      <!-- hamburger for mobile -->
+      <button id="hamburgerBtn" class="mobile-menu-toggle" style="display:none;background:none;border:none;cursor:pointer;padding:8px;">
+        <span style="display:block;width:24px;height:3px;background:#ff6b9d;margin:5px 0;border-radius:2px;"></span>
+        <span style="display:block;width:24px;height:3px;background:#ff6b9d;margin:5px 0;border-radius:2px;"></span>
+        <span style="display:block;width:24px;height:3px;background:#ff6b9d;margin:5px 0;border-radius:2px;"></span>
+      </button>
       <h1 class="logo-kawaii">
         <a href="#" onclick="navigateToHome()" class="hover:opacity-80 transition block w-32">
           <img src="assets/logo.png" alt="Indigo Store Logo" class="w-full h-auto" />
         </a>
       </h1>
-
       <nav class="nav-menu flex-wrap justify-center">
         <a href="#" onclick="navigateToHome()">Inicio ♡</a>
-        
         <div class="dropdown">
           <span class="dropdown-toggle">Nuevos ♡</span>
-          <div class="dropdown-content" id="new-dropdown">
-            <!-- dinamyc -->
-          </div>
+          <div class="dropdown-content" id="new-dropdown"></div>
         </div>
-
         <div class="dropdown">
           <span class="dropdown-toggle">Categorías ♡</span>
-          <div class="dropdown-content" id="cat-dropdown">
-            <!-- dynamic? como se escribe?-->
-          </div>
+          <div class="dropdown-content" id="cat-dropdown"></div>
         </div>
-
         <div class="dropdown">
           <span class="dropdown-toggle">Colecciones ♡</span>
-          <div class="dropdown-content" id="col-dropdown">
-            <!-- dinamic? aswell -->
-          </div>
+          <div class="dropdown-content" id="col-dropdown"></div>
         </div>
-
         <div class="dropdown">
           <span class="dropdown-toggle">Redes ♡</span>
           <div class="dropdown-content">
@@ -70,18 +77,57 @@
           </div>
         </div>
       </nav>
-
-      <div class="relative w-full sm:w-64">
+      <div class="relative w-full sm:w-64" id="desktopSearchBar">
         <input id="search" type="text" placeholder="Buscar producto..." class="search-kawaii w-full text-sm" />
         <div id="search-loading" class="absolute right-4 top-1/2 transform -translate-y-1/2 hidden">
           <div class="w-4 h-4 loading-kawaii"></div>
         </div>
       </div>
     </div>
+    <!-- mobil search bar hidden -->
+    <div id="mobileSearchBar" style="display:none;padding:8px 0 0 0;">
+      <input id="search-mobile" type="text" placeholder="Buscar producto..." class="search-kawaii w-full text-sm" />
+    </div>
   </header>
+  <!-- mob meny onverlay -->
+  <div id="mobileMenuOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:1001;"></div>
+  <!-- mob menu drag -->
+  <div id="mobileMenuDrawer" style="display:none;position:fixed;top:0;left:0;width:80vw;max-width:320px;height:100vh;background:#fff;z-index:1002;box-shadow:2px 0 20px rgba(255,107,157,0.1);padding:32px 16px;overflow-y:auto;">
+    <a href="#" class="mobile-menu-item" onclick="navigateToHome(); closeMobileMenu();">Inicio ♡</a>
+    <div class="mobile-menu-item" onclick="toggleMobileSubmenu('nuevos-submenu-mobile')">
+      Nuevos ♡
+      <div class="mobile-submenu" id="nuevos-submenu-mobile"></div>
+    </div>
+    <div class="mobile-menu-item" onclick="toggleMobileSubmenu('categorias-submenu-mobile')">
+      Categorías ♡
+      <div class="mobile-submenu" id="categorias-submenu-mobile"></div>
+    </div>
+    <div class="mobile-menu-item" onclick="toggleMobileSubmenu('colecciones-submenu-mobile')">
+      Colecciones ♡
+      <div class="mobile-submenu" id="colecciones-submenu-mobile"></div>
+    </div>
+    <div class="mobile-menu-item" onclick="toggleMobileSubmenu('redes-submenu-mobile')">
+      Redes ♡
+      <div class="mobile-submenu" id="redes-submenu-mobile">
+        <a href="https://www.instagram.com/indig0.store" target="_blank" class="mobile-submenu-item">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="social-icon" alt=""> Instagram
+        </a>
+        <a href="https://www.tiktok.com/@indig0.store" target="_blank" class="mobile-submenu-item">
+          <img src="https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/tiktok.svg" class="social-icon" alt=""> TikTok
+        </a>
+        <a href="https://www.whatsapp.com/catalog/584128503608/?app_absent=0" target="_blank" class="mobile-submenu-item">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="social-icon" alt=""> WhatsApp
+        </a>
+        <a href="https://maps.app.goo.gl/MQ2BxeCVe8wEMx1B7" target="_blank" class="mobile-submenu-item">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/a/aa/Google_Maps_icon_%282020%29.svg" class="social-icon" alt=""> Dirección
+        </a>
+      </div>
+    </div>
+  </div>
+  <!-- YOU SHALL NOT PAASSS -->
 
   <main class="max-w-7xl mx-auto px-4">
-    <!-- Breadcrumb -->
+    <!-- breadcrumb -->
     <nav id="breadcrumb" class="breadcrumb-kawaii mb-6 mt-6 hidden">
       <!-- dynamic contnte is showed here -->
     </nav>
@@ -181,6 +227,185 @@
   <footer class="footer-kawaii text-center p-6 text-sm">
     <p class="mb-2">Indigo Store - Todos los derechos reservados</p>
   </footer>
+  <!-- scroll to top -->
+  <button id="scrollToTopBtn" style="display:none;position:fixed;bottom:32px;right:24px;z-index:1001;background:#ff6b9d;color:white;border:none;border-radius:50%;width:48px;height:48px;box-shadow:0 4px 15px rgba(255,107,157,0.3);font-size:2rem;align-items:center;justify-content:center;transition:opacity 0.3s;">
+    ↑
+  </button>
   <script src="assets/main.js"></script>
+  <script src="assets/mob.js"></script>
+  <script>
+  // sscroll to top buttono logic
+  const scrollBtn = document.getElementById('scrollToTopBtn');
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 200) {
+      scrollBtn.style.display = 'flex';
+    } else {
+      scrollBtn.style.display = 'none';
+    }
+  });
+  scrollBtn.onclick = function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  // hmburger menu logic
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+  const mobileMenuDrawer = document.getElementById('mobileMenuDrawer');
+  function openMobileMenu() {
+    mobileMenuOverlay.style.display = 'block';
+    mobileMenuDrawer.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMobileMenu() {
+    mobileMenuOverlay.style.display = 'none';
+    mobileMenuDrawer.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  hamburgerBtn.onclick = openMobileMenu;
+  mobileMenuOverlay.onclick = closeMobileMenu;
+  // show hide ham menu
+  function updateMenuDisplay() {
+    if (window.innerWidth < 768) {
+      document.querySelector('.nav-menu').style.display = 'none';
+      hamburgerBtn.style.display = 'block';
+      document.getElementById('searchIconBtn').style.display = 'block';
+      document.getElementById('desktopSearchBar').style.display = 'none';
+    } else {
+      document.querySelector('.nav-menu').style.display = '';
+      hamburgerBtn.style.display = 'none';
+      document.getElementById('searchIconBtn').style.display = 'none';
+      document.getElementById('desktopSearchBar').style.display = '';
+      closeMobileMenu();
+    }
+  }
+  window.addEventListener('resize', updateMenuDisplay);
+  document.addEventListener('DOMContentLoaded', updateMenuDisplay);
+  // fixed search
+  const searchIconBtn = document.getElementById('searchIconBtn');
+  const desktopSearchBar = document.getElementById('desktopSearchBar');
+  searchIconBtn.onclick = function(e) {
+    if (window.innerWidth < 768) {
+      desktopSearchBar.style.display = (desktopSearchBar.style.display === 'block') ? 'none' : 'block';
+      if (desktopSearchBar.style.display === 'block') {
+        setTimeout(() => document.getElementById('search').focus(), 100);
+      }
+      e.stopPropagation();
+    }
+  };
+  // hide search mobile
+  if (window.innerWidth < 768) {
+    document.addEventListener('click', function(e) {
+      if (desktopSearchBar.style.display === 'block' && !desktopSearchBar.contains(e.target) && e.target !== searchIconBtn) {
+        desktopSearchBar.style.display = 'none';
+      }
+    });
+  }
+  // mobile sub logic
+  function toggleMobileSubmenu(id) {
+    const submenu = document.getElementById(id);
+    if (submenu) submenu.classList.toggle('active');
+  }
+  // safe, take from main logic
+  document.addEventListener('DOMContentLoaded', function() {
+    // copy main logi values here if necessary
+    const copyDropdown = (desktopId, mobileId) => {
+      const desktop = document.getElementById(desktopId);
+      const mobile = document.getElementById(mobileId);
+      if (desktop && mobile) mobile.innerHTML = desktop.innerHTML;
+    };
+    copyDropdown('new-dropdown', 'nuevos-submenu-mobile');
+    copyDropdown('cat-dropdown', 'categorias-submenu-mobile');
+    copyDropdown('col-dropdown', 'colecciones-submenu-mobile');
+  });
+  // header hide - mobile
+  let lastScrollY = window.scrollY;
+  let ticking = false;
+  const header = document.getElementById('main-header');
+  function updateHeaderOnScroll() {
+    if (window.innerWidth < 768) {
+      if (window.scrollY > lastScrollY && window.scrollY > 80) {
+        header.classList.add('mobile-hidden');
+      } else {
+        header.classList.remove('mobile-hidden');
+      }
+    } else {
+      header.classList.remove('mobile-hidden');
+    }
+    lastScrollY = window.scrollY;
+    ticking = false;
+  }
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(updateHeaderOnScroll);
+      ticking = true;
+    }
+  });
+  window.addEventListener('resize', updateHeaderOnScroll);
+  // populate mobile menu
+  function syncMobileMenus() {
+    const copyDropdown = (desktopId, mobileId) => {
+      const desktop = document.getElementById(desktopId);
+      const mobile = document.getElementById(mobileId);
+      if (desktop && mobile) mobile.innerHTML = desktop.innerHTML;
+    };
+    copyDropdown('new-dropdown', 'nuevos-submenu-mobile');
+    copyDropdown('cat-dropdown', 'categorias-submenu-mobile');
+    copyDropdown('col-dropdown', 'colecciones-submenu-mobile');
+
+    // click handlers check nuevos later
+    const catLinks = document.querySelectorAll('#categorias-submenu-mobile a');
+    catLinks.forEach(link => {
+      link.onclick = function(e) {
+        e.preventDefault();
+        const name = link.textContent.trim();
+        if (window.navigateToCategory) window.navigateToCategory(name);
+        if (window.closeMobileMenu) window.closeMobileMenu();
+      };
+    });
+    const colLinks = document.querySelectorAll('#colecciones-submenu-mobile a');
+    colLinks.forEach(link => {
+      link.onclick = function(e) {
+        e.preventDefault();
+        const name = link.textContent.trim();
+        if (window.navigateToCollection) window.navigateToCollection(name);
+        if (window.closeMobileMenu) window.closeMobileMenu();
+      };
+    });
+    const newLinks = document.querySelectorAll('#nuevos-submenu-mobile .mobile-submenu-item[data-id]');
+    newLinks.forEach(link => {
+      link.onclick = function(e) {
+        e.preventDefault();
+        const id = link.getAttribute('data-id');
+        if (id && window.navigateToProduct) {
+          window.navigateToProduct(id);
+        }
+        if (window.closeMobileMenu) window.closeMobileMenu();
+      };
+    });
+  }
+  // expose syncMobileMenus call api
+  window.syncMobileMenus = syncMobileMenus;
+  document.addEventListener('DOMContentLoaded', syncMobileMenus);
+  // hide loading
+  function hideLoadingOverlay() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+      overlay.style.opacity = '0';
+      setTimeout(() => overlay.style.display = 'none', 400);
+    }
+  }
+
+  // closee menuu
+  if (window.innerWidth < 768) {
+    document.addEventListener('click', function(e) {
+      const drawer = document.getElementById('mobileMenuDrawer');
+      const overlay = document.getElementById('mobileMenuOverlay');
+      if (drawer && overlay && drawer.style.display === 'block' && overlay.style.display === 'block') {
+        if (!drawer.contains(e.target) && e.target !== document.getElementById('hamburgerBtn')) {
+          closeMobileMenu();
+        }
+      }
+    });
+  }
+  </script>
 </body>
 </html>
