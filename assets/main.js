@@ -263,6 +263,7 @@ function setupSearch() {
   const noResults = document.getElementById("no-results");
   const clearSearchBtn = document.getElementById("clear-search");
   const searchLoading = document.getElementById("search-loading");
+  const mobileSearchBar = document.getElementById('mobile-search-bar');
 
   function clearSearch() {
     if (searchInput) searchInput.value = "";
@@ -332,8 +333,13 @@ function setupSearch() {
       const term = e.target.value.trim().toLowerCase();
       // Hide main search results when overlay is open
       if (searchResults) searchResults.classList.add("hidden");
+      // HIDE MAIN CONTENT ON MOBILE SEARCH
+      if (mainContent) mainContent.classList.add("hidden");
       if (!term) {
         if (mobileSearchResults) mobileSearchResults.innerHTML = "";
+        // SHOW MAIN CONTENT AGAIN IF SEARCH IS CLEARED
+        if (mainContent) mainContent.classList.remove("hidden");
+        mobileSearchBar.style.display = 'none';
         return;
       }
       if (mobileSearchResults) mobileSearchResults.innerHTML = '<div class="w-full text-center py-4 text-pink-400">Buscando...</div>';

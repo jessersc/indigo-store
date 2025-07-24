@@ -87,6 +87,7 @@
     <!-- mobil search bar hidden -->
     <div id="mobileSearchBar" style="display:none;padding:8px 0 0 0;">
       <input id="search-mobile" type="text" placeholder="Buscar producto..." class="search-kawaii w-full text-sm" />
+      <div id="mobile-search-results" class="grid grid-cols-2 gap-4 mt-2"></div>
     </div>
   </header>
   <!-- mob meny onverlay -->
@@ -282,8 +283,21 @@
   // fixed search
   const searchIconBtn = document.getElementById('searchIconBtn');
   const desktopSearchBar = document.getElementById('desktopSearchBar');
+  const mobileSearchBar = document.getElementById('mobileSearchBar');
+  const mobileSearchInput = document.getElementById('search-mobile');
   searchIconBtn.onclick = function(e) {
     if (window.innerWidth < 768) {
+      // show mobile search bar, hide desktop
+      if (mobileSearchBar.style.display === 'block') {
+        mobileSearchBar.style.display = 'none';
+      } else {
+        mobileSearchBar.style.display = 'block';
+        setTimeout(() => mobileSearchInput && mobileSearchInput.focus(), 100);
+      }
+      desktopSearchBar.style.display = 'none';
+      e.stopPropagation(); // stop event from closing the bar
+    } else {
+      // full view behavior
       desktopSearchBar.style.display = (desktopSearchBar.style.display === 'block') ? 'none' : 'block';
       if (desktopSearchBar.style.display === 'block') {
         setTimeout(() => document.getElementById('search').focus(), 100);
@@ -291,14 +305,17 @@
       e.stopPropagation();
     }
   };
-  // hide search mobile
-  if (window.innerWidth < 768) {
+  // handle closing mobile search bar
+  function setupMobileSearchCloseHandler() {
     document.addEventListener('click', function(e) {
-      if (desktopSearchBar.style.display === 'block' && !desktopSearchBar.contains(e.target) && e.target !== searchIconBtn) {
-        desktopSearchBar.style.display = 'none';
+      if (window.innerWidth < 768 && mobileSearchBar.style.display === 'block') {
+        if (!mobileSearchBar.contains(e.target) && e.target !== searchIconBtn) {
+          mobileSearchBar.style.display = 'none';
+        }
       }
     });
   }
+  document.addEventListener('DOMContentLoaded', setupMobileSearchCloseHandler);
   // mobile sub logic
   function toggleMobileSubmenu(id) {
     const submenu = document.getElementById(id);

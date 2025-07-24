@@ -1285,3 +1285,19 @@ body {
     margin: 0;
   }
 }
+
+@media (max-width: 768px) {
+  #mobileSearchBar {
+    position: sticky;
+    top: 0;
+    z-index: 1002;
+    background: #fff;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  #mobile-search-results {
+    max-height: calc(100vh - 120px); /* adjust this for footerr */
+    overflow-y: auto;
+    padding-bottom: 80px; /* and this for height */
+  }
+}
