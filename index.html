@@ -24,29 +24,47 @@
   <div id="loadingOverlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#ffd2e9;z-index:3000;display:flex;align-items:center;justify-content:center;transition:opacity 0.4s;">
     <!-- From Uiverse.io by alexruix -->
     <div class="loader">
-      <span class="loader-text">loading</span>
+      <span class="loader-text">Cargando...</span>
       <span class="load"></span>
     </div>
   </div>
   <header class="header-kawaii p-4 sticky top-0 z-50" id="main-header">
-    <div class="flex flex-row justify-between items-center max-w-7xl mx-auto">
-      <!-- icon mobile seachr -->
-      <button id="searchIconBtn" style="display:none;background:none;border:none;cursor:pointer;padding:8px;margin-right:8px;">
-        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="28" height="28" viewBox="0 0 50 50"><path d="M 21 3 C 11.622998 3 4 10.623005 4 20 C 4 29.376995 11.622998 37 21 37 C 24.712383 37 28.139151 35.791079 30.9375 33.765625 L 44.085938 46.914062 L 46.914062 44.085938 L 33.886719 31.058594 C 36.443536 28.083 38 24.223631 38 20 C 38 10.623005 30.377002 3 21 3 z M 21 5 C 29.296122 5 36 11.703883 36 20 C 36 28.296117 29.296122 35 21 35 C 12.703878 35 6 28.296117 6 20 C 6 11.703883 12.703878 5 21 5 z"></path></svg>
-      </button>
-      <!-- hamburger for mobile -->
-      <button id="hamburgerBtn" class="mobile-menu-toggle" style="display:none;background:none;border:none;cursor:pointer;padding:8px;">
+    <div class="flex flex-row items-center max-w-7xl mx-auto flex-nowrap">
+      <!-- hamburger for mobile (left) -->
+      <button id="hamburgerBtn" class="mobile-menu-toggle mr-2" style="display:none;background:none;border:none;cursor:pointer;padding:8px;">
         <span style="display:block;width:24px;height:3px;background:#ff6b9d;margin:5px 0;border-radius:2px;"></span>
         <span style="display:block;width:24px;height:3px;background:#ff6b9d;margin:5px 0;border-radius:2px;"></span>
         <span style="display:block;width:24px;height:3px;background:#ff6b9d;margin:5px 0;border-radius:2px;"></span>
       </button>
-      <h1 class="logo-kawaii">
-        <a href="#" onclick="navigateToHome()" class="hover:opacity-80 transition block w-32">
-          <img src="assets/logo.png" alt="Indigo Store Logo" class="w-full h-auto" />
-        </a>
-      </h1>
-      <nav class="nav-menu flex-wrap justify-center">
-        <a href="#" onclick="navigateToHome()">Inicio ♡</a>
+      <!-- logo centered -->
+      <div class="flex-1 flex justify-center">
+        <h1 class="logo-kawaii">
+          <a href="#" onclick="navigateToHome()" class="hover:opacity-80 transition block w-32">
+            <img src="assets/logo.png" alt="Indigo Store Logo" class="w-full h-auto" />
+          </a>
+        </h1>
+      </div>
+      <!-- search and cart icons (right) -->
+      <div class="flex items-center gap-2 flex-shrink-0 ml-2">
+        <button id="searchIconBtn" style="display:none;background:none;border:none;cursor:pointer;padding:8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="28" height="28" viewBox="0 0 50 50"><path d="M 21 3 C 11.622998 3 4 10.623005 4 20 C 4 29.376995 11.622998 37 21 37 C 24.712383 37 28.139151 35.791079 30.9375 33.765625 L 44.085938 46.914062 L 46.914062 44.085938 L 33.886719 31.058594 C 36.443536 28.083 38 24.223631 38 20 C 38 10.623005 30.377002 3 21 3 z M 21 5 C 29.296122 5 36 11.703883 36 20 C 36 28.296117 29.296122 35 21 35 C 12.703878 35 6 28.296117 6 20 C 6 11.703883 12.703878 5 21 5 z"></path></svg>
+        </button>
+        <button id="cartIconBtnMobile" class="cart-icon-header flex items-center justify-center" style="background:none;border:none;cursor:pointer;padding:8px;">
+          <svg fill="#ff6b9d" stroke="#ff6b9d" width="28px" height="28px" viewBox="144 144 512 512" xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#a)">
+              <defs>
+                <clipPath id="a">
+                  <path d="m148.09 190h503.81v420h-503.81z"/>
+                </clipPath>
+              </defs>
+              <g clip-path="url(#a)">
+                <path d="m246.17 257.25-6.9961-41.984h-25.105c-3.7422-14.445-16.777-25.191-32.387-25.191-18.523 0-33.586 15.062-33.586 33.586 0 18.523 15.062 33.586 33.586 33.586 15.609 0 28.641-10.746 32.395-25.191h10.867l4.1992 25.191-0.32031 0.003906 43.422 218.45c-20.699 1.5781-37.938 17.516-39.969 37.566-1.1914 11.797 2.6875 23.613 10.648 32.395 7.9648 8.8086 19.316 13.871 31.125 13.871h16.793c0 27.785 22.598 50.383 50.383 50.383s50.383-22.598 50.383-50.383h92.363c0 27.785 22.598 50.383 50.383 50.383 27.785 0 50.383-22.598 50.383-50.383h33.586c4.6445 0 8.3984-3.7539 8.3984-8.3984s-3.7539-8.3984-8.3984-8.3984h-36.527c-6.9375-19.539-25.551-33.586-47.441-33.586-21.891 0-40.508 14.047-47.441 33.586h-98.242c-6.9375-19.539-25.551-33.586-47.441-33.586-21.891 0-40.508 14.047-47.441 33.586l-19.738 0.003906c-7.0703 0-13.871-3.0391-18.676-8.3398-4.8438-5.3672-7.1211-12.27-6.3906-19.445 1.2773-12.672 12.98-22.586 26.645-22.586h6.6406 0.32812 327.43c23.102-0.011719 41.883-18.797 41.883-41.887v-193.23zm-64.488-16.797c-9.2617 0-16.793-7.5312-16.793-16.793 0-9.2617 7.5312-16.793 16.793-16.793 9.2617 0 16.793 7.5312 16.793 16.793 0.003906 9.2617-7.5312 16.793-16.793 16.793zm352.67 285.49c18.523 0 33.586 15.062 33.586 33.586 0 18.523-15.062 33.586-33.586 33.586-18.523 0-33.586-15.062-33.586-33.586 0-18.52 15.062-33.586 33.586-33.586zm-193.12 0c18.523 0 33.586 15.062 33.586 33.586 0 18.523-15.062 33.586-33.586 33.586-18.523 0-33.586-15.062-33.586-33.586-0.003907-18.52 15.062-33.586 33.586-33.586zm293.89-75.461c0 13.828-11.25 25.082-25.082 25.082h-320.69l-40.055-201.52h385.83z"/>
+              </g>
+            </g>
+          </svg>
+        </button>
+      </div>
+      <nav class="nav-menu flex-wrap justify-center flex-grow">
         <div class="dropdown">
           <span class="dropdown-toggle">Nuevos ♡</span>
           <div class="dropdown-content" id="new-dropdown"></div>
@@ -77,14 +95,30 @@
           </div>
         </div>
       </nav>
-      <div class="relative w-full sm:w-64" id="desktopSearchBar">
+      <div class="relative w-full sm:w-64 flex items-center" id="desktopSearchBar">
         <input id="search" type="text" placeholder="Buscar producto..." class="search-kawaii w-full text-sm" />
         <div id="search-loading" class="absolute right-4 top-1/2 transform -translate-y-1/2 hidden">
           <div class="w-4 h-4 loading-kawaii"></div>
         </div>
       </div>
-    </div>
-    <!-- mobil search bar hidden -->
+      <!-- cart icon desktop, always to the right of search bar -->
+      <div class="flex items-center ml-2" id="desktopCartWrapper">
+        <button id="cartIconBtn" class="cart-icon-header flex items-center justify-center" style="background:none;border:none;cursor:pointer;padding:8px;">
+          <svg fill="#ff6b9d" stroke="#ff6b9d" width="32px" height="32px" viewBox="144 144 512 512" xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#a)">
+              <defs>
+                <clipPath id="a">
+                  <path d="m148.09 190h503.81v420h-503.81z"/>
+                </clipPath>
+              </defs>
+              <g clip-path="url(#a)">
+                <path d="m246.17 257.25-6.9961-41.984h-25.105c-3.7422-14.445-16.777-25.191-32.387-25.191-18.523 0-33.586 15.062-33.586 33.586 0 18.523 15.062 33.586 33.586 33.586 15.609 0 28.641-10.746 32.395-25.191h10.867l4.1992 25.191-0.32031 0.003906 43.422 218.45c-20.699 1.5781-37.938 17.516-39.969 37.566-1.1914 11.797 2.6875 23.613 10.648 32.395 7.9648 8.8086 19.316 13.871 31.125 13.871h16.793c0 27.785 22.598 50.383 50.383 50.383s50.383-22.598 50.383-50.383h92.363c0 27.785 22.598 50.383 50.383 50.383 27.785 0 50.383-22.598 50.383-50.383h33.586c4.6445 0 8.3984-3.7539 8.3984-8.3984s-3.7539-8.3984-8.3984-8.3984h-36.527c-6.9375-19.539-25.551-33.586-47.441-33.586-21.891 0-40.508 14.047-47.441 33.586h-98.242c-6.9375-19.539-25.551-33.586-47.441-33.586-21.891 0-40.508 14.047-47.441 33.586l-19.738 0.003906c-7.0703 0-13.871-3.0391-18.676-8.3398-4.8438-5.3672-7.1211-12.27-6.3906-19.445 1.2773-12.672 12.98-22.586 26.645-22.586h6.6406 0.32812 327.43c23.102-0.011719 41.883-18.797 41.883-41.887v-193.23zm-64.488-16.797c-9.2617 0-16.793-7.5312-16.793-16.793 0-9.2617 7.5312-16.793 16.793-16.793 9.2617 0 16.793 7.5312 16.793 16.793 0.003906 9.2617-7.5312 16.793-16.793 16.793zm352.67 285.49c18.523 0 33.586 15.062 33.586 33.586 0 18.523-15.062 33.586-33.586 33.586-18.523 0-33.586-15.062-33.586-33.586 0-18.52 15.062-33.586 33.586-33.586zm-193.12 0c18.523 0 33.586 15.062 33.586 33.586 0 18.523-15.062 33.586-33.586 33.586-18.523 0-33.586-15.062-33.586-33.586-0.003907-18.52 15.062-33.586 33.586-33.586zm293.89-75.461c0 13.828-11.25 25.082-25.082 25.082h-320.69l-40.055-201.52h385.83z"/>
+              </g>
+            </g>
+          </svg>
+        </button>
+      </div>
+      <!-- mobil search bar hidden -->
     <div id="mobileSearchBar" style="display:none;padding:8px 0 0 0;">
       <input id="search-mobile" type="text" placeholder="Buscar producto..." class="search-kawaii w-full text-sm" />
       <div id="mobile-search-results" class="grid grid-cols-2 gap-4 mt-2"></div>
@@ -94,7 +128,6 @@
   <div id="mobileMenuOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:1001;"></div>
   <!-- mob menu drag -->
   <div id="mobileMenuDrawer" style="display:none;position:fixed;top:0;left:0;width:80vw;max-width:320px;height:100vh;background:#fff;z-index:1002;box-shadow:2px 0 20px rgba(255,107,157,0.1);padding:32px 16px;overflow-y:auto;">
-    <a href="#" class="mobile-menu-item" onclick="navigateToHome(); closeMobileMenu();">Inicio ♡</a>
     <div class="mobile-menu-item" onclick="toggleMobileSubmenu('nuevos-submenu-mobile')">
       Nuevos ♡
       <div class="mobile-submenu" id="nuevos-submenu-mobile"></div>
@@ -136,9 +169,8 @@
     <!-- search results -->
     <section id="search-results" class="mb-12 hidden">
       <div class="flex items-center gap-4 mb-6">
-        <h2 class="text-3xl font-bold section-title-kawaii">Resultados de búsqueda</h2>
         <button id="clear-search" class="nav-button">
-          <div class="nav-button-icon flex items-center gap-4 mb-6">
+          <div class="nav-button-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="20px" width="20px" fill="white">
               <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"></path>
               <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"></path>
@@ -147,6 +179,14 @@
           <span>Volver</span>
         </button>
       </div>
+      
+      <!-- pink header como kawaiishop -->
+      <div class="category-header -mx-4 mb-8">
+        <div class="max-w-7xl mx-auto px-4">
+          <h1>Resultados de búsqueda</h1>
+        </div>
+      </div>
+      
       <div id="search-products" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
       <p id="no-results" class="text-center text-gray-500 mt-8 text-lg hidden">No se encontraron productos.</p>
     </section>
@@ -223,6 +263,15 @@
         <div id="collection-products" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
       </section>
     </div>
+    <section id="checkout-page" class="mb-12 hidden">
+      <div class="max-w-2xl mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold mb-6 text-center">Resumen de tu pedido</h2>
+        <div id="checkoutSummary"></div>
+        <h3 class="text-xl font-semibold mt-8 mb-4">Método de pago</h3>
+        <div id="paymentMethods" class="mb-8"></div>
+        <button id="checkoutBtn" class="cart-modal-checkout w-full">Confirmar pedido</button>
+      </div>
+    </section>
   </main>
 
   <footer class="footer-kawaii text-center p-6 text-sm">
@@ -232,6 +281,15 @@
   <button id="scrollToTopBtn" style="display:none;position:fixed;bottom:32px;right:24px;z-index:1001;background:#ff6b9d;color:white;border:none;border-radius:50%;width:48px;height:48px;box-shadow:0 4px 15px rgba(255,107,157,0.3);font-size:2rem;align-items:center;justify-content:center;transition:opacity 0.3s;">
     ↑
   </button>
+  <!-- Cart Modal -->
+  <div id="cartModal" class="cart-modal-overlay" style="display:none;">
+    <div class="cart-modal">
+      <button class="cart-modal-close" onclick="closeCartModal()">&times;</button>
+      <h2 class="cart-modal-title">Tu carrito</h2>
+      <div id="cartItemsContainer"></div>
+      <div id="cartSummaryContainer"></div>
+    </div>
+  </div>
   <script src="assets/main.js"></script>
   <script src="assets/mob.js"></script>
   <script>
@@ -270,11 +328,15 @@
       hamburgerBtn.style.display = 'block';
       document.getElementById('searchIconBtn').style.display = 'block';
       document.getElementById('desktopSearchBar').style.display = 'none';
+      document.getElementById('cartIconBtnMobile').style.display = 'block';
+      document.getElementById('desktopCartWrapper').style.display = 'none';
     } else {
       document.querySelector('.nav-menu').style.display = '';
       hamburgerBtn.style.display = 'none';
       document.getElementById('searchIconBtn').style.display = 'none';
       document.getElementById('desktopSearchBar').style.display = '';
+      document.getElementById('cartIconBtnMobile').style.display = 'none';
+      document.getElementById('desktopCartWrapper').style.display = 'flex';
       closeMobileMenu();
     }
   }
@@ -315,6 +377,22 @@
       }
     });
   }
+
+  // add this new function to hide mobile search results
+  function hideMobileSearchResults() {
+    const mobileSearchBar = document.getElementById('mobileSearchBar');
+    const mobileSearchResults = document.getElementById('mobile-search-results');
+    if (mobileSearchBar) {
+      mobileSearchBar.style.display = 'none';
+    }
+    if (mobileSearchResults) {
+      mobileSearchResults.innerHTML = '';
+    }
+  }
+
+  // expose the function globally so it can be called from other scripts
+  window.hideMobileSearchResults = hideMobileSearchResults;
+
   document.addEventListener('DOMContentLoaded', setupMobileSearchCloseHandler);
   // mobile sub logic
   function toggleMobileSubmenu(id) {
@@ -333,19 +411,37 @@
     copyDropdown('cat-dropdown', 'categorias-submenu-mobile');
     copyDropdown('col-dropdown', 'colecciones-submenu-mobile');
   });
-  // header hide - mobile
+  // header shrink logic - mobile and desktop
   let lastScrollY = window.scrollY;
   let ticking = false;
   const header = document.getElementById('main-header');
   function updateHeaderOnScroll() {
+    // check search results or other pages where header should be visible
+    const searchResults = document.getElementById('search-results');
+    const categoryPage = document.getElementById('category-page');
+    const productPage = document.getElementById('product-page');
+    
+    const shouldKeepHeaderVisible = searchResults && !searchResults.classList.contains('hidden') ||
+                                   categoryPage && !categoryPage.classList.contains('hidden') ||
+                                   productPage && !productPage.classList.contains('hidden');
+
     if (window.innerWidth < 768) {
-      if (window.scrollY > lastScrollY && window.scrollY > 80) {
+      // mobile: hide header completely when scrolling down (original behavior)
+      // but also keeps it visible on search results and other pages
+      if (shouldKeepHeaderVisible) {
+        header.classList.remove('mobile-hidden');
+      } else if (window.scrollY > lastScrollY && window.scrollY > 80) {
         header.classList.add('mobile-hidden');
       } else {
         header.classList.remove('mobile-hidden');
       }
     } else {
-      header.classList.remove('mobile-hidden');
+      // desktop: shrink header when scrolling down
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
     }
     lastScrollY = window.scrollY;
     ticking = false;
@@ -368,7 +464,18 @@
     copyDropdown('cat-dropdown', 'categorias-submenu-mobile');
     copyDropdown('col-dropdown', 'colecciones-submenu-mobile');
 
-    // click handlers check nuevos later
+    // click handlers for nuevos
+    const nuevosLinks = document.querySelectorAll('#nuevos-submenu-mobile a');
+    nuevosLinks.forEach(link => {
+      link.onclick = function(e) {
+        e.preventDefault();
+        const name = link.textContent.trim();
+        if (window.navigateToNew) window.navigateToNew(name);
+        if (window.closeMobileMenu) window.closeMobileMenu();
+      };
+    });
+    
+    // click handlers for categorias
     const catLinks = document.querySelectorAll('#categorias-submenu-mobile a');
     catLinks.forEach(link => {
       link.onclick = function(e) {
@@ -378,6 +485,8 @@
         if (window.closeMobileMenu) window.closeMobileMenu();
       };
     });
+    
+    // click handlers for colecciones
     const colLinks = document.querySelectorAll('#colecciones-submenu-mobile a');
     colLinks.forEach(link => {
       link.onclick = function(e) {
@@ -387,8 +496,10 @@
         if (window.closeMobileMenu) window.closeMobileMenu();
       };
     });
-    const newLinks = document.querySelectorAll('#nuevos-submenu-mobile .mobile-submenu-item[data-id]');
-    newLinks.forEach(link => {
+    
+    // click handlers for product items in nuevos
+    const productLinks = document.querySelectorAll('#nuevos-submenu-mobile .mobile-submenu-item[data-id]');
+    productLinks.forEach(link => {
       link.onclick = function(e) {
         e.preventDefault();
         const id = link.getAttribute('data-id');
@@ -423,6 +534,16 @@
       }
     });
   }
+
+  // add global click handler for mobile search results
+  document.addEventListener('click', function(e) {
+    // check if clicked element is a mobile search result item
+    if (e.target.closest('#mobile-search-results .product-card-kawaii') || 
+        e.target.closest('#mobile-search-results a')) {
+      // hide mobile search results when a product is clicked
+      hideMobileSearchResults();
+    }
+  });
   </script>
 </body>
 </html>

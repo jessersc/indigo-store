@@ -37,6 +37,10 @@ function navigateToCollection(collectionName) {
 }
 
 function navigateToProduct(productId) {
+  // Close mobile menu if on mobile
+  if (window.innerWidth <= 768 && window.closeMobileMenu) {
+    window.closeMobileMenu();
+  }
   updateUrl({ page: 'product', product: productId });
   showProductPage(productId);
 }
@@ -46,12 +50,50 @@ function navigateToHome() {
   showHomePage();
 }
 
+function navigateToCheckout() {
+  updateUrl({ page: 'checkout' });
+  showCheckoutPage();
+}
+
+function showCheckoutPage() {
+  hideAllPages();
+  document.getElementById('checkout-page').classList.remove('hidden');
+  
+  // Check if cart is empty and hide button immediately
+  const cart = getCart();
+  const checkoutBtn = document.getElementById('checkoutBtn');
+  if (checkoutBtn && cart.length === 0) {
+    checkoutBtn.style.display = 'none';
+  }
+  
+  // Dynamically load checkout.js if not already loaded
+  if (!window.checkoutLoaded) {
+    const script = document.createElement('script');
+    script.src = 'assets/checkout.js';
+    script.onload = function() { 
+      window.checkoutLoaded = true;
+      // Initialize after script loads
+      if (window.renderCheckoutSummary) {
+        window.renderCheckoutSummary();
+        window.setupPaymentMethods();
+        window.setupCheckoutButton();
+      }
+    };
+    document.body.appendChild(script);
+  } else if (window.renderCheckoutSummary) {
+    window.renderCheckoutSummary();
+    window.setupPaymentMethods();
+    window.setupCheckoutButton();
+  }
+}
+
 // page display functions
 function hideAllPages() {
   document.getElementById('main-content').classList.add('hidden');
   document.getElementById('search-results').classList.add('hidden');
   document.getElementById('category-page').classList.add('hidden');
   document.getElementById('product-page').classList.add('hidden');
+  document.getElementById('checkout-page').classList.add('hidden');
   document.getElementById('breadcrumb').classList.add('hidden');
 }
 
@@ -131,6 +173,10 @@ function renderCategoryProducts(products) {
 
 function renderProductDetail(product) {
   const container = document.getElementById('product-detail');
+  const stock = parseInt(product.Stock) || 0;
+  const maxQuantity = stock <= 1 ? 1 : stock;
+  const isLowStock = stock <= 1;
+  
   container.innerHTML = `
     <div class="fade-in">
       <img src="${product.Image}" alt="${product.Product}" class="w-full rounded-lg shadow-lg mb-4">
@@ -150,20 +196,30 @@ function renderProductDetail(product) {
         <h3>Descripción:</h3>
         <p>${product.Description || 'Sin descripción disponible'}</p>
       </div>
-      <div class="product-info-grid grid grid-cols-2 gap-4 text-sm mb-6">
-        <div>
-          <strong>Categoría:</strong><br>
-          ${product.Category || 'Sin categoría'}
+      
+      <!-- Quantity and Add to Cart Section -->
+      <div class="quantity-cart-section">
+        <div class="quantity-controls">
+          <button class="quantity-btn minus-btn" onclick="changeQuantity('${product.ItemID}', -1)" ${isLowStock ? 'disabled' : ''}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+          <span class="quantity-display" id="quantity-${product.ItemID}">1</span>
+          <button class="quantity-btn plus-btn" onclick="changeQuantity('${product.ItemID}', 1)" ${isLowStock ? 'disabled' : ''}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
         </div>
-        <div>
-          <strong>Colección:</strong><br>
-          ${product.Collection || 'Sin colección'}
-        </div>
+        <button onclick="addToCartWithQuantity('${product.ItemID}')" 
+                class="add-to-cart-large cart-icon">
+          Agregar al carrito
+        </button>
       </div>
-      <button onclick="addToCart(${JSON.stringify(product).replace(/"/g, '&quot;')})" 
-              class="add-to-cart-large cart-icon">
-        Agregar al carrito
-      </button>
+      
+      ${isLowStock ? '<p class="stock-warning">Stock limitado</p>' : ''}
     </div>
   `;
 }
@@ -225,6 +281,9 @@ function handleRouting() {
         navigateToHome();
       }
       break;
+    case 'checkout':
+      showCheckoutPage();
+      break;
     default:
       showHomePage();
   }
@@ -239,18 +298,236 @@ function saveCart(cart) {
   localStorage.setItem("cart", JSON.stringify(cart));
 }
 
-function addToCart(product) {
+// quantity control functions
+function changeQuantity(productId, change) {
+  let quantityDisplay = document.getElementById(`quantity-${productId}`);
+  if (!quantityDisplay) return;
+  const currentQuantity = parseInt(quantityDisplay.textContent) || 1;
+  let product;
+  if (productId.startsWith('card-')) {
+    const realId = productId.replace('card-', '');
+    product = allProducts.find(p => p.ItemID == realId);
+  } else {
+    product = allProducts.find(p => p.ItemID == productId);
+  }
+  if (!product) return;
+  const stock = parseInt(product.Stock) || 0;
+  const maxQuantity = stock <= 1 ? 1 : stock;
+  const newQuantity = Math.max(1, Math.min(maxQuantity, currentQuantity + change));
+  quantityDisplay.textContent = newQuantity;
+  // update button states
+  const minusBtn = quantityDisplay.previousElementSibling;
+  const plusBtn = quantityDisplay.nextElementSibling;
+  minusBtn.disabled = newQuantity <= 1;
+  plusBtn.disabled = newQuantity >= maxQuantity;
+  // update button styles
+  if (minusBtn.disabled) {
+    minusBtn.classList.add('disabled');
+  } else {
+    minusBtn.classList.remove('disabled');
+  }
+  if (plusBtn.disabled) {
+    plusBtn.classList.add('disabled');
+  } else {
+    plusBtn.classList.remove('disabled');
+  }
+}
+
+function addToCartWithQuantity(productId) {
+  let product, quantityDisplay;
+  if (productId.startsWith('card-')) {
+    const realId = productId.replace('card-', '');
+    product = allProducts.find(p => p.ItemID == realId);
+    quantityDisplay = document.getElementById(`quantity-card-${realId}`);
+  } else {
+    product = allProducts.find(p => p.ItemID == productId);
+    quantityDisplay = document.getElementById(`quantity-${productId}`);
+  }
+  if (!product || !quantityDisplay) return;
+  const quantity = parseInt(quantityDisplay.textContent) || 1;
   const cart = getCart();
   const existing = cart.find(p => p.ItemID === product.ItemID);
   if (existing) {
+    const stock = parseInt(product.Stock) || 0;
+    const maxQuantity = stock <= 1 ? 1 : stock;
+    const newTotalQuantity = existing.quantity + quantity;
+    if (newTotalQuantity > maxQuantity) {
+      showCartNotification('No hay suficiente stock disponible.');
+      return;
+    }
+    existing.quantity = newTotalQuantity;
+  } else {
+    product.quantity = quantity;
+    cart.push(product);
+  }
+  saveCart(cart);
+  showCartNotification(`${quantity} ${quantity === 1 ? 'unidad' : 'unidades'} agregada${quantity === 1 ? '' : 's'} al carrito`);
+}
+
+// updated addToCart function for product cards (keeps existing behavior)
+function addToCart(product) {
+  const cart = getCart();
+  const existing = cart.find(p => p.ItemID === product.ItemID);
+  
+  if (existing) {
+    const stock = parseInt(product.Stock) || 0;
+    const maxQuantity = stock <= 1 ? 1 : stock;
+    
+    if (existing.quantity >= maxQuantity) {
+      showCartNotification('No hay suficiente stock disponible.');
+      return;
+    }
+    
     existing.quantity += 1;
   } else {
     product.quantity = 1;
     cart.push(product);
   }
+  
   saveCart(cart);
-  alert("Agregado al carrito");
+  showCartNotification("Agregado al carrito");
 }
+
+// cart notification function
+function showCartNotification(message) {
+  const notification = document.createElement('div');
+  notification.className = 'cart-notification';
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  // show notification
+  setTimeout(() => {
+    notification.classList.add('show');
+  }, 100);
+  
+  // hide and remove notification
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => {
+      document.body.removeChild(notification);
+    }, 300);
+  }, 2000);
+}
+
+// Cart modal logic
+function openCartModal() {
+  renderCartModal();
+  document.getElementById('cartModal').style.display = 'flex';
+}
+function closeCartModal() {
+  document.getElementById('cartModal').style.display = 'none';
+}
+
+// Attach openCartModal to cart icons
+if (document.getElementById('cartIconBtn')) {
+  document.getElementById('cartIconBtn').onclick = openCartModal;
+}
+if (document.getElementById('cartIconBtnMobile')) {
+  document.getElementById('cartIconBtnMobile').onclick = openCartModal;
+}
+
+// Attach navigateToCheckout to the cart modal checkout button
+const cartCheckoutBtn = document.querySelector('.cart-modal-checkout');
+if (cartCheckoutBtn) {
+  cartCheckoutBtn.onclick = function() {
+    closeCartModal();
+    navigateToCheckout();
+  };
+}
+
+// Add event listener to close cart modal when clicking outside the modal box
+const cartModalOverlay = document.getElementById('cartModal');
+if (cartModalOverlay) {
+  cartModalOverlay.addEventListener('click', function(e) {
+    if (e.target === cartModalOverlay) {
+      closeCartModal();
+    }
+  });
+}
+
+function renderCartModal() {
+  const cart = getCart();
+  const cartItemsContainer = document.getElementById('cartItemsContainer');
+  const cartSummaryContainer = document.getElementById('cartSummaryContainer');
+  if (!cartItemsContainer || !cartSummaryContainer) return;
+  if (cart.length === 0) {
+    cartItemsContainer.innerHTML = '<div class="text-center text-gray-500">Tu carrito está vacío.</div>';
+    cartSummaryContainer.innerHTML = '';
+    updateCartIconCount();
+    return;
+  }
+  let totalUSD = 0, totalBS = 0, totalCount = 0;
+  cartItemsContainer.innerHTML = cart.map(item => {
+    const stock = parseInt(item.Stock) || 0;
+    const maxQuantity = stock <= 1 ? 1 : stock;
+    totalUSD += (parseFloat(item.USD) || 0) * item.quantity;
+    totalBS += (parseFloat(item.Bs) || 0) * item.quantity;
+    totalCount += item.quantity;
+    return `
+      <div class="cart-item-row">
+        <img src="${item.Image}" class="cart-item-img" alt="${item.Product}">
+        <div class="cart-item-info">
+          <div class="cart-item-title">${item.Product}</div>
+          <div class="cart-item-price">$${item.USD} | Bs ${item.Bs}</div>
+        </div>
+        <div class="cart-item-qty-controls">
+          <button class="cart-item-qty-btn" onclick="updateCartItemQty('${item.ItemID}', -1)">-</button>
+          <span class="cart-item-qty">${item.quantity}</span>
+          <button class="cart-item-qty-btn" onclick="updateCartItemQty('${item.ItemID}', 1)">+</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  cartSummaryContainer.innerHTML = `
+    <div class="cart-summary-row"><span>Items:</span><span>${totalCount}</span></div>
+    <div class="cart-summary-row"><span>Total USD:</span><span>$${totalUSD.toFixed(2)}</span></div>
+    <div class="cart-summary-row"><span>Total Bs:</span><span>Bs ${totalBS.toFixed(2)}</span></div>
+    <div class="cart-summary-total"><span>Total:</span><span>$${totalUSD.toFixed(2)} | Bs ${totalBS.toFixed(2)}</span></div>
+    <button class="cart-modal-checkout" style="width:100%;margin-top:1.5rem;" onclick="closeCartModal();navigateToCheckout();">Finalizar compra</button>
+  `;
+  updateCartIconCount();
+}
+
+function updateCartItemQty(itemId, change) {
+  const cart = getCart();
+  const item = cart.find(p => p.ItemID == itemId);
+  if (!item) return;
+  const stock = parseInt(item.Stock) || 0;
+  const maxQuantity = stock <= 1 ? 1 : stock;
+  if (change === 1 && item.quantity >= maxQuantity) {
+    showCartNotification('No hay suficiente stock disponible.');
+    return;
+  }
+  item.quantity += change;
+  if (item.quantity <= 0) {
+    // Remove item from cart
+    const idx = cart.findIndex(p => p.ItemID == itemId);
+    if (idx !== -1) cart.splice(idx, 1);
+  }
+  saveCart(cart);
+  renderCartModal();
+}
+
+function updateCartIconCount() {
+  const cart = getCart();
+  let count = 0;
+  cart.forEach(item => { count += item.quantity; });
+  // Add badge to cart icons
+  [document.getElementById('cartIconBtn'), document.getElementById('cartIconBtnMobile')].forEach(btn => {
+    if (!btn) return;
+    let badge = btn.querySelector('.cart-badge');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'cart-badge';
+      btn.appendChild(badge);
+    }
+    badge.textContent = count > 0 ? count : '';
+    badge.style.display = count > 0 ? 'inline-block' : 'none';
+  });
+}
+
+document.addEventListener('DOMContentLoaded', updateCartIconCount);
+window.addEventListener('storage', updateCartIconCount);
 
 // mi bb
 function setupSearch() {
@@ -368,6 +645,11 @@ function setupSearch() {
 
 // prduct card render
 function renderCard(product) {
+  const stock = parseInt(product.Stock) || 0;
+  const maxQuantity = stock <= 1 ? 1 : stock;
+  const isLowStock = stock <= 1;
+  const cardId = `card-${product.ItemID}`;
+
   const div = document.createElement("div");
   div.className = "product-card-kawaii fade-in";
   div.innerHTML = `
@@ -380,7 +662,26 @@ function renderCard(product) {
         <span class="price-bs">Bs ${product.Bs}</span>
       </p>
     </div>
-    <button class="add-to-cart-small cart-icon" onclick="addToCart(${JSON.stringify(product).replace(/"/g, '&quot;')})">
+    
+    <!-- Quantity controls + Stock message at the top -->
+    <div class="quantity-controls mb-2 mt-2">
+      <button class="quantity-btn minus-btn" onclick="changeQuantity('card-${product.ItemID}', -1)" ${isLowStock ? 'disabled' : ''}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+      <span class="quantity-display" id="quantity-card-${product.ItemID}">1</span>
+      <button class="quantity-btn plus-btn" onclick="changeQuantity('card-${product.ItemID}', 1)" ${isLowStock ? 'disabled' : ''}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+      ${isLowStock ? '<p class="stock-warning mt-1">Stock limitado</p>' : ''}
+    </div>
+
+    <!-- Add to cart button at the bottom -->
+    <button class="add-to-cart-small cart-icon w-full" onclick="addToCartWithQuantity('card-${product.ItemID}')">
       Agregar al carrito
     </button>
   `;
