@@ -361,6 +361,7 @@ function addToCartWithQuantity(productId) {
     cart.push(product);
   }
   saveCart(cart);
+  updateCartIconCount(); // update cart count immediately
   showCartNotification(`${quantity} ${quantity === 1 ? 'unidad' : 'unidades'} agregada${quantity === 1 ? '' : 's'} al carrito`);
 }
 
@@ -385,6 +386,7 @@ function addToCart(product) {
   }
   
   saveCart(cart);
+  updateCartIconCount(); // update cart count immediately
   showCartNotification("Agregado al carrito");
 }
 
@@ -505,6 +507,7 @@ function updateCartItemQty(itemId, change) {
     if (idx !== -1) cart.splice(idx, 1);
   }
   saveCart(cart);
+  updateCartIconCount(); // update cart count immediately
   renderCartModal();
 }
 
