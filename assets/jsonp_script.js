@@ -55,7 +55,7 @@ function processRequest(data) {
 
 function saveOrder(data) {
   try {
-    const sheet = SpreadsheetApp.openById('1U9-I_UeYLorCqpGXOoZ_ATuMcc92oOjiPyNVG823j60');
+    const sheet = SpreadsheetApp.openById('1n6jHeyW_6M8zyUTeaX5k2VxiHllwlWxOLEoOD7Ke8iY');
     const orderSheet = sheet.getSheetByName('Orders');
     
     const rowData = [
@@ -86,7 +86,7 @@ function saveOrder(data) {
 
 function savePayment(data) {
   try {
-    const sheet = SpreadsheetApp.openById('1U9-I_UeYLorCqpGXOoZ_ATuMcc92oOjiPyNVG823j60');
+    const sheet = SpreadsheetApp.openById('1n6jHeyW_6M8zyUTeaX5k2VxiHllwlWxOLEoOD7Ke8iY');
     const paymentSheet = sheet.getSheetByName('Payments');
     
     let imageUrl = '';
@@ -124,14 +124,39 @@ function savePayment(data) {
 
 function saveImageToDrive(imageData, imageType, orderNumber) {
   try {
+    // validate input
+    if (!imageData || !imageType || !orderNumber) {
+      console.error('Missing required parameters:', { imageData: !!imageData, imageType, orderNumber });
+      return '';
+    }
+    
+    // clean base64 data
     const base64Data = imageData.replace(/^data:image\/[a-z]+;base64,/, '');
+    if (!base64Data) {
+      console.error('Invalid image data format');
+      return '';
+    }
+    
+    // create blob
     const blob = Utilities.newBlob(Utilities.base64Decode(base64Data), `image/${imageType}`, `${orderNumber}_payment.${imageType}`);
     
-    const folder = DriveApp.getFolderById('11bAJHQedyfaOxk1p1Hh_kFka0AEXPw2E'); 
+    // try to get folder - if it fails, create a new one
+    let folder;
+    try {
+      folder = DriveApp.getFolderById('11bAJHQedyfaOxk1p1Hh_kFka0AEXPw2E');
+    } catch (folderError) {
+      console.error('Could not find folder with ID 11bAJHQedyfaOxk1p1Hh_kFka0AEXPw2E, creating new folder');
+      // create a new folder in the root
+      folder = DriveApp.createFolder('Indigo Store Payment Images');
+    }
+    
+    // create file
     const file = folder.createFile(blob);
     
+    // set sharing permissions
     file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
     
+    console.log('Image saved successfully:', file.getUrl());
     return file.getUrl();
   } catch (error) {
     console.error('Error saving image:', error);
@@ -141,7 +166,7 @@ function saveImageToDrive(imageData, imageType, orderNumber) {
 
 function getOrderStatus(orderNumber) {
   try {
-    const sheet = SpreadsheetApp.openById('1U9-I_UeYLorCqpGXOoZ_ATuMcc92oOjiPyNVG823j60');
+    const sheet = SpreadsheetApp.openById('1n6jHeyW_6M8zyUTeaX5k2VxiHllwlWxOLEoOD7Ke8iY');
     const orderSheet = sheet.getSheetByName('Orders');
     const data = orderSheet.getDataRange().getValues();
     
@@ -159,7 +184,7 @@ function getOrderStatus(orderNumber) {
 
 function getAllOrderStatuses() {
   try {
-    const sheet = SpreadsheetApp.openById('1U9-I_UeYLorCqpGXOoZ_ATuMcc92oOjiPyNVG823j60');
+    const sheet = SpreadsheetApp.openById('1n6jHeyW_6M8zyUTeaX5k2VxiHllwlWxOLEoOD7Ke8iY');
     const orderSheet = sheet.getSheetByName('Orders');
     const data = orderSheet.getDataRange().getValues();
     
@@ -179,7 +204,7 @@ function getAllOrderStatuses() {
 
 function deleteOrder(orderNumber) {
   try {
-    const sheet = SpreadsheetApp.openById('1U9-I_UeYLorCqpGXOoZ_ATuMcc92oOjiPyNVG823j60');
+    const sheet = SpreadsheetApp.openById('1n6jHeyW_6M8zyUTeaX5k2VxiHllwlWxOLEoOD7Ke8iY');
     const orderSheet = sheet.getSheetByName('Orders');
     const data = orderSheet.getDataRange().getValues();
     
@@ -198,7 +223,7 @@ function deleteOrder(orderNumber) {
 
 function getOrder(orderNumber) {
   try {
-    const sheet = SpreadsheetApp.openById('1U9-I_UeYLorCqpGXOoZ_ATuMcc92oOjiPyNVG823j60');
+    const sheet = SpreadsheetApp.openById('1n6jHeyW_6M8zyUTeaX5k2VxiHllwlWxOLEoOD7Ke8iY');
     const orderSheet = sheet.getSheetByName('Orders');
     const data = orderSheet.getDataRange().getValues();
     
@@ -233,7 +258,7 @@ function getOrder(orderNumber) {
 
 function reprocessPayment(data) {
   try {
-    const sheet = SpreadsheetApp.openById('1U9-I_UeYLorCqpGXOoZ_ATuMcc92oOjiPyNVG823j60');
+    const sheet = SpreadsheetApp.openById('1n6jHeyW_6M8zyUTeaX5k2VxiHllwlWxOLEoOD7Ke8iY');
     const paymentSheet = sheet.getSheetByName('Payments');
     
     let imageUrl = '';

@@ -1864,96 +1864,7 @@ function submitPayment(method, orderNumber) {
   reader.readAsDataURL(imageFile);
 }
 
-function sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionId, method, order) {
-  // Google Apps Script web app URL
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
-  
-  const orderData = {
-    orderNumber: orderNumber,
-    orderDate: new Date(order.orderDate).toLocaleString('es-ES'),
-    paymentMethod: method,
-    products: order.items.map(item => item.product).join(', '),
-    quantities: order.items.map(item => item.quantity).join(', '),
-    totalBS: order.totalBS.toFixed(2),
-    totalUSD: order.totalUSD.toFixed(2),
-    transactionId: transactionId,
-    status: 'processing',
-    imageData: imageData,
-    imageType: imageType,
-    deliveryMethod: order.deliveryMethod || '',
-    deliveryInfo: order.deliveryInfo || null,
-    customerName: order.deliveryInfo ? order.deliveryInfo.name : '',
-    customerPhone: order.deliveryInfo ? order.deliveryInfo.phone : '',
-    customerEmail: order.deliveryInfo ? order.deliveryInfo.email : '',
-    customerAddress: order.deliveryInfo ? order.deliveryInfo.address : '',
-    deliveryInstructions: order.deliveryInfo ? order.deliveryInfo.instructions : ''
-  };
-  
-  fetch(GOOGLE_SCRIPT_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(orderData)
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      // create whatsapp message
-      const methodLabels = {
-        'paypal': 'PayPal',
-        'zelle': 'Zelle',
-        'binance': 'Binance',
-        'pago-movil': 'Pago Móvil'
-      };
-      
-      const methodLabel = methodLabels[method] || method;
-      const orderInfo = parseOrderNumber(orderNumber);
-      
-      let message = `¡Hola! He completado mi pago.\n\n`;
-      message += `Orden: ${orderInfo.shortNumber}\n`;
-      message += `Fecha: ${orderInfo.formattedDate}\n`;
-      message += `Transacción: ${orderNumber}\n`;
-      message += `Método de pago: ${methodLabel}\n`;
-      
-      if (transactionId) {
-        message += `ID de transacción: ${transactionId}\n`;
-      }
-      
-      message += `\nTotal: $${order.totalUSD.toFixed(2)} | Bs ${order.totalBS.toFixed(2)}`;
-      message += `\n\nHe subido el comprobante de pago. Por favor confirma mi orden.`;
-      
-      // update order status to 'processing'
-      updateOrderStatus(orderNumber, 'processing');
-      
-      // show success message
-      alert('¡Comprobante enviado exitosamente! Redirigiendo a WhatsApp...');
-      
-      // send whatsapp message
-      const url = `https://wa.me/584128503608?text=${encodeURIComponent(message)}`;
-      window.open(url, '_blank');
-      
-      // redirect to home after a short delay
-      setTimeout(() => {
-        navigateToHome();
-      }, 2000);
-    } else {
-      alert('Error al enviar el comprobante: ' + (data.error || 'Error desconocido'));
-      // Re-enable button
-      const submitBtn = document.getElementById('submitPaymentBtn');
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Finalizar compra';
-    }
-  })
-  .catch(error => {
-    console.error('Error sending payment:', error);
-    alert('Error al enviar el comprobante. Por favor intenta de nuevo.');
-    // Re-enable button
-    const submitBtn = document.getElementById('submitPaymentBtn');
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Finalizar compra';
-  });
-}
+
 
 function updateOrderStatus(orderNumber, status) {
   const history = getOrderHistory();
@@ -2462,10 +2373,14 @@ fetch(API_URL)
   });
 
 function syncOrderStatusWithSpreadsheet(orderNumber) {
-  // use the new google script function from google_script.js
-  window.getOrderStatus(orderNumber, function(data) {
-    if (data.success && data.status) {
-      updateOrderStatus(orderNumber, data.status);
+  const data = {
+    action: 'getOrderStatus',
+    orderNumber: orderNumber
+  };
+  
+  sendToGoogleSheets(data, function(response) {
+    if (response.success && response.status) {
+      updateOrderStatus(orderNumber, response.status);
       displayOrderHistory();
     }
   });
@@ -2475,12 +2390,15 @@ function syncAllOrderStatuses() {
   const history = getOrderHistory();
   if (history.length === 0) return;
   
-  // use the new google script function from google_script.js
-  window.getAllOrderStatuses(function(data) {
-    if (data.success && data.statuses) {
+  const data = {
+    action: 'getAllOrderStatuses'
+  };
+  
+  sendToGoogleSheets(data, function(response) {
+    if (response.success && response.statuses) {
       let hasChanges = false;
       
-      data.statuses.forEach(item => {
+      response.statuses.forEach(item => {
         const localOrder = history.find(order => order.orderNumber === item.orderNumber);
         if (localOrder && localOrder.status !== item.status) {
           updateOrderStatus(item.orderNumber, item.status);
@@ -2490,6 +2408,9 @@ function syncAllOrderStatuses() {
       
       if (hasChanges) {
         displayOrderHistory();
+        alert('Estados sincronizados exitosamente!');
+      } else {
+        alert('Todos los estados están actualizados!');
       }
     }
   });
@@ -2527,12 +2448,16 @@ function deleteOrder(orderNumber) {
 }
 
 function deleteOrderFromSpreadsheet(orderNumber) {
-  // use the new google script function from google_script.js
-  window.deleteOrderFromGoogleSheets(orderNumber, function(data) {
-    if (data.success) {
+  const data = {
+    action: 'deleteOrder',
+    orderNumber: orderNumber
+  };
+  
+  sendToGoogleSheets(data, function(response) {
+    if (response.success) {
       console.log('Order deleted from spreadsheet:', orderNumber);
     } else {
-      console.error('Error deleting order from spreadsheet:', data.error);
+      console.error('Error deleting order from spreadsheet:', response.error);
     }
   });
 }
@@ -2556,10 +2481,14 @@ function loadOrderById() {
 }
 
 function loadOrderFromSpreadsheet(orderNumber) {
-  // use the new google script function from google_script.js
-  window.getOrderFromGoogleSheets(orderNumber, function(data) {
-    if (data.success && data.order) {
-      const localOrder = convertSpreadsheetOrderToLocal(data.order);
+  const data = {
+    action: 'getOrder',
+    orderNumber: orderNumber
+  };
+  
+  sendToGoogleSheets(data, function(response) {
+    if (response.success && response.order) {
+      const localOrder = convertSpreadsheetOrderToLocal(response.order);
       
       const history = getOrderHistory();
       history.push(localOrder);
@@ -2810,8 +2739,16 @@ function sendReprocessedPaymentToGoogleSheets(imageData, orderNumber, imageType,
     return;
   }
   
-  // use the new google script function from google_script.js
-  window.sendReprocessedPaymentToGoogleSheets(imageData, orderNumber, imageType, transactionId, newPaymentMethod, function(data) {
+  const orderData = {
+    action: 'reprocessPayment',
+    orderNumber: orderNumber,
+    transactionId: transactionId,
+    newPaymentMethod: newPaymentMethod,
+    imageData: imageData,
+    imageType: imageType
+  };
+  
+  sendToGoogleSheets(orderData, function(data) {
     if (data.success) {
       // update local order
       updateLocalOrderPayment(orderNumber, newPaymentMethod, transactionId);
@@ -2902,34 +2839,7 @@ function closeReprocessPaymentModal() {
   }
 }
 
-function syncAllOrderStatuses() {
-  const history = getOrderHistory();
-  if (history.length === 0) return;
-  
-  // use the new google script function from google_script.js
-  window.getAllOrderStatuses(function(data) {
-    if (data.success && data.statuses) {
-      let hasChanges = false;
-      
-      // update local statuses
-      data.statuses.forEach(item => {
-        const localOrder = history.find(order => order.orderNumber === item.orderNumber);
-        if (localOrder && localOrder.status !== item.status) {
-          updateOrderStatus(item.orderNumber, item.status);
-          hasChanges = true;
-        }
-      });
-      
-      // refresh display if there were changes
-      if (hasChanges) {
-        displayOrderHistory();
-        alert('Estados sincronizados exitosamente!');
-      } else {
-        alert('Todos los estados están actualizados!');
-      }
-    }
-  });
-}
+
 
 
 
@@ -2988,8 +2898,29 @@ function submitPayment(method, orderNumber) {
 
 // sends to googlesheets
 function sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionId, method, order) {
-  // new function from google_script.js
-  window.sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionId, method, order, function(data) {
+  const orderData = {
+    action: 'savePayment',
+    orderNumber: orderNumber,
+    orderDate: new Date(order.orderDate).toLocaleString('es-ES'),
+    paymentMethod: method,
+    products: order.items.map(item => item.product).join(', '),
+    quantities: order.items.map(item => item.quantity).join(', '),
+    totalBS: order.totalBS.toFixed(2),
+    totalUSD: order.totalUSD.toFixed(2),
+    transactionId: transactionId,
+    status: 'processing',
+    imageData: imageData,
+    imageType: imageType,
+    deliveryMethod: order.deliveryMethod || '',
+    deliveryInfo: order.deliveryInfo || null,
+    customerName: order.deliveryInfo ? order.deliveryInfo.name : '',
+    customerPhone: order.deliveryInfo ? order.deliveryInfo.phone : '',
+    customerEmail: order.deliveryInfo ? order.deliveryInfo.email : '',
+    customerAddress: order.deliveryInfo ? order.deliveryInfo.address : '',
+    deliveryInstructions: order.deliveryInfo ? order.deliveryInfo.instructions : ''
+  };
+  
+  sendToGoogleSheets(orderData, function(data) {
     if (data.success) {
       // create whatsapp message
       const methodLabels = {
