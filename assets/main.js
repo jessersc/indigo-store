@@ -1299,6 +1299,9 @@ function displayOrderHistory() {
     // determines if order can be deleted (only pending)
     const canDelete = order.status === 'pending';
     
+    // get order number from spreadsheet if available, otherwise use local
+    const displayOrderNumber = order.spreadsheetOrderNumber || order.orderNumber || 'ORD-ERROR';
+    
     return `
       <div class="order-history-item" style="
         border: 1px solid #e5e7eb;
@@ -1310,7 +1313,7 @@ function displayOrderHistory() {
       ">
         <!-- Header: Order ID and Status -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <div style="font-weight: bold; color: #ff6b9d; font-size: 16px;">${order.orderNumber ? (order.orderNumber.includes('-') ? order.orderNumber.split('-')[0] + '-' + order.orderNumber.split('-')[2] : order.orderNumber) : 'ORD-ERROR'}</div>
+          <div style="font-weight: bold; color: #ff6b9d; font-size: 16px;">${displayOrderNumber}</div>
           <div style="
             padding: 3px 8px;
             border-radius: 4px;
@@ -1434,21 +1437,8 @@ function showOrderHistoryModal() {
           font-size: 14px;
           cursor: pointer;
           transition: background 0.2s;
-          margin-right: 8px;
         " onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
           🗑️ Limpiar Historial
-        </button>
-        <button onclick="cleanCorruptedOrders()" style="
-          padding: 8px 16px;
-          background: #f59e0b;
-          color: white;
-          border: none;
-          border-radius: 6px;
-          font-size: 14px;
-          cursor: pointer;
-          transition: background 0.2s;
-        " onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
-          🧹 Limpiar Corruptas
         </button>
 
       </div>
@@ -2495,10 +2485,18 @@ function syncAllOrderStatusesSilently() {
       
       response.statuses.forEach(item => {
         const localOrder = history.find(order => order.orderNumber === item.orderNumber);
-        if (localOrder && localOrder.status !== item.status) {
-          console.log(`Updating status for ${item.orderNumber}: ${localOrder.status} -> ${item.status}`);
-          updateOrderStatus(item.orderNumber, item.status);
-          hasChanges = true;
+        if (localOrder) {
+          // update status if different
+          if (localOrder.status !== item.status) {
+            console.log(`Updating status for ${item.orderNumber}: ${localOrder.status} -> ${item.status}`);
+            updateOrderStatus(item.orderNumber, item.status);
+            hasChanges = true;
+          }
+          // update order number from spreadsheet (row 1) if available
+          if (item.orderNumber && !localOrder.spreadsheetOrderNumber) {
+            localOrder.spreadsheetOrderNumber = item.orderNumber;
+            hasChanges = true;
+          }
         }
       });
       
@@ -2658,6 +2656,7 @@ function loadOrderFromSpreadsheet(orderNumber) {
 function convertSpreadsheetOrderToLocal(spreadsheetOrder) {
   return {
     orderNumber: spreadsheetOrder.orderNumber,
+    spreadsheetOrderNumber: spreadsheetOrder.orderNumber, // store the spreadsheet order number separately
     orderDate: new Date(spreadsheetOrder.orderDate),
     items: parseOrderItems(spreadsheetOrder.products, spreadsheetOrder.quantities),
     totalUSD: parseFloat(spreadsheetOrder.totalUSD),
