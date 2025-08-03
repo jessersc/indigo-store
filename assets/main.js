@@ -2698,7 +2698,6 @@ function showOrderSuccessNotification(orderNumber, isCashPayment = false) {
   }
 
 function submitPayment(method, orderNumber) {
-  const transactionId = document.getElementById('transactionId').value.trim();
   const imageFile = document.getElementById('paymentImage').files[0];
   
   if (!imageFile) {
@@ -2713,7 +2712,7 @@ function submitPayment(method, orderNumber) {
     return;
   }
   
-  // orevents double submission
+  // prevents double submission
   const submitBtn = document.getElementById('submitPaymentBtn');
   submitBtn.disabled = true;
   submitBtn.textContent = '🔄 Procesando...';
@@ -2724,8 +2723,8 @@ function submitPayment(method, orderNumber) {
     const imageData = e.target.result;
     const imageType = imageFile.name.split('.').pop().toLowerCase();
     
-    // image - app script
-    sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionId, method, order);
+    // send image to app script
+    sendImageToGoogleSheets(imageData, orderNumber, imageType, '', method, order);
   };
   
   reader.readAsDataURL(imageFile);
@@ -2739,6 +2738,9 @@ function sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionI
   console.log('Image type:', imageType);
   console.log('Image data length:', imageData ? imageData.length : 'null');
   
+  // Use the short order number (first and third parts)
+  const shortOrderNumber = orderNumber.split('-')[0] + '-' + orderNumber.split('-')[2];
+  
   // Check if image is too large (limit to 1MB for JSONP)
   if (imageData && imageData.length > 1000000) {
     console.warn('Image too large for JSONP, compressing...');
@@ -2748,7 +2750,7 @@ function sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionI
   
   const orderData = {
     action: 'savePayment',
-    orderNumber: orderNumber,
+    orderNumber: shortOrderNumber,
     orderDate: new Date(order.orderDate).toLocaleString('es-ES'),
     paymentMethod: method,
     products: order.items.map(item => item.product).join(', '),
@@ -2824,6 +2826,9 @@ function sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionI
 function sendImageSeparately(imageData, orderNumber, imageType) {
   console.log('Sending image separately for order:', orderNumber);
   
+  // Use the short order number (first and third parts)
+  const shortOrderNumber = orderNumber.split('-')[0] + '-' + orderNumber.split('-')[2];
+  
   // Compress the image if it's too large
   const maxSize = 500000; // 500KB limit
   if (imageData.length > maxSize) {
@@ -2835,7 +2840,7 @@ function sendImageSeparately(imageData, orderNumber, imageType) {
   
   const imageRequest = {
     action: 'saveImageOnly',
-    orderNumber: orderNumber,
+    orderNumber: shortOrderNumber,
     imageData: imageData,
     imageType: imageType
   };

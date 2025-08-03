@@ -177,9 +177,12 @@ function saveOrderToHistory(orderNumber, cart, totalUSD, totalBS, paymentMethod,
 }
 
 function sendOrderToGoogleSheets(orderInfo) {
+  // Use the short order number (first and third parts)
+  const shortOrderNumber = orderInfo.orderNumber.split('-')[0] + '-' + orderInfo.orderNumber.split('-')[2];
+  
   const orderData = {
     action: 'saveOrder',
-    orderNumber: orderInfo.orderNumber,
+    orderNumber: shortOrderNumber,
     orderDate: new Date(orderInfo.orderDate).toLocaleString('es-ES'),
     paymentMethod: orderInfo.paymentMethod,
     products: orderInfo.items.map(item => item.product).join(', '),

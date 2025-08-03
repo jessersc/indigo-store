@@ -35,16 +35,20 @@ body {
   position: fixed;
   top: 20px;
   right: 20px;
+  left: 20px;
   background: linear-gradient(135deg, var(--kawaii-pink-primary), var(--kawaii-pink-secondary));
   color: white;
   padding: 16px 24px;
   border-radius: 12px;
   box-shadow: 0 8px 25px rgba(255, 107, 157, 0.4);
-  transform: translateX(400px);
+  transform: translateY(-100px);
   transition: transform 0.3s ease;
   z-index: 1000;
   font-weight: 600;
   font-family: 'Nunito', sans-serif;
+  text-align: center;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
 .cart-notification.show {
@@ -919,6 +923,8 @@ body {
     right: 10px;
     left: 10px;
     transform: translateY(-100px);
+    max-width: none;
+    margin: 0 10px;
   }
 
   .cart-notification.show {
