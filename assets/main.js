@@ -1310,7 +1310,7 @@ function displayOrderHistory() {
       ">
         <!-- Header: Order ID and Status -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <div style="font-weight: bold; color: #ff6b9d; font-size: 16px;">${order.orderNumber.split('-')[0]}-${order.orderNumber.split('-')[2]}</div>
+          <div style="font-weight: bold; color: #ff6b9d; font-size: 16px;">${order.orderNumber ? (order.orderNumber.includes('-') ? order.orderNumber.split('-')[0] + '-' + order.orderNumber.split('-')[2] : order.orderNumber) : 'ORD-ERROR'}</div>
           <div style="
             padding: 3px 8px;
             border-radius: 4px;
@@ -1438,18 +1438,19 @@ function showOrderHistoryModal() {
         " onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
           🗑️ Limpiar Historial
         </button>
-        <button onclick="debugOrderHistory()" style="
+        <button onclick="cleanCorruptedOrders()" style="
           padding: 8px 16px;
-          background: #10b981;
+          background: #f59e0b;
           color: white;
           border: none;
           border-radius: 6px;
           font-size: 14px;
           cursor: pointer;
           transition: background 0.2s;
-        " onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
-          🔍 Debug ORD-090633
+        " onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
+          🧹 Limpiar Corruptas
         </button>
+
       </div>
     </div>
   `;
@@ -1497,6 +1498,7 @@ window.submitReprocessedPayment = submitReprocessedPayment;
 window.previewNewPaymentImage = previewNewPaymentImage;
 window.removeNewPaymentImage = removeNewPaymentImage;
 window.clearOrderHistory = clearOrderHistory;
+window.cleanCorruptedOrders = cleanCorruptedOrders;
 
 // payment processing functions
 function renderPaymentPage(method, orderNumber) {
@@ -1905,9 +1907,42 @@ function updateOrderStatus(orderNumber, status) {
 
 // utility function for parsing order numbers (copied from checkout.js)
 function parseOrderNumber(orderNumber) {
+  // validate order number
+  if (!orderNumber || typeof orderNumber !== 'string') {
+    console.warn('Invalid order number:', orderNumber);
+    return {
+      prefix: 'ORD',
+      orderDate: new Date(),
+      sequential: 0,
+      formattedDate: new Date().toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      shortNumber: 'ORD-ERROR'
+    };
+  }
+  
   // parse order number format: ORD-XXXXXX (9 characters)
   const parts = orderNumber.split('-');
-  if (parts.length !== 2) return null;
+  if (parts.length !== 2) {
+    console.warn('Invalid order number format:', orderNumber);
+    return {
+      prefix: 'ORD',
+      orderDate: new Date(),
+      sequential: 0,
+      formattedDate: new Date().toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      shortNumber: orderNumber
+    };
+  }
   
   const [prefix, sequential] = parts;
   
@@ -1917,7 +1952,7 @@ function parseOrderNumber(orderNumber) {
   return {
     prefix,
     orderDate,
-    sequential: parseInt(sequential),
+    sequential: parseInt(sequential) || 0,
     formattedDate: orderDate.toLocaleDateString('es-ES', {
       year: 'numeric',
       month: '2-digit',
@@ -2529,8 +2564,39 @@ function clearOrderHistory() {
   if (confirmed) {
     localStorage.removeItem('orderHistory');
     // refresh display
-    displayOrderHistory();
+    const contentDiv = document.getElementById('orderHistoryContent');
+    if (contentDiv) {
+      contentDiv.innerHTML = displayOrderHistory();
+    }
     alert('Historial de órdenes eliminado!');
+  }
+}
+
+// function to clean corrupted orders from history
+function cleanCorruptedOrders() {
+  const history = getOrderHistory();
+  const cleanHistory = history.filter(order => {
+    // remove orders with invalid order numbers
+    if (!order.orderNumber || order.orderNumber === 'undefined' || order.orderNumber.includes('undefined')) {
+      console.log('Removing corrupted order:', order);
+      return false;
+    }
+    return true;
+  });
+  
+  if (cleanHistory.length !== history.length) {
+    localStorage.setItem('orderHistory', JSON.stringify(cleanHistory));
+    console.log(`Cleaned ${history.length - cleanHistory.length} corrupted orders`);
+    
+    // refresh display
+    const contentDiv = document.getElementById('orderHistoryContent');
+    if (contentDiv) {
+      contentDiv.innerHTML = displayOrderHistory();
+    }
+    
+    alert(`Se limpiaron ${history.length - cleanHistory.length} órdenes corruptas del historial.`);
+  } else {
+    alert('No se encontraron órdenes corruptas.');
   }
 }
 
@@ -2659,54 +2725,123 @@ function getStatusEmoji(status) {
 }
 
 function getStatusDisplayText(status) {
-  switch (status) {
-    case 'pending': return ' Pendiente';
-    case 'processing': return ' Procesando';
-    case 'completed': return ' Completado';
-    case 'cancelled': return ' Cancelado';
-    case 'apartado': return ' Apartado';
-    case 'Entregada': return ' Entregada';
-    case 'ending': return ' Finalizando';
-    default: return ` ${status}`;
+  // normalize status to lowercase for comparison
+  const normalizedStatus = (status || '').toLowerCase().trim();
+  
+  switch (normalizedStatus) {
+    case 'pending':
+    case 'pendiente':
+    case 'p': return ' Pendiente';
+    case 'processing':
+    case 'procesando':
+    case 'proc': return ' Procesando';
+    case 'completed':
+    case 'completado':
+    case 'completo':
+    case 'c': return ' Completado';
+    case 'cancelled':
+    case 'cancelado':
+    case 'cancel': return ' Cancelado';
+    case 'apartado':
+    case 'a': return ' Apartado';
+    case 'entregada':
+    case 'entregado':
+    case 'e': return ' Entregada';
+    case 'ending':
+    case 'finalizando':
+    case 'f': return ' Finalizando';
+    case 'paid':
+    case 'pagado':
+    case 'pago': return ' Pagado';
+    case 'shipped':
+    case 'enviado':
+    case 'envio': return ' Enviado';
+    case 'delivered':
+    case 'entregado':
+    case 'delivery': return ' Entregado';
+    default: 
+      console.log('Unknown status:', status, 'normalized:', normalizedStatus);
+      return ` ${status || 'Desconocido'}`;
   }
 }
 
 function getStatusBackgroundColor(status) {
-  switch (status) {
-    case 'pending': return '#fef3c7';
-    case 'processing': return '#dbeafe';
-    case 'completed': return '#d1fae5';
-    case 'cancelled': return '#fee2e2';
-    case 'apartado': return '#dbeafe';
-    case 'Entregada': return '#d1fae5';
-    case 'ending': return '#fef3c7';
+  // normalize status to lowercase for comparison
+  const normalizedStatus = (status || '').toLowerCase().trim();
+  
+  switch (normalizedStatus) {
+    case 'pending':
+    case 'pendiente':
+    case 'p': return '#fef3c7';
+    case 'processing':
+    case 'procesando':
+    case 'proc': return '#dbeafe';
+    case 'completed':
+    case 'completado':
+    case 'completo':
+    case 'c': return '#d1fae5';
+    case 'cancelled':
+    case 'cancelado':
+    case 'cancel': return '#fee2e2';
+    case 'apartado':
+    case 'a': return '#dbeafe';
+    case 'entregada':
+    case 'entregado':
+    case 'e': return '#d1fae5';
+    case 'ending':
+    case 'finalizando':
+    case 'f': return '#fef3c7';
+    case 'paid':
+    case 'pagado':
+    case 'pago': return '#d1fae5';
+    case 'shipped':
+    case 'enviado':
+    case 'envio': return '#dbeafe';
+    case 'delivered':
+    case 'entregado':
+    case 'delivery': return '#d1fae5';
     default: return '#f3f4f6';
   }
 }
 
 function getStatusTextColor(status) {
-  switch (status) {
-    case 'pending': return '#92400e';
-    case 'processing': return '#1e40af';
-    case 'completed': return '#065f46';
-    case 'cancelled': return '#dc2626';
-    case 'apartado': return '#1e40af';
-    case 'Entregada': return '#065f46';
-    case 'ending': return '#92400e';
+  // normalize status to lowercase for comparison
+  const normalizedStatus = (status || '').toLowerCase().trim();
+  
+  switch (normalizedStatus) {
+    case 'pending':
+    case 'pendiente':
+    case 'p': return '#92400e';
+    case 'processing':
+    case 'procesando':
+    case 'proc': return '#1e40af';
+    case 'completed':
+    case 'completado':
+    case 'completo':
+    case 'c': return '#065f46';
+    case 'cancelled':
+    case 'cancelado':
+    case 'cancel': return '#dc2626';
+    case 'apartado':
+    case 'a': return '#1e40af';
+    case 'entregada':
+    case 'entregado':
+    case 'e': return '#065f46';
+    case 'ending':
+    case 'finalizando':
+    case 'f': return '#92400e';
+    case 'paid':
+    case 'pagado':
+    case 'pago': return '#065f46';
+    case 'shipped':
+    case 'enviado':
+    case 'envio': return '#1e40af';
+    case 'delivered':
+    case 'entregado':
+    case 'delivery': return '#065f46';
     default: return '#374151';
   }
 }
-
-// This function is now handled by the first reprocessPayment function above
-// which redirects to the payment page instead of showing a modal
-
-// Modal function removed - now using direct payment page navigation
-
-// All modal-related functions removed - now using direct payment page navigation
-
-
-
-
 
 function showSoldOutMessage() {
   showCartNotification('No hay stock disponible para este producto.');
@@ -3053,28 +3188,3 @@ function submitReprocessedPayment(orderNumber) {
   reader.readAsDataURL(imageFile);
 }
 
-// debug function to check for specific order
-function debugOrderHistory() {
-  const history = getOrderHistory();
-  console.log('=== ORDER HISTORY DEBUG ===');
-  console.log('Total orders in history:', history.length);
-  
-  const targetOrder = history.find(order => order.orderNumber === 'ORD-090633');
-  if (targetOrder) {
-    console.log('Found ORD-090633:', targetOrder);
-    console.log('Order date:', new Date(targetOrder.orderDate));
-    console.log('Order status:', targetOrder.status);
-    console.log('Order items:', targetOrder.items);
-  } else {
-    console.log('ORD-090633 not found in local history');
-  }
-  
-  // also check localStorage directly
-  const rawHistory = localStorage.getItem('orderHistory');
-  console.log('Raw localStorage data:', rawHistory);
-  
-  return targetOrder;
-}
-
-// expose debug function globally
-window.debugOrderHistory = debugOrderHistory;
