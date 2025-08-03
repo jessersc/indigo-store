@@ -1,5 +1,63 @@
 // checkout.js
 
+// jsonp for cors issues
+// google script web app url for orders
+const ORDER_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHaxeUKcp8XK1SY0niB07L_FLC0lugNBGnxS77DIb1ICrd52ifS_-ZVlyZLQ3hcRut7A/exec';
+
+// jsonp callback counter
+let jsonpCounter = 0;
+
+// send data to google sheets using jsonp
+function sendToGoogleSheets(data, callback) {
+  // create unique callback name
+  const callbackName = 'jsonpCallback_' + (++jsonpCounter);
+  
+  // create global callback function
+  window[callbackName] = function(response) {
+    // cleanup
+    delete window[callbackName];
+    document.head.removeChild(script);
+    
+    // call the actual callback
+    if (callback) {
+      callback(response);
+    }
+  };
+  
+  // create script tag for jsonp
+  const script = document.createElement('script');
+  
+  // build url with parameters
+  const params = new URLSearchParams();
+  params.append('callback', callbackName);
+  params.append('data', JSON.stringify(data));
+  
+  script.src = `${ORDER_SCRIPT_URL}?${params.toString()}`;
+  
+  // add error handling
+  script.onerror = function() {
+    delete window[callbackName];
+    document.head.removeChild(script);
+    if (callback) {
+      callback({ success: false, error: 'Network error' });
+    }
+  };
+  
+  // add timeout
+  setTimeout(function() {
+    if (window[callbackName]) {
+      delete window[callbackName];
+      document.head.removeChild(script);
+      if (callback) {
+        callback({ success: false, error: 'Timeout' });
+      }
+    }
+  }, 10000); // 10 second timeout
+  
+  // add script to page
+  document.head.appendChild(script);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Checkout page loaded');
   renderCheckoutSummary();
@@ -115,8 +173,26 @@ function saveOrderToHistory(orderNumber, cart, totalUSD, totalBS, paymentMethod,
 }
 
 function sendOrderToGoogleSheets(orderInfo) {
-  // new fucntion from google_script.js
-  window.sendOrderToGoogleSheets(orderInfo, function(data) {
+  const orderData = {
+    action: 'saveOrder',
+    orderNumber: orderInfo.orderNumber,
+    orderDate: new Date(orderInfo.orderDate).toLocaleString('es-ES'),
+    paymentMethod: orderInfo.paymentMethod,
+    products: orderInfo.items.map(item => item.product).join(', '),
+    quantities: orderInfo.items.map(item => item.quantity).join(', '),
+    totalBS: orderInfo.totalBS.toFixed(2),
+    totalUSD: orderInfo.totalUSD.toFixed(2),
+    status: orderInfo.status || 'pending',
+    deliveryMethod: orderInfo.deliveryMethod || '',
+    deliveryInfo: orderInfo.deliveryInfo || null,
+    customerName: orderInfo.deliveryInfo ? orderInfo.deliveryInfo.name : '',
+    customerPhone: orderInfo.deliveryInfo ? orderInfo.deliveryInfo.phone : '',
+    customerEmail: orderInfo.deliveryInfo ? orderInfo.deliveryInfo.email : '',
+    customerAddress: orderInfo.deliveryInfo ? orderInfo.deliveryInfo.address : '',
+    deliveryInstructions: orderInfo.deliveryInfo ? orderInfo.deliveryInfo.instructions : ''
+  };
+  
+  sendToGoogleSheets(orderData, function(data) {
     if (data.success) {
       console.log('Order sent to Google Sheets successfully');
     } else {

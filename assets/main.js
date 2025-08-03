@@ -70,26 +70,22 @@ function showCheckoutPage() {
     checkoutBtn.style.display = 'none';
   }
   
-  // Dynamically load checkout.js if not already loaded
-  if (!window.checkoutLoaded) {
-    const script = document.createElement('script');
-    script.src = 'assets/checkout.js';
-    script.onload = function() { 
-      window.checkoutLoaded = true;
-      // Initialize after script loads
+  // Initialize checkout page since script is now loaded directly
+  if (window.renderCheckoutSummary) {
+    window.renderCheckoutSummary();
+    window.setupPaymentMethods();
+    window.setupCheckoutButton();
+    window.setupDeliveryOptions();
+  } else {
+    // Fallback: try to initialize after a short delay
+    setTimeout(() => {
       if (window.renderCheckoutSummary) {
         window.renderCheckoutSummary();
         window.setupPaymentMethods();
         window.setupCheckoutButton();
         window.setupDeliveryOptions();
       }
-    };
-    document.body.appendChild(script);
-  } else if (window.renderCheckoutSummary) {
-    window.renderCheckoutSummary();
-    window.setupPaymentMethods();
-    window.setupCheckoutButton();
-    window.setupDeliveryOptions();
+    }, 100);
   }
 }
 
@@ -383,6 +379,9 @@ function renderProductDetail(product) {
         ` : `
         <!-- Sold Out Section -->
         <div class="quantity-cart-section">
+          <div class="quantity-controls" style="visibility: hidden;">
+            <!-- hidden placeholder to maintain flex layout -->
+          </div>
           <button class="sold-out-button-large" onclick="showSoldOutMessage()">
             SOLD OUT
           </button>
@@ -516,8 +515,11 @@ function switchToVariant(variantId) {
             </button>
           `;
         } else {
-          // render sold out button
+          // render sold out button with placeholder to maintain flex layout
           quantityCartSection.innerHTML = `
+            <div class="quantity-controls" style="visibility: hidden;">
+              <!-- hidden placeholder to maintain flex layout -->
+            </div>
             <button class="sold-out-button-large" onclick="showSoldOutMessage()">
               SOLD OUT
             </button>
@@ -777,7 +779,13 @@ function changeQuantity(productId, change) {
   
   if (!product) return;
   
+  // check if product is sold out
   const stock = parseInt(product.Stock) || 0;
+  if (stock <= 0 || product.Stock === null || product.Stock === undefined || product.Stock === '') {
+    showCartNotification('No hay stock disponible para este producto.');
+    return;
+  }
+  
   const maxQuantity = stock <= 1 ? 1 : stock;
   const newQuantity = Math.max(1, Math.min(maxQuantity, currentQuantity + change));
   quantityDisplay.textContent = newQuantity;
@@ -823,6 +831,13 @@ function addToCartWithQuantity(productId) {
     return;
   }
   
+  // check if product is sold out
+  const stock = parseInt(product.Stock) || 0;
+  if (stock <= 0 || product.Stock === null || product.Stock === undefined || product.Stock === '') {
+    showCartNotification('No hay stock disponible para este producto.');
+    return;
+  }
+  
   const quantity = parseInt(quantityDisplay.textContent) || 1;
   const cart = getCart();
   const existing = cart.find(p => p.ItemID.toString() === product.ItemID.toString());
@@ -849,11 +864,17 @@ function addToCartWithQuantity(productId) {
 
 // updated addToCart function for product cards (keeps existing behavior)
 function addToCart(product) {
+  // check if product is sold out
+  const stock = parseInt(product.Stock) || 0;
+  if (stock <= 0 || product.Stock === null || product.Stock === undefined || product.Stock === '') {
+    showCartNotification('No hay stock disponible para este producto.');
+    return;
+  }
+  
   const cart = getCart();
   const existing = cart.find(p => p.ItemID.toString() === product.ItemID.toString());
   
   if (existing) {
-    const stock = parseInt(product.Stock) || 0;
     const maxQuantity = stock <= 1 ? 1 : stock;
     
     if (existing.quantity >= maxQuantity) {
@@ -907,32 +928,11 @@ function closeCartModal() {
   document.getElementById('cartModal').style.display = 'none';
 }
 
-// Attach openCartModal to cart icons
-if (document.getElementById('cartIconBtn')) {
-  document.getElementById('cartIconBtn').onclick = openCartModal;
-}
-if (document.getElementById('cartIconBtnMobile')) {
-  document.getElementById('cartIconBtnMobile').onclick = openCartModal;
-}
 
-// Attach navigateToCheckout to the cart modal checkout button
-const cartCheckoutBtn = document.querySelector('.cart-modal-checkout');
-if (cartCheckoutBtn) {
-  cartCheckoutBtn.onclick = function() {
-    closeCartModal();
-    navigateToCheckout();
-  };
-}
 
-// Add event listener to close cart modal when clicking outside the modal box
-const cartModalOverlay = document.getElementById('cartModal');
-if (cartModalOverlay) {
-  cartModalOverlay.addEventListener('click', function(e) {
-    if (e.target === cartModalOverlay) {
-      closeCartModal();
-    }
-  });
-}
+
+
+
 
 function renderCartModal() {
   const cart = getCart();
@@ -972,7 +972,7 @@ function renderCartModal() {
     <div class="cart-summary-row"><span>Total USD:</span><span>$${totalUSD.toFixed(2)}</span></div>
     <div class="cart-summary-row"><span>Total Bs:</span><span>Bs ${totalBS.toFixed(2)}</span></div>
     <div class="cart-summary-total"><span>Total:</span><span>$${totalUSD.toFixed(2)} | Bs ${totalBS.toFixed(2)}</span></div>
-            <button class="cart-modal-checkout" style="width:100%;margin-top:1.5rem;" onclick="closeCartModal();navigateToCheckout();">Ir a Pagar!</button>
+    <button class="cart-modal-checkout" style="width:100%;margin-top:1.5rem;" onclick="closeCartModal();navigateToCheckout();">Ir a Pagar!</button>
   `;
   updateCartIconCount();
 }
@@ -1135,6 +1135,12 @@ function setupSearch() {
 
 // prduct card render
 function renderCard(product) {
+  // validate product data
+  if (!product || !product.ItemID || !product.Product) {
+    console.warn('Invalid product data for card rendering:', product);
+    return document.createElement('div'); // return empty div
+  }
+  
   const stock = parseInt(product.Stock) || 0;
   const maxQuantity = stock <= 1 ? 1 : stock;
   const isLowStock = stock <= 1;
@@ -1151,30 +1157,32 @@ function renderCard(product) {
   
   div.innerHTML = `
     <div class="cursor-pointer" onclick="navigateToProduct(${product.ItemID})">
-      <img src="${firstImage}" alt="${product.Product}" class="w-full h-48 object-cover">
-      <h3 class="product-title">${product.Product}</h3>
-      <p class="product-price">
-        <span class="price-usd">$${product.USD}</span>
-        <span class="price-separator">|</span>
-        <span class="price-bs">Bs ${product.Bs}</span>
-      </p>
+      <img src="${firstImage}" alt="${product.Product}" class="w-full h-48 object-cover rounded-t-lg">
+      <div class="p-4">
+        <h3 class="product-title mb-2">${product.Product}</h3>
+        <p class="product-price mb-3">
+          <span class="price-usd">$${product.USD}</span>
+          <span class="price-separator">|</span>
+          <span class="price-bs">Bs ${product.Bs}</span>
+        </p>
+      </div>
     </div>
     
-    <!-- stock warning at the top - only show for low stock, not sold out -->
-    ${isLowStock && !isSoldOut ? '<p class="stock-warning mt-2 mb-2">Stock limitado</p>' : ''}
+    <!-- stock warning - only show for low stock, not sold out -->
+    ${isLowStock && !isSoldOut ? '<p class="stock-warning px-4 mb-3">Stock limitado</p>' : ''}
 
     <!-- spacer to push controls to bottom -->
     <div style="flex-grow: 1;"></div>
 
     <!-- quantity controls buttons centered at bottom - always visible -->
-    <div class="quantity-controls mb-2" style="justify-content: center; padding: 8px 16px;">
-      <button class="quantity-btn minus-btn" onclick="changeQuantity('card-${product.ItemID}', -1)" ${isSoldOut || isLowStock ? 'disabled' : ''}>
+    <div class="quantity-controls px-4 mb-3" style="justify-content: center;">
+      <button class="quantity-btn minus-btn ${isSoldOut ? 'disabled' : ''}" onclick="changeQuantity('card-${product.ItemID}', -1)" ${isSoldOut ? 'disabled' : ''}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
       </button>
       <span class="quantity-display" id="quantity-card-${product.ItemID}">${isSoldOut ? '0' : '1'}</span>
-      <button class="quantity-btn plus-btn" onclick="changeQuantity('card-${product.ItemID}', 1)" ${isSoldOut || isLowStock ? 'disabled' : ''}>
+      <button class="quantity-btn plus-btn ${isSoldOut ? 'disabled' : ''}" onclick="changeQuantity('card-${product.ItemID}', 1)" ${isSoldOut ? 'disabled' : ''}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -1183,14 +1191,16 @@ function renderCard(product) {
     </div>
 
     <!-- add to cart button or sold out-->
-    ${isSoldOut ? 
-      `<button class="sold-out-button w-full" onclick="showSoldOutMessage()">
-        SOLD OUT
-      </button>` : 
-      `<button class="add-to-cart-small cart-icon w-full" onclick="addToCartWithQuantity('card-${product.ItemID}')">
-        Agregar al carrito
-      </button>`
-    }
+    <div class="px-4 pb-4">
+      ${isSoldOut ? 
+        `<button class="sold-out-button w-full" onclick="showSoldOutMessage()">
+          SOLD OUT
+        </button>` : 
+        `<button class="add-to-cart-small cart-icon w-full" onclick="addToCartWithQuantity('card-${product.ItemID}')">
+          Agregar al carrito
+        </button>`
+      }
+    </div>
   `;
   return div;
 }
@@ -1202,14 +1212,20 @@ function renderProductMini(product) {
     firstImage = product.Image.split(',')[0].trim();
   }
   
+  // ensure we have valid data
+  if (!product.Product || !product.ItemID) {
+    console.warn('Invalid product data:', product);
+    return '';
+  }
+  
   return `
     <div class="block hover:bg-gray-100 p-3 rounded-lg cursor-pointer transition-colors" onclick="navigateToProduct(${product.ItemID})">
       <div class="flex gap-3 items-center">
-        <img src="${firstImage}" class="w-12 h-12 object-cover rounded-lg">
-        <div class="flex-1">
-          <p class="text-sm font-semibold text-gray-800 mb-1 leading-tight">${product.Product}</p>
+        <img src="${firstImage}" alt="${product.Product}" class="w-12 h-12 object-cover rounded-lg" onerror="this.style.display='none'">
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-gray-800 mb-1 leading-tight truncate">${product.Product}</p>
           <p class="text-xs font-medium" style="background: linear-gradient(135deg, #ff6b9d, #ff8fab); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-            $${product.USD} | Bs ${product.Bs}
+            $${product.USD || '0'} | Bs ${product.Bs || '0'}
           </p>
         </div>
       </div>
@@ -2323,18 +2339,18 @@ fetch(API_URL)
     const valid = products.filter(p => p.ItemID && p.Product);
     console.log('Valid products:', valid.length);
     
-    // process variants and separate main products from variants
+    // process variants
     const { mainProducts, allProductsWithVariants } = processProductVariants(valid);
-    
-    allProducts = mainProducts; // only main products for search/indexes
-    window.allProductsWithVariants = allProductsWithVariants; // all products including variants for detail view
+    allProducts = mainProducts;
+    window.allProductsWithVariants = allProductsWithVariants;
 
-    // new products
+    // new products - get the 8 most recent products (same as indigo2.2)
     const nuevos = valid.slice(-8);
     const newBox = document.getElementById("new-products");
     const newDrop = document.getElementById("new-dropdown");
     
     if (newBox) {
+      newBox.innerHTML = ''; // clear existing content
       nuevos.forEach(p => {
         newBox.appendChild(renderCard(p));
       });
@@ -2343,11 +2359,12 @@ fetch(API_URL)
     if (newDrop) {
       newDrop.innerHTML = nuevos.map(p => renderProductMini(p)).join('');
     }
+    
     // Also render for mobile menu with data-id
     const nuevosSubmenuMobile = document.getElementById('nuevos-submenu-mobile');
     if (nuevosSubmenuMobile) {
       nuevosSubmenuMobile.innerHTML = nuevos.map(p =>
-        `<a href="#" class="mobile-submenu-item" data-id="${p.ItemID}">${p.Product}</a>`
+        `<a href="#" class="mobile-submenu-item" onclick="navigateToProduct(${p.ItemID})">${p.Product}</a>`
       ).join('');
     }
 
@@ -2914,35 +2931,17 @@ function syncAllOrderStatuses() {
   });
 }
 
-function showCartNotification(message) {
-  const notification = document.createElement('div');
-  notification.className = 'cart-notification';
-  notification.innerHTML = `
-    <div class="notification-content">
-      <span class="notification-icon">🛒</span>
-      <span class="notification-text">${message}</span>
-    </div>
-  `;
-  
-  document.body.appendChild(notification);
-  
-  // remove notification after 3 seconds
-  setTimeout(() => {
-    if (notification.parentNode) {
-      notification.parentNode.removeChild(notification);
-    }
-  }, 3000);
-}
+
 
 function showSoldOutMessage() {
-  showCartNotification('❌ Producto agotado (｡•́︿•̀｡)');
+  showCartNotification('No hay stock disponible para este producto.');
 }
 
 // Enhanced checkout functions with emojis
 function showOrderSuccessNotification(orderNumber, isCashPayment = false) {
   const message = isCashPayment 
-    ? `✅ ¡Apartado exitoso! Orden: ${orderNumber} (◕‿◕)`
-    : `✅ ¡Orden creada exitosamente! Orden: ${orderNumber} (◕‿◕)`;
+    ? `¡Apartado exitoso! Orden: ${orderNumber}`
+    : `¡Orden creada exitosamente! Orden: ${orderNumber}`;
   
   showCartNotification(message);
 }

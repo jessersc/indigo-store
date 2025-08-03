@@ -15,7 +15,7 @@
 
   <link rel="stylesheet" href="assets/style.css"/>
 
-  <link rel="stylesheet" href="assets/tailwind.css"/>
+  <script src="https://cdn.tailwindcss.com"></script>
   <!-- <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"> -->
 
 </head>
@@ -83,19 +83,19 @@
       </div>
       <nav class="nav-menu flex-wrap justify-center flex-grow">
         <div class="dropdown">
-          <span class="dropdown-toggle">Nuevos</span>
+          <span class="dropdown-toggle">Nuevos ♡</span>
           <div class="dropdown-content" id="new-dropdown"></div>
         </div>
         <div class="dropdown">
-          <span class="dropdown-toggle">Categorías</span>
+          <span class="dropdown-toggle">Categorías ♡</span>
           <div class="dropdown-content" id="cat-dropdown"></div>
         </div>
         <div class="dropdown">
-          <span class="dropdown-toggle">Colecciones</span>
+          <span class="dropdown-toggle">Colecciones ♡</span>
           <div class="dropdown-content" id="col-dropdown"></div>
         </div>
         <div class="dropdown">
-          <span class="dropdown-toggle">Redes</span>
+          <span class="dropdown-toggle">Redes ♡</span>
           <div class="dropdown-content">
             <a href="https://www.instagram.com/indig0.store" target="_blank" class="social-link flex items-center gap-3 p-2 rounded-lg hover:bg-pink-50 transition">
               <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="social-icon" alt=""> Instagram
@@ -163,19 +163,19 @@
   <!-- mob menu drag -->
   <div id="mobileMenuDrawer" style="display:none;position:fixed;top:0;left:0;width:80vw;max-width:320px;height:100vh;background:#fff;z-index:1002;box-shadow:2px 0 20px rgba(255,107,157,0.1);padding:32px 16px;overflow-y:auto;">
     <div class="mobile-menu-item" onclick="toggleMobileSubmenu('nuevos-submenu-mobile')">
-      Nuevos
+      Nuevos ♡
       <div class="mobile-submenu" id="nuevos-submenu-mobile"></div>
     </div>
     <div class="mobile-menu-item" onclick="toggleMobileSubmenu('categorias-submenu-mobile')">
-      Categorías
+      Categorías ♡
       <div class="mobile-submenu" id="categorias-submenu-mobile"></div>
     </div>
     <div class="mobile-menu-item" onclick="toggleMobileSubmenu('colecciones-submenu-mobile')">
-      Colecciones
+      Colecciones ♡
       <div class="mobile-submenu" id="colecciones-submenu-mobile"></div>
     </div>
     <div class="mobile-menu-item" onclick="toggleMobileSubmenu('redes-submenu-mobile')">
-      Redes
+      Redes ♡
       <div class="mobile-submenu" id="redes-submenu-mobile">
         <a href="https://www.instagram.com/indig0.store" target="_blank" class="mobile-submenu-item">
           <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="social-icon" alt=""> Instagram
@@ -463,9 +463,32 @@
       <div id="cartSummaryContainer"></div>
     </div>
   </div>
-  <script src="assets/google_script.js"></script>
+  
   <script src="assets/main.js"></script>
   <script src="assets/mob.js"></script>
+  <script src="assets/checkout.js"></script>
+  <script>
+  // Attach cart modal event listeners after DOM is loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    // Attach openCartModal to cart icons
+    if (document.getElementById('cartIconBtn')) {
+      document.getElementById('cartIconBtn').onclick = openCartModal;
+    }
+    if (document.getElementById('cartIconBtnMobile')) {
+      document.getElementById('cartIconBtnMobile').onclick = openCartModal;
+    }
+
+    // Add event listener to close cart modal when clicking outside the modal box
+    const cartModalOverlay = document.getElementById('cartModal');
+    if (cartModalOverlay) {
+      cartModalOverlay.addEventListener('click', function(e) {
+        if (e.target === cartModalOverlay) {
+          closeCartModal();
+        }
+      });
+    }
+  });
+  </script>
   <script>
   // sscroll to top buttono logic
   const scrollBtn = document.getElementById('scrollToTopBtn');
