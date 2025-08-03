@@ -1917,6 +1917,12 @@ window.loadApartadoOrderById = loadApartadoOrderById;
 window.previewPaymentImage = previewPaymentImage;
 window.removePaymentImage = removePaymentImage;
 window.submitPayment = submitPayment;
+window.reprocessPayment = reprocessPayment;
+window.showReprocessPaymentModal = showReprocessPaymentModal;
+window.closeReprocessPaymentModal = closeReprocessPaymentModal;
+window.previewNewPaymentImage = previewNewPaymentImage;
+window.removeNewPaymentImage = removeNewPaymentImage;
+window.submitReprocessedPayment = submitReprocessedPayment;
 
 // Add missing toggleImageUpload function
 function toggleImageUpload() {

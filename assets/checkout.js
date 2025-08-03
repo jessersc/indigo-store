@@ -3,7 +3,7 @@
 // jsonp for cors issues
 // google script web app url for orders
 // TODO: Replace this with your actual deployed Google Apps Script URL
-const ORDER_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHaxeUKcp8XK1SY0niB07L_FLC0lugNBGnxS77DIb1ICrd52ifS_-ZVlyZLQ3hcRut7A/exec';
+const ORDER_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
 
 // jsonp callback counter
 let jsonpCounter = 0;
@@ -61,6 +61,9 @@ function sendToGoogleSheets(data, callback) {
   // add script to page
   document.head.appendChild(script);
 }
+
+// expose function globally for use in main.js
+window.sendToGoogleSheets = sendToGoogleSheets;
 
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Checkout page loaded');

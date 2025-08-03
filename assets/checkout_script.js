@@ -137,10 +137,12 @@ function saveImageToDrive(imageData, orderNumber, imageType) {
     return file.getUrl();
     
   } catch (error) {
-    console.error('Error saving image:', error);
+    console.error('Error saving image:', error.toString());
     return '';
   }
 }
+
+
 
 // function to handle image upload seprates
 function uploadImage(e) {
@@ -235,36 +237,7 @@ function reprocessPaymentInSheet(e) {
   }
 }
 
-//  test the connection
-function testConnection() {
-  try {
-    const sheet = getSheet();
-    const testData = [
-      'TEST-' + new Date().getTime(),
-      new Date().toLocaleString('es-ES'),
-      'Test Method',
-      'Test Product',
-      '1',
-      '100.00',
-      '10.00',
-      'TEST-TRANSACTION',
-      'Test',
-      '',
-      'Test Delivery',
-      '',
-      'Test Customer',
-      'Test Phone',
-      'test@email.com',
-      'Test Address',
-      'Test Instructions'
-    ];
-    
-    sheet.appendRow(testData);
-    return 'Test successful - data added to spreadsheet';
-  } catch (error) {
-    return 'Test failed: ' + error.toString();
-  }
-}
+
 
 // get order statistics
 function getOrderStats() {
