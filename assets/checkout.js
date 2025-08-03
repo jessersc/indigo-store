@@ -2,6 +2,7 @@
 
 // jsonp for cors issues
 // google script web app url for orders
+// TODO: Replace this with your actual deployed Google Apps Script URL
 const ORDER_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHaxeUKcp8XK1SY0niB07L_FLC0lugNBGnxS77DIb1ICrd52ifS_-ZVlyZLQ3hcRut7A/exec';
 
 // jsonp callback counter
@@ -36,10 +37,13 @@ function sendToGoogleSheets(data, callback) {
   
   // add error handling
   script.onerror = function() {
+    console.error('Script load error for URL:', script.src);
     delete window[callbackName];
-    document.head.removeChild(script);
+    if (document.head.contains(script)) {
+      document.head.removeChild(script);
+    }
     if (callback) {
-      callback({ success: false, error: 'Network error' });
+      callback({ success: false, error: 'Network error - Script failed to load' });
     }
   };
   

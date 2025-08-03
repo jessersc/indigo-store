@@ -2,17 +2,26 @@ User-agent: *
 Allow: /
 
 
-# Sitemap location
+Disallow: /*_script.js
+Disallow: /assets/*_script.js
+
+
 Sitemap: https://www.indigostore.site/sitemap.xml
 
 User-agent: Googlebot
 Allow: /
+Disallow: /*_script.js
+Disallow: /assets/*_script.js
 
 User-agent: Bingbot
 Allow: /
+Disallow: /*_script.js
+Disallow: /assets/*_script.js
 
 User-agent: Slurp
 Allow: /
+Disallow: /*_script.js
+Disallow: /assets/*_script.js
 
 # Disallow: /admin/
 # Disallow: /private/
