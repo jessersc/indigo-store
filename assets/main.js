@@ -1306,6 +1306,9 @@ function displayOrderHistory() {
     // determine if order can be reprocessed (pending or apartado status)
     const canReprocess = order.status === 'pending' || order.status === 'apartado';
     
+    // determines if order can be deleted (only pending)
+    const canDelete = order.status === 'pending';
+    
     return `
       <div class="order-history-item" style="
         border: 1px solid #e5e7eb;
@@ -1385,19 +1388,21 @@ function displayOrderHistory() {
             </button>
           ` : ''}
           
-          <button onclick="deleteOrder('${order.orderNumber}')" 
-                  style="
-                    padding: 6px 12px;
-                    background: #fee2e2;
-                    border: 1px solid #fca5a5;
-                    border-radius: 6px;
-                    font-size: 12px;
-                    color: #dc2626;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                  " onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">
-            Eliminar
-          </button>
+          ${canDelete ? `
+            <button onclick="deleteOrder('${order.orderNumber}')" 
+                    style="
+                      padding: 6px 12px;
+                      background: #fee2e2;
+                      border: 1px solid #fca5a5;
+                      border-radius: 6px;
+                      font-size: 12px;
+                      color: #dc2626;
+                      cursor: pointer;
+                      transition: all 0.2s;
+                    " onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">
+              Eliminar
+            </button>
+          ` : ''}
         </div>
         
         <div style="margin-top: 8px; font-size: 11px; color: #9ca3af; font-family: monospace;">
@@ -2096,9 +2101,9 @@ function deleteOrder(orderNumber) {
     return;
   }
   
-  // check if order can be deleted (only pending or apartado orders)
-  if (order.status === 'processing' || order.status === 'completed') {
-    alert('No se puede eliminar una orden que ya está siendo procesada o completada.');
+  // check if order can be deleted (only pending orders can be deleted)
+  if (order.status !== 'pending') {
+    alert(`No se puede eliminar una orden con estado: ${order.status}\n\nSolo las órdenes pendientes pueden ser eliminadas.`);
     return;
   }
   
@@ -2287,7 +2292,7 @@ function renderOrderDetails(orderNumber) {
           </button>
         ` : ''}
         
-        ${(order.status === 'pending' || order.status === 'apartado') ? `
+        ${order.status === 'pending' ? `
           <button onclick="deleteOrder('${orderNumber}')" 
                   class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
             Eliminar orden
@@ -2440,37 +2445,21 @@ fetch(API_URL)
   });
 
 function syncOrderStatusWithSpreadsheet(orderNumber) {
-  // Google Apps Script web app URL
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
-  
-  fetch(`${GOOGLE_SCRIPT_URL}?action=getOrderStatus&orderNumber=${orderNumber}`)
-    .then(response => response.json())
-    .then(data => {
-      if (data.success && data.status) {
-        updateOrderStatus(orderNumber, data.status);
-        displayOrderHistory();
-      }
-    })
-    .catch(error => {
-      console.error('Error syncing order status:', error);
-    });
+  // use the new google script function from google_script.js
+  window.getOrderStatus(orderNumber, function(data) {
+    if (data.success && data.status) {
+      updateOrderStatus(orderNumber, data.status);
+      displayOrderHistory();
+    }
+  });
 }
 
 function syncAllOrderStatuses() {
   const history = getOrderHistory();
   if (history.length === 0) return;
   
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
-  
-  fetch(`${GOOGLE_SCRIPT_URL}?action=getAllOrderStatuses`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ orderNumbers: history.map(order => order.orderNumber) })
-  })
-  .then(response => response.json())
-  .then(data => {
+  // use the new google script function from google_script.js
+  window.getAllOrderStatuses(function(data) {
     if (data.success && data.statuses) {
       let hasChanges = false;
       
@@ -2486,9 +2475,6 @@ function syncAllOrderStatuses() {
         displayOrderHistory();
       }
     }
-  })
-  .catch(error => {
-    console.error('Error syncing all order statuses:', error);
   });
 }
 
@@ -2502,7 +2488,7 @@ function deleteOrder(orderNumber) {
   }
   
   // check if order can be deleted locally
-  if (order.status === 'pendiente') {
+  if (order.status === 'pending') {
     // can delete locally
     const confirmed = confirm('¿Estás seguro de que quieres eliminar esta orden?');
     if (confirmed) {
@@ -2518,26 +2504,20 @@ function deleteOrder(orderNumber) {
       alert('Orden eliminada exitosamente!');
     }
   } else {
-    // Status is not 'pendiente', can only be deleted from spreadsheet
+    // Status is not 'pending', can only be deleted from spreadsheet
     alert(`Esta orden no puede ser eliminada localmente. El estado actual es: ${order.status}\n\nSolo puede ser eliminada desde la hoja de cálculo.`);
   }
 }
 
 function deleteOrderFromSpreadsheet(orderNumber) {
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
-  
-  fetch(`${GOOGLE_SCRIPT_URL}?action=deleteOrder&orderNumber=${orderNumber}`)
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        console.log('Order deleted from spreadsheet:', orderNumber);
-      } else {
-        console.error('Error deleting order from spreadsheet:', data.error);
-      }
-    })
-    .catch(error => {
-      console.error('Error deleting order from spreadsheet:', error);
-    });
+  // use the new google script function from google_script.js
+  window.deleteOrderFromGoogleSheets(orderNumber, function(data) {
+    if (data.success) {
+      console.log('Order deleted from spreadsheet:', orderNumber);
+    } else {
+      console.error('Error deleting order from spreadsheet:', data.error);
+    }
+  });
 }
 
 function loadOrderById() {
@@ -2559,28 +2539,21 @@ function loadOrderById() {
 }
 
 function loadOrderFromSpreadsheet(orderNumber) {
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
-  
-  fetch(`${GOOGLE_SCRIPT_URL}?action=getOrder&orderNumber=${orderNumber}`)
-    .then(response => response.json())
-    .then(data => {
-      if (data.success && data.order) {
-        const localOrder = convertSpreadsheetOrderToLocal(data.order);
-        
-        const history = getOrderHistory();
-        history.push(localOrder);
-        localStorage.setItem('orderHistory', JSON.stringify(history));
-        
-        showOrderDetailsPage(orderNumber);
-        alert('Orden cargada exitosamente desde la hoja de cálculo!');
-      } else {
-        alert('Orden no encontrada en la hoja de cálculo');
-      }
-    })
-    .catch(error => {
-      console.error('Error loading order from spreadsheet:', error);
-      alert('Error al cargar la orden desde la hoja de cálculo');
-    });
+  // use the new google script function from google_script.js
+  window.getOrderFromGoogleSheets(orderNumber, function(data) {
+    if (data.success && data.order) {
+      const localOrder = convertSpreadsheetOrderToLocal(data.order);
+      
+      const history = getOrderHistory();
+      history.push(localOrder);
+      localStorage.setItem('orderHistory', JSON.stringify(history));
+      
+      showOrderDetailsPage(orderNumber);
+      alert('Orden cargada exitosamente desde la hoja de cálculo!');
+    } else {
+      alert('Orden no encontrada en la hoja de cálculo');
+    }
+  });
 }
 
 function convertSpreadsheetOrderToLocal(spreadsheetOrder) {
@@ -2814,44 +2787,14 @@ function submitReprocessedPayment(orderNumber) {
 }
 
 function sendReprocessedPaymentToGoogleSheets(imageData, orderNumber, imageType, transactionId, newPaymentMethod) {
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
-  
   const order = getOrderFromHistory(orderNumber);
   if (!order) {
     alert('❌ Orden no encontrada (｡•́︿•̀｡)');
     return;
   }
   
-  const reprocessData = {
-    action: 'reprocessPayment',
-    orderNumber: orderNumber,
-    newPaymentMethod: newPaymentMethod,
-    newTransactionId: transactionId,
-    imageData: imageData,
-    imageType: imageType,
-    orderDate: new Date(order.orderDate).toLocaleString('es-ES'),
-    products: order.items.map(item => item.product).join(', '),
-    quantities: order.items.map(item => item.quantity).join(', '),
-    totalBS: order.totalBS.toFixed(2),
-    totalUSD: order.totalUSD.toFixed(2),
-    deliveryMethod: order.deliveryMethod || '',
-    deliveryInfo: order.deliveryInfo || null,
-    customerName: order.deliveryInfo ? order.deliveryInfo.name : '',
-    customerPhone: order.deliveryInfo ? order.deliveryInfo.phone : '',
-    customerEmail: order.deliveryInfo ? order.deliveryInfo.email : '',
-    customerAddress: order.deliveryInfo ? order.deliveryInfo.address : '',
-    deliveryInstructions: order.deliveryInfo ? order.deliveryInfo.instructions : ''
-  };
-  
-  fetch(GOOGLE_SCRIPT_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(reprocessData)
-  })
-  .then(response => response.json())
-  .then(data => {
+  // use the new google script function from google_script.js
+  window.sendReprocessedPaymentToGoogleSheets(imageData, orderNumber, imageType, transactionId, newPaymentMethod, function(data) {
     if (data.success) {
       // update local order
       updateLocalOrderPayment(orderNumber, newPaymentMethod, transactionId);
@@ -2894,13 +2837,6 @@ function sendReprocessedPaymentToGoogleSheets(imageData, orderNumber, imageType,
       submitBtn.disabled = false;
       submitBtn.textContent = 'Actualizar Pago';
     }
-  })
-  .catch(error => {
-    console.error('Error reprocessing payment:', error);
-    alert('Error al reprocesar el pago. Por favor intenta de nuevo.');
-    const submitBtn = document.getElementById('submitReprocessBtn');
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Actualizar Pago';
   });
 }
 
@@ -2953,18 +2889,8 @@ function syncAllOrderStatuses() {
   const history = getOrderHistory();
   if (history.length === 0) return;
   
-
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
-  
-  fetch(`${GOOGLE_SCRIPT_URL}?action=getAllOrderStatuses`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ orderNumbers: history.map(order => order.orderNumber) })
-  })
-  .then(response => response.json())
-  .then(data => {
+  // use the new google script function from google_script.js
+  window.getAllOrderStatuses(function(data) {
     if (data.success && data.statuses) {
       let hasChanges = false;
       
@@ -2985,10 +2911,6 @@ function syncAllOrderStatuses() {
         alert('Todos los estados están actualizados!');
       }
     }
-  })
-  .catch(error => {
-    console.error('Error syncing all order statuses:', error);
-    alert('Error al sincronizar estados');
   });
 }
 
@@ -3067,39 +2989,8 @@ function submitPayment(method, orderNumber) {
 
 // sends to googlesheets
 function sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionId, method, order) {
-  // google script web app url
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
-  
-  const orderData = {
-    orderNumber: orderNumber,
-    orderDate: new Date(order.orderDate).toLocaleString('es-ES'),
-    paymentMethod: method,
-    products: order.items.map(item => item.product).join(', '),
-    quantities: order.items.map(item => item.quantity).join(', '),
-    totalBS: order.totalBS.toFixed(2),
-    totalUSD: order.totalUSD.toFixed(2),
-    transactionId: transactionId,
-    status: 'processing',
-    imageData: imageData,
-    imageType: imageType,
-    deliveryMethod: order.deliveryMethod || '',
-    deliveryInfo: order.deliveryInfo || null,
-    customerName: order.deliveryInfo ? order.deliveryInfo.name : '',
-    customerPhone: order.deliveryInfo ? order.deliveryInfo.phone : '',
-    customerEmail: order.deliveryInfo ? order.deliveryInfo.email : '',
-    customerAddress: order.deliveryInfo ? order.deliveryInfo.address : '',
-    deliveryInstructions: order.deliveryInfo ? order.deliveryInfo.instructions : ''
-  };
-  
-  fetch(GOOGLE_SCRIPT_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(orderData)
-  })
-  .then(response => response.json())
-  .then(data => {
+  // new function from google_script.js
+  window.sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionId, method, order, function(data) {
     if (data.success) {
       // create whatsapp message
       const methodLabels = {
@@ -3146,13 +3037,5 @@ function sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionI
       submitBtn.disabled = false;
       submitBtn.textContent = 'Finalizar compra';
     }
-  })
-  .catch(error => {
-    console.error('Error sending payment:', error);
-    alert('Error al enviar el comprobante. Por favor intenta de nuevo.');
-    // renable button
-    const submitBtn = document.getElementById('submitPaymentBtn');
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Finalizar compra';
   });
 }

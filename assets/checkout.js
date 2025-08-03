@@ -115,44 +115,13 @@ function saveOrderToHistory(orderNumber, cart, totalUSD, totalBS, paymentMethod,
 }
 
 function sendOrderToGoogleSheets(orderInfo) {
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
-  
-  const orderData = {
-    orderNumber: orderInfo.orderNumber,
-    orderDate: new Date(orderInfo.orderDate).toLocaleString('es-ES'),
-    paymentMethod: orderInfo.paymentMethod,
-    products: orderInfo.items.map(item => item.product).join(', '),
-    quantities: orderInfo.items.map(item => item.quantity).join(', '),
-    totalBS: orderInfo.totalBS.toFixed(2),
-    totalUSD: orderInfo.totalUSD.toFixed(2),
-    transactionId: orderInfo.orderNumber,
-    status: orderInfo.status,
-    deliveryMethod: orderInfo.deliveryMethod || '',
-    deliveryInfo: orderInfo.deliveryInfo || null,
-    customerName: orderInfo.deliveryInfo ? orderInfo.deliveryInfo.name : '',
-    customerPhone: orderInfo.deliveryInfo ? orderInfo.deliveryInfo.phone : '',
-    customerEmail: orderInfo.deliveryInfo ? orderInfo.deliveryInfo.email : '',
-    customerAddress: orderInfo.deliveryInfo ? orderInfo.deliveryInfo.address : '',
-    deliveryInstructions: orderInfo.deliveryInfo ? orderInfo.deliveryInfo.instructions : ''
-  };
-  
-  fetch(GOOGLE_SCRIPT_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(orderData)
-  })
-  .then(response => response.json())
-  .then(data => {
+  // new fucntion from google_script.js
+  window.sendOrderToGoogleSheets(orderInfo, function(data) {
     if (data.success) {
       console.log('Order sent to Google Sheets successfully');
     } else {
       console.error('Error sending order to Google Sheets:', data.error);
     }
-  })
-  .catch(error => {
-    console.error('Error sending order to Google Sheets:', error);
   });
 }
 

@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+
+
+# Sitemap location
+Sitemap: https://www.indigostore.site/sitemap.xml
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Disallow: /admin/
+# Disallow: /private/
+
+Allow: /assets/
+Allow: /images/
+Allow: /css/
+Allow: /js/
+
+Crawl-delay: 1 

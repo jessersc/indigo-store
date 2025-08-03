@@ -1,0 +1,608 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+     <url>
+     <loc>https://www.indigostore.site/</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>daily</changefreq>
+     <priority>1.0</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/"/>
+     <xhtml:link rel="alternate" hreflang="es-VE" href="https://www.indigostore.site/"/>
+   </url>
+
+     <url>
+     <loc>https://www.indigostore.site/?page=category&amp;name=nuevos</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>daily</changefreq>
+     <priority>0.9</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=category&amp;name=nuevos"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=category&amp;name=categorias</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=category&amp;name=categorias"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=category&amp;name=colecciones</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=category&amp;name=colecciones"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=checkout</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>monthly</changefreq>
+     <priority>0.6</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=checkout"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=pay</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>monthly</changefreq>
+     <priority>0.5</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=pay"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=apartado</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>monthly</changefreq>
+     <priority>0.5</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=apartado"/>
+   </url>
+
+
+         <!-- Product pages with correct URL structure (products 1-690) -->
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=1</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=1"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=2</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=2"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=3</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=3"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=4</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=4"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=5</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=5"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=6</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=6"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=7</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=7"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=8</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=8"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=9</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=9"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=10</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=10"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=11</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=11"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=12</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=12"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=13</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=13"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=14</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=14"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=15</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=15"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=16</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=16"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=17</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=17"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=18</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=18"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=19</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=19"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=20</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=20"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=50</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=50"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=100</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=100"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=200</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=200"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=300</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=300"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=400</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=400"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=500</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=500"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=600</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=600"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=product&amp;product=690</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.7</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=product&amp;product=690"/>
+   </url>
+
+     <url>
+     <loc>https://www.indigostore.site/?page=category&amp;name=ropa</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=category&amp;name=ropa"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=category&amp;name=accesorios</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=category&amp;name=accesorios"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=category&amp;name=calzado</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=category&amp;name=calzado"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=category&amp;name=cosmeticos</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=category&amp;name=cosmeticos"/>
+   </url>
+
+     <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Vivienne+Westwood</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Vivienne+Westwood"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Nana</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Nana"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Accesorios+match</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Accesorios+match"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Anime</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Anime"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=One+piece</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=One+piece"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=El+extraño+mundo+de+Jack</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=El+extraño+mundo+de+Jack"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Gaming</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Gaming"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=gaming</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=gaming"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Studio+Ghibli</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Studio+Ghibli"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Berserk</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Berserk"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Harry+Potter</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Harry+Potter"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=The+Legend+of+Zelda</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=The+Legend+of+Zelda"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Artistas</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Artistas"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Goth/Alternative</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Goth/Alternative"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Props</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Props"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Jujutsu+Kaisen</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Jujutsu+Kaisen"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Sanrio</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Sanrio"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Kpop</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Kpop"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Hora+de+Aventura</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Hora+de+Aventura"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Pokemon</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Pokemon"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Harry+potter</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Harry+potter"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=My+Little+Pony</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=My+Little+Pony"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Hollow+Knight</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Hollow+Knight"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Mofusand</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Mofusand"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Naruto</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Naruto"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=The+legend+of+Zelda</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=The+legend+of+Zelda"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Genshin+Impact</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Genshin+Impact"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Snoopy</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Snoopy"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Artículos+originales</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Artículos+originales"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Evangelion</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Evangelion"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Minecraft</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Minecraft"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Hollow+knight</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Hollow+knight"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Chiikawa</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Chiikawa"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Noche+estrellada</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Noche+estrellada"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Spiderman</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Spiderman"/>
+   </url>
+
+   <url>
+     <loc>https://www.indigostore.site/?page=collection&amp;collection=Labubu</loc>
+     <lastmod>2025-08-03</lastmod>
+     <changefreq>weekly</changefreq>
+     <priority>0.8</priority>
+     <xhtml:link rel="alternate" hreflang="es" href="https://www.indigostore.site/?page=collection&amp;collection=Labubu"/>
+   </url>
+
+</urlset> 
