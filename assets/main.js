@@ -1421,8 +1421,34 @@ function showOrderHistoryModal() {
           font-size: 14px;
           cursor: pointer;
           transition: background 0.2s;
+          margin-right: 8px;
         " onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
           🔄 Sincronizar Estados
+        </button>
+        <button onclick="clearOrderHistory()" style="
+          padding: 8px 16px;
+          background: #ef4444;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: background 0.2s;
+          margin-right: 8px;
+        " onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
+          🗑️ Limpiar Historial
+        </button>
+        <button onclick="debugOrderHistory()" style="
+          padding: 8px 16px;
+          background: #10b981;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: background 0.2s;
+        " onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
+          🔍 Debug ORD-090633
         </button>
       </div>
     </div>
@@ -1470,6 +1496,7 @@ window.closeReprocessPaymentModal = closeReprocessPaymentModal;
 window.submitReprocessedPayment = submitReprocessedPayment;
 window.previewNewPaymentImage = previewNewPaymentImage;
 window.removeNewPaymentImage = removeNewPaymentImage;
+window.clearOrderHistory = clearOrderHistory;
 
 // payment processing functions
 function renderPaymentPage(method, orderNumber) {
@@ -1858,7 +1885,7 @@ function submitPayment(method, orderNumber) {
     const imageType = imageFile.name.split('.').pop().toLowerCase();
     
     // Send image to Google Apps Script
-    sendImageToGoogleSheets(imageData, orderNumber, imageType, '', method, order);
+    sendImageToGoogleSheets(imageData, orderNumber, imageType, method, order);
   };
   
   reader.readAsDataURL(imageFile);
@@ -1878,28 +1905,19 @@ function updateOrderStatus(orderNumber, status) {
 
 // utility function for parsing order numbers (copied from checkout.js)
 function parseOrderNumber(orderNumber) {
-  // parse order number format: ORD-YYYYMMDD-HHMMSS-SEQUENTIAL-SESSION-RANDOM
+  // parse order number format: ORD-XXXXXX (9 characters)
   const parts = orderNumber.split('-');
-  if (parts.length !== 6) return null;
+  if (parts.length !== 2) return null;
   
-  const [prefix, dateTime, sequential, session, random] = parts;
+  const [prefix, sequential] = parts;
   
-  // parse date and time
-  const year = dateTime.substring(0, 4);
-  const month = dateTime.substring(4, 6);
-  const day = dateTime.substring(6, 8);
-  const hour = dateTime.substring(9, 11);
-  const minute = dateTime.substring(11, 13);
-  const second = dateTime.substring(13, 15);
-  
-  const orderDate = new Date(year, month - 1, day, hour, minute, second);
+  // create a default date since we don't store it in the order number anymore
+  const orderDate = new Date();
   
   return {
     prefix,
     orderDate,
     sequential: parseInt(sequential),
-    session,
-    random: parseInt(random),
     formattedDate: orderDate.toLocaleDateString('es-ES', {
       year: 'numeric',
       month: '2-digit',
@@ -1907,7 +1925,7 @@ function parseOrderNumber(orderNumber) {
       hour: '2-digit',
       minute: '2-digit'
     }),
-    shortNumber: `${prefix}-${sequential}` // shorter version for display
+    shortNumber: orderNumber // same as full number for 9-character format
   };
 }
 
@@ -2007,8 +2025,8 @@ function reprocessPayment(orderNumber) {
     return;
   }
   
-  // show payment method selection modal
-  showReprocessPaymentModal(orderNumber, order);
+  // open normal payment page instead of reprocess modal
+  showPaymentPage(order.paymentMethod, orderNumber);
 }
 
 function deleteOrder(orderNumber) {
@@ -2236,6 +2254,7 @@ fetch(API_URL)
     return res.json();
   })
   .then(products => {
+    console.log('Products loaded successfully:', products.length);
     console.log('Products loaded:', products.length);
     const valid = products.filter(p => p.ItemID && p.Product);
     console.log('Valid products:', valid.length);
@@ -2293,13 +2312,23 @@ fetch(API_URL)
   })
   .catch(err => {
     console.error("Error fetching or processing data:", err);
+    
+    // ensure loading overlay is hidden on error
+    if (window.hideLoadingOverlay) {
+      window.hideLoadingOverlay();
+    }
+    
     const errorDiv = document.createElement('div');
     errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
     errorDiv.innerHTML = `
       <strong>Error:</strong> No se pudieron cargar los productos. 
       <br>Por favor, verifica tu conexión a internet o intenta más tarde.
     `;
-    document.querySelector('main').insertBefore(errorDiv, document.querySelector('main').firstChild);
+    
+    const mainElement = document.querySelector('main');
+    if (mainElement) {
+      mainElement.insertBefore(errorDiv, mainElement.firstChild);
+    }
 
     // populate menus and search  static - FALLBACK
     // nuevos
@@ -2418,13 +2447,21 @@ function syncAllOrderStatusesSilently() {
     action: 'getAllOrderStatuses'
   };
   
+  console.log('=== SYNC DEBUG ===');
+  console.log('Local history before sync:', history.length, 'orders');
+  console.log('Local order numbers:', history.map(o => o.orderNumber));
+  
   sendToGoogleSheets(data, function(response) {
     if (response.success && response.statuses) {
+      console.log('Spreadsheet statuses received:', response.statuses);
+      console.log('Spreadsheet order numbers:', response.statuses.map(s => s.orderNumber));
+      
       let hasChanges = false;
       
       response.statuses.forEach(item => {
         const localOrder = history.find(order => order.orderNumber === item.orderNumber);
         if (localOrder && localOrder.status !== item.status) {
+          console.log(`Updating status for ${item.orderNumber}: ${localOrder.status} -> ${item.status}`);
           updateOrderStatus(item.orderNumber, item.status);
           hasChanges = true;
         }
@@ -2437,7 +2474,11 @@ function syncAllOrderStatusesSilently() {
           contentDiv.innerHTML = displayOrderHistory();
         }
         console.log('Order statuses updated silently');
+      } else {
+        console.log('No status changes found');
       }
+    } else {
+      console.log('Sync response:', response);
     }
   });
 }
@@ -2468,8 +2509,28 @@ function deleteOrder(orderNumber) {
       alert('Orden eliminada exitosamente!');
     }
   } else {
-    // Status is not 'pending', can only be deleted from spreadsheet
-    alert(`Esta orden no puede ser eliminada localmente. El estado actual es: ${order.status}\n\nSolo puede ser eliminada desde la hoja de cálculo.`);
+    // Status is not 'pending', ask if user wants to force delete
+    const confirmed = confirm(`Esta orden tiene estado: ${order.status}\n\n¿Quieres eliminarla del historial local de todas formas? (Solo se eliminará localmente, no de la hoja de cálculo)`);
+    if (confirmed) {
+      // force delete from local storage only
+      const updatedHistory = history.filter(order => order.orderNumber !== orderNumber);
+      localStorage.setItem('orderHistory', JSON.stringify(updatedHistory));
+      
+      // refresh display
+      displayOrderHistory();
+      alert('Orden eliminada del historial local!');
+    }
+  }
+}
+
+// function to clear all order history
+function clearOrderHistory() {
+  const confirmed = confirm('¿Estás seguro de que quieres eliminar todo el historial de órdenes? Esta acción no se puede deshacer.');
+  if (confirmed) {
+    localStorage.removeItem('orderHistory');
+    // refresh display
+    displayOrderHistory();
+    alert('Historial de órdenes eliminado!');
   }
 }
 
@@ -2693,22 +2754,22 @@ function submitPayment(method, orderNumber) {
     const imageType = imageFile.name.split('.').pop().toLowerCase();
     
     // send image to app script
-    sendImageToGoogleSheets(imageData, orderNumber, imageType, '', method, order);
+    sendImageToGoogleSheets(imageData, orderNumber, imageType, method, order);
   };
   
   reader.readAsDataURL(imageFile);
 }
 
 // sends to googlesheets
-function sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionId, method, order) {
+function sendImageToGoogleSheets(imageData, orderNumber, imageType, method, order) {
   console.log('=== CLIENT SIDE: SENDING PAYMENT ===');
   console.log('Order number:', orderNumber);
   console.log('Payment method:', method);
   console.log('Image type:', imageType);
   console.log('Image data length:', imageData ? imageData.length : 'null');
   
-  // Use the short order number (first and third parts)
-  const shortOrderNumber = orderNumber.split('-')[0] + '-' + orderNumber.split('-')[2];
+  // Use the full order number (already 9 characters)
+  const orderNumberToSend = orderNumber;
   
   // Check if image is too large (limit to 1MB for JSONP)
   if (imageData && imageData.length > 1000000) {
@@ -2717,37 +2778,17 @@ function sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionI
     imageData = null;
   }
   
-  const orderData = {
-    action: 'savePayment',
-    orderNumber: shortOrderNumber,
-    orderDate: new Date(order.orderDate).toLocaleString('es-ES'),
-    paymentMethod: method,
-    products: order.items.map(item => item.product).join(', '),
-    quantities: order.items.map(item => item.quantity).join(', '),
-    totalBS: order.totalBS.toFixed(2),
-    totalUSD: order.totalUSD.toFixed(2),
-    transactionId: transactionId || '',
-    status: 'processing',
+  // Only send image data, not order data again
+  const imageDataToSend = {
+    action: 'saveImage',
+    orderNumber: orderNumberToSend,
     imageData: imageData,
-    imageType: imageType,
-    deliveryMethod: order.deliveryMethod || '',
-    deliveryInfo: order.deliveryInfo || null,
-    customerName: order.deliveryInfo ? order.deliveryInfo.name : '',
-    customerPhone: order.deliveryInfo ? order.deliveryInfo.phone : '',
-    customerEmail: order.deliveryInfo ? order.deliveryInfo.email : '',
-    customerAddress: order.deliveryInfo ? order.deliveryInfo.address : '',
-    deliveryInstructions: order.deliveryInfo ? order.deliveryInfo.instructions : ''
+    imageType: imageType
   };
   
-  sendToGoogleSheets(orderData, function(data) {
+  sendToGoogleSheets(imageDataToSend, function(data) {
     if (data.success) {
-      console.log('Payment data saved successfully');
-      
-      // If we have image data and it wasn't sent, try to send it separately
-      if (imageData && !orderData.imageData) {
-        console.log('Attempting to send image separately...');
-        sendImageSeparately(imageData, orderNumber, imageType);
-      }
+      console.log('Image data saved successfully');
       
       // create whatsapp message
       const methodLabels = {
@@ -2795,8 +2836,8 @@ function sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionI
 function sendImageSeparately(imageData, orderNumber, imageType) {
   console.log('Sending image separately for order:', orderNumber);
   
-  // Use the short order number (first and third parts)
-  const shortOrderNumber = orderNumber.split('-')[0] + '-' + orderNumber.split('-')[2];
+  // Use the full order number (already 9 characters)
+  const orderNumberToSend = orderNumber;
   
   // Compress the image if it's too large
   const maxSize = 500000; // 500KB limit
@@ -2808,8 +2849,8 @@ function sendImageSeparately(imageData, orderNumber, imageType) {
   }
   
   const imageRequest = {
-    action: 'saveImageOnly',
-    orderNumber: shortOrderNumber,
+    action: 'saveImage',
+    orderNumber: orderNumberToSend,
     imageData: imageData,
     imageType: imageType
   };
@@ -3011,3 +3052,29 @@ function submitReprocessedPayment(orderNumber) {
   
   reader.readAsDataURL(imageFile);
 }
+
+// debug function to check for specific order
+function debugOrderHistory() {
+  const history = getOrderHistory();
+  console.log('=== ORDER HISTORY DEBUG ===');
+  console.log('Total orders in history:', history.length);
+  
+  const targetOrder = history.find(order => order.orderNumber === 'ORD-090633');
+  if (targetOrder) {
+    console.log('Found ORD-090633:', targetOrder);
+    console.log('Order date:', new Date(targetOrder.orderDate));
+    console.log('Order status:', targetOrder.status);
+    console.log('Order items:', targetOrder.items);
+  } else {
+    console.log('ORD-090633 not found in local history');
+  }
+  
+  // also check localStorage directly
+  const rawHistory = localStorage.getItem('orderHistory');
+  console.log('Raw localStorage data:', rawHistory);
+  
+  return targetOrder;
+}
+
+// expose debug function globally
+window.debugOrderHistory = debugOrderHistory;

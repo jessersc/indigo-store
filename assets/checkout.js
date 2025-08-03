@@ -1,15 +1,17 @@
 // checkout.js
 
 // jsonp for cors issues
-// google script web app url for orders
-// TODO: Replace this with your actual deployed Google Apps Script URL
-const ORDER_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
+// google script web app url for orders - using working SAGRADO 2 URL
+const ORDER_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHaxeUKcp8XK1SY0niB07L_FLC0lugNBGnxS77DIb1ICrd52ifS_-ZVlyZLQ3hcRut7A/exec';
+
+// backup script url in case the main one fails
+const BACKUP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHaxeUKcp8XK1SY0niB07L_FLC0lugNBGnxS77DIb1ICrd52ifS_-ZVlyZLQ3hcRut7A/exec';
 
 // jsonp callback counter
 let jsonpCounter = 0;
 
 // send data to google sheets using jsonp
-function sendToGoogleSheets(data, callback) {
+function sendToGoogleSheets(data, callback, retryCount = 0) {
   // create unique callback name
   const callbackName = 'jsonpCallback_' + (++jsonpCounter);
   
@@ -17,7 +19,9 @@ function sendToGoogleSheets(data, callback) {
   window[callbackName] = function(response) {
     // cleanup
     delete window[callbackName];
-    document.head.removeChild(script);
+    if (document.head.contains(script)) {
+      document.head.removeChild(script);
+    }
     
     // call the actual callback
     if (callback) {
@@ -33,7 +37,9 @@ function sendToGoogleSheets(data, callback) {
   params.append('callback', callbackName);
   params.append('data', JSON.stringify(data));
   
-  script.src = `${ORDER_SCRIPT_URL}?${params.toString()}`;
+  // use backup url if retrying
+  const scriptUrl = retryCount > 0 ? BACKUP_SCRIPT_URL : ORDER_SCRIPT_URL;
+  script.src = `${scriptUrl}?${params.toString()}`;
   
   // add error handling
   script.onerror = function() {
@@ -42,8 +48,17 @@ function sendToGoogleSheets(data, callback) {
     if (document.head.contains(script)) {
       document.head.removeChild(script);
     }
-    if (callback) {
-      callback({ success: false, error: 'Network error - Script failed to load' });
+    
+    // retry with backup url if this was the first attempt
+    if (retryCount === 0) {
+      console.log('Retrying with backup URL...');
+      setTimeout(() => {
+        sendToGoogleSheets(data, callback, 1);
+      }, 1000);
+    } else {
+      if (callback) {
+        callback({ success: false, error: 'Network error - Script failed to load after retry' });
+      }
     }
   };
   
@@ -51,12 +66,21 @@ function sendToGoogleSheets(data, callback) {
   setTimeout(function() {
     if (window[callbackName]) {
       delete window[callbackName];
-      document.head.removeChild(script);
-      if (callback) {
-        callback({ success: false, error: 'Timeout' });
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+      
+      // retry with backup url if this was the first attempt
+      if (retryCount === 0) {
+        console.log('Timeout, retrying with backup URL...');
+        sendToGoogleSheets(data, callback, 1);
+      } else {
+        if (callback) {
+          callback({ success: false, error: 'Timeout after retry' });
+        }
       }
     }
-  }, 10000); // 10 second timeout
+  }, 15000); // 15 second timeout
   
   // add script to page
   document.head.appendChild(script);
@@ -79,37 +103,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
-// enhanced order number generation system
+// enhanced order number generation system - 9 CHARACTERS
 function generateOrderNumber() {
-  // get current timestamp
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  
   // get sequential order number from localStorage
   const lastOrderNumber = localStorage.getItem('lastOrderNumber') || 0;
   const nextOrderNumber = parseInt(lastOrderNumber) + 1;
   localStorage.setItem('lastOrderNumber', nextOrderNumber.toString());
   
-  // generate unique session identifier (first 4 chars of session storage key)
-  const sessionId = sessionStorage.getItem('sessionId') || generateSessionId();
-  sessionStorage.setItem('sessionId', sessionId);
-  
-  // create timestamp component
-  const timestamp = `${year}${month}${day}-${hours}${minutes}${seconds}`;
-  
-  // create sequential component (padded to 6 digits)
+  // create 9-character order number: ORD-XXXXXX (6 digits)
   const sequential = String(nextOrderNumber).padStart(6, '0');
-  
-  // create random component for extra uniqueness (3 digits)
-  const random = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
-  
-  // combine all components
-  const orderNumber = `ORD-${timestamp}-${sequential}-${sessionId}-${random}`;
+  const orderNumber = `ORD-${sequential}`;
   
   return orderNumber;
 }
@@ -180,12 +183,12 @@ function saveOrderToHistory(orderNumber, cart, totalUSD, totalBS, paymentMethod,
 }
 
 function sendOrderToGoogleSheets(orderInfo) {
-  // Use the short order number (first and third parts)
-  const shortOrderNumber = orderInfo.orderNumber.split('-')[0] + '-' + orderInfo.orderNumber.split('-')[2];
+  // Use the full order number (already 9 characters)
+  const orderNumber = orderInfo.orderNumber;
   
   const orderData = {
     action: 'saveOrder',
-    orderNumber: shortOrderNumber,
+    orderNumber: orderNumber,
     orderDate: new Date(orderInfo.orderDate).toLocaleString('es-ES'),
     paymentMethod: orderInfo.paymentMethod,
     products: orderInfo.items.map(item => item.product).join(', '),
@@ -201,6 +204,8 @@ function sendOrderToGoogleSheets(orderInfo) {
     customerAddress: orderInfo.deliveryInfo ? orderInfo.deliveryInfo.address : '',
     deliveryInstructions: orderInfo.deliveryInfo ? orderInfo.deliveryInfo.instructions : ''
   };
+  
+  console.log('Sending order data to Google Sheets:', orderData);
   
   sendToGoogleSheets(orderData, function(data) {
     if (data.success) {

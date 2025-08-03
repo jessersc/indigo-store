@@ -683,6 +683,15 @@
     }
   }
 
+  // fallback to hide loading overlay after 10 seconds if it doesn't hide automatically
+  setTimeout(() => {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay && overlay.style.display !== 'none') {
+      console.warn('Loading overlay fallback: hiding after timeout');
+      hideLoadingOverlay();
+    }
+  }, 10000);
+
   if (window.innerWidth < 768) {
     document.addEventListener('click', function(e) {
       const drawer = document.getElementById('mobileMenuDrawer');

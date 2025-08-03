@@ -38,8 +38,8 @@ function processRequest(data) {
       return saveOrder(data);
     case 'savePayment':
       return savePayment(data);
-    case 'saveImageOnly':
-      return saveImageOnly(data);
+    case 'saveImage':
+      return saveImage(data);
     case 'getOrderStatus':
       return getOrderStatus(data.orderNumber);
     case 'getAllOrderStatuses':
@@ -88,18 +88,12 @@ function saveOrder(data) {
 
 function savePayment(data) {
   try {
-    console.log('Saving payment for order:', data.orderNumber);
-    
     const sheet = SpreadsheetApp.openById('1n6jHeyW_6M8zyUTeaX5k2VxiHllwlWxOLEoOD7Ke8iY');
     const paymentSheet = sheet.getSheetByName('Payments');
     
     let imageUrl = '';
     if (data.imageData) {
-      console.log('Processing image upload...');
       imageUrl = saveImageToDrive(data.imageData, data.imageType, data.orderNumber);
-      console.log('Image upload result:', imageUrl ? 'Success' : 'Failed');
-    } else {
-      console.log('No image data provided');
     }
     
     const rowData = [
@@ -123,117 +117,52 @@ function savePayment(data) {
     ];
     
     paymentSheet.appendRow(rowData);
-    console.log('Payment data saved to spreadsheet successfully');
     
     return { success: true, message: 'Payment saved successfully', imageUrl: imageUrl };
   } catch (error) {
-    console.error('Error in savePayment:', error);
+    return { success: false, error: error.toString() };
+  }
+}
+
+function saveImage(data) {
+  try {
+    const sheet = SpreadsheetApp.openById('1n6jHeyW_6M8zyUTeaX5k2VxiHllwlWxOLEoOD7Ke8iY');
+    const imageSheet = sheet.getSheetByName('PaymentImages');
+    
+    let imageUrl = '';
+    if (data.imageData) {
+      imageUrl = saveImageToDrive(data.imageData, data.imageType, data.orderNumber);
+    }
+    
+    const rowData = [
+      data.orderNumber,
+      data.imageType,
+      imageUrl,
+      new Date().toISOString()
+    ];
+    
+    imageSheet.appendRow(rowData);
+    
+    return { success: true, message: 'Image saved successfully', imageUrl: imageUrl };
+  } catch (error) {
     return { success: false, error: error.toString() };
   }
 }
 
 function saveImageToDrive(imageData, imageType, orderNumber) {
   try {
-    console.log('=== STARTING IMAGE UPLOAD ===');
-    console.log('Order number:', orderNumber);
-    console.log('Image type:', imageType);
-    console.log('Image data length:', imageData ? imageData.length : 'null');
-    
-    // validate input
-    if (!imageData || !imageType || !orderNumber) {
-      console.error('Missing required parameters:', { imageData: !!imageData, imageType, orderNumber });
-      return '';
-    }
-    
-    // clean base64 data
     const base64Data = imageData.replace(/^data:image\/[a-z]+;base64,/, '');
-    console.log('Base64 data length after cleaning:', base64Data.length);
-    
-    if (!base64Data) {
-      console.error('Invalid image data format');
-      return '';
-    }
-    
-    // create blob
-    console.log('Creating blob...');
     const blob = Utilities.newBlob(Utilities.base64Decode(base64Data), `image/${imageType}`, `${orderNumber}_payment.${imageType}`);
-    console.log('Blob created successfully, size:', blob.getBytes().length);
     
-    // always create a new folder to avoid permission issues
-    let folder;
-    try {
-      console.log('Looking for existing folder...');
-      // first try to find existing folder by name
-      const folders = DriveApp.getFoldersByName('Indigo Store Payment Images');
-      if (folders.hasNext()) {
-        folder = folders.next();
-        console.log('Found existing folder:', folder.getName(), 'ID:', folder.getId());
-      } else {
-        console.log('No existing folder found, creating new one...');
-        // create new folder
-        folder = DriveApp.createFolder('Indigo Store Payment Images');
-        console.log('Created new folder:', folder.getName(), 'ID:', folder.getId());
-      }
-    } catch (folderError) {
-      console.error('Error with folder creation:', folderError);
-      console.error('Folder error details:', folderError.toString());
-      // fallback: save to root
-      console.log('Using root folder as fallback...');
-      folder = DriveApp.getRootFolder();
-      console.log('Root folder ID:', folder.getId());
-    }
-    
-    // create file
-    console.log('Creating file in folder...');
+    const folder = DriveApp.getFolderById('11bAJHQedyfaOxk1p1Hh_kFka0AEXPw2E'); 
     const file = folder.createFile(blob);
-    console.log('File created successfully:', file.getName(), 'ID:', file.getId());
     
-    // set sharing permissions
-    try {
-      console.log('Setting file sharing permissions...');
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      console.log('File sharing set successfully');
-    } catch (sharingError) {
-      console.error('Error setting file sharing:', sharingError);
-      console.error('Sharing error details:', sharingError.toString());
-    }
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
     
-    const fileUrl = file.getUrl();
-    console.log('=== IMAGE UPLOAD SUCCESSFUL ===');
-    console.log('File URL:', fileUrl);
-    return fileUrl;
+    return file.getUrl();
   } catch (error) {
-    console.error('=== IMAGE UPLOAD FAILED ===');
     console.error('Error saving image:', error);
-    console.error('Error details:', error.toString());
-    console.error('Error stack:', error.stack);
     return '';
-  }
-}
-
-function saveImageOnly(data) {
-  try {
-    console.log('=== SAVE IMAGE ONLY ===');
-    console.log('Order number:', data.orderNumber);
-    console.log('Image type:', data.imageType);
-    console.log('Image data length:', data.imageData ? data.imageData.length : 'null');
-    
-    if (!data.imageData || !data.imageType || !data.orderNumber) {
-      return { success: false, error: 'Missing required image data' };
-    }
-    
-    const imageUrl = saveImageToDrive(data.imageData, data.imageType, data.orderNumber);
-    
-    if (imageUrl) {
-      console.log('Image saved successfully:', imageUrl);
-      return { success: true, imageUrl: imageUrl };
-    } else {
-      console.error('Failed to save image');
-      return { success: false, error: 'Failed to save image to Drive' };
-    }
-  } catch (error) {
-    console.error('Error in saveImageOnly:', error);
-    return { success: false, error: error.toString() };
   }
 }
 

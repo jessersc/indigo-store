@@ -1,3 +1,7 @@
+// Google Apps Script for Indigo Store
+// Deploy as web app with access: Anyone, even anonymous
+// Execute as: Me
+
 function doGet(e) { 
   const sheet = SpreadsheetApp.openById('1U9-I_UeYLorCqpGXOoZ_ATuMcc92oOjiPyNVG823j60');
   const data = sheet.getSheetByName('Sheet1');
