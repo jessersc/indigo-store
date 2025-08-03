@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Indigo Store♡</title>
+  <title>Indigo Store</title>
   <link rel="icon" href="assets/conejito.png" type="image/png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,6 +49,23 @@
         <button id="searchIconBtn" style="display:none;background:none;border:none;cursor:pointer;padding:8px;">
           <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="28" height="28" viewBox="0 0 50 50"><path d="M 21 3 C 11.622998 3 4 10.623005 4 20 C 4 29.376995 11.622998 37 21 37 C 24.712383 37 28.139151 35.791079 30.9375 33.765625 L 44.085938 46.914062 L 46.914062 44.085938 L 33.886719 31.058594 C 36.443536 28.083 38 24.223631 38 20 C 38 10.623005 30.377002 3 21 3 z M 21 5 C 29.296122 5 36 11.703883 36 20 C 36 28.296117 29.296122 35 21 35 C 12.703878 35 6 28.296117 6 20 C 6 11.703883 12.703878 5 21 5 z"></path></svg>
         </button>
+        <button id="orderHistoryBtnMobile" onclick="showOrderHistoryModal()" style="
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 8px;
+          border-radius: 8px;
+          color: #ff6b9d;
+          transition: all 0.2s;
+        " onmouseover="this.style.background='rgba(255,107,157,0.1)'" onmouseout="this.style.background='none'">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12l2 2 4-4"></path>
+            <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
+            <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
+            <path d="M12 3c0 1-1 3-3 3s-3-2-3-3 1-3 3-3 3 2 3 3"></path>
+            <path d="M12 21c0-1 1-3 3-3s3 2 3 3-1 3-3 3-3-2-3-3"></path>
+          </svg>
+        </button>
         <button id="cartIconBtnMobile" class="cart-icon-header flex items-center justify-center" style="background:none;border:none;cursor:pointer;padding:8px;">
           <svg fill="#ff6b9d" stroke="#ff6b9d" width="28px" height="28px" viewBox="144 144 512 512" xmlns="http://www.w3.org/2000/svg">
             <g clip-path="url(#a)">
@@ -66,19 +83,19 @@
       </div>
       <nav class="nav-menu flex-wrap justify-center flex-grow">
         <div class="dropdown">
-          <span class="dropdown-toggle">Nuevos ♡</span>
+          <span class="dropdown-toggle">Nuevos</span>
           <div class="dropdown-content" id="new-dropdown"></div>
         </div>
         <div class="dropdown">
-          <span class="dropdown-toggle">Categorías ♡</span>
+          <span class="dropdown-toggle">Categorías</span>
           <div class="dropdown-content" id="cat-dropdown"></div>
         </div>
         <div class="dropdown">
-          <span class="dropdown-toggle">Colecciones ♡</span>
+          <span class="dropdown-toggle">Colecciones</span>
           <div class="dropdown-content" id="col-dropdown"></div>
         </div>
         <div class="dropdown">
-          <span class="dropdown-toggle">Redes ♡</span>
+          <span class="dropdown-toggle">Redes</span>
           <div class="dropdown-content">
             <a href="https://www.instagram.com/indig0.store" target="_blank" class="social-link flex items-center gap-3 p-2 rounded-lg hover:bg-pink-50 transition">
               <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="social-icon" alt=""> Instagram
@@ -102,7 +119,24 @@
         </div>
       </div>
       <!-- cart icon desktop, always to the right of search bar -->
-      <div class="flex items-center ml-2" id="desktopCartWrapper">
+      <div class="flex items-center ml-2 gap-2" id="desktopCartWrapper">
+        <button id="orderHistoryBtn" onclick="showOrderHistoryModal()" style="
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 8px;
+          border-radius: 8px;
+          color: #ff6b9d;
+          transition: all 0.2s;
+        " onmouseover="this.style.background='rgba(255,107,157,0.1)'" onmouseout="this.style.background='none'">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12l2 2 4-4"></path>
+            <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
+            <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
+            <path d="M12 3c0 1-1 3-3 3s-3-2-3-3 1-3 3-3 3 2 3 3"></path>
+            <path d="M12 21c0-1 1-3 3-3s3 2 3 3-1 3-3 3-3-2-3-3"></path>
+          </svg>
+        </button>
         <button id="cartIconBtn" class="cart-icon-header flex items-center justify-center" style="background:none;border:none;cursor:pointer;padding:8px;">
           <svg fill="#ff6b9d" stroke="#ff6b9d" width="32px" height="32px" viewBox="144 144 512 512" xmlns="http://www.w3.org/2000/svg">
             <g clip-path="url(#a)">
@@ -129,19 +163,19 @@
   <!-- mob menu drag -->
   <div id="mobileMenuDrawer" style="display:none;position:fixed;top:0;left:0;width:80vw;max-width:320px;height:100vh;background:#fff;z-index:1002;box-shadow:2px 0 20px rgba(255,107,157,0.1);padding:32px 16px;overflow-y:auto;">
     <div class="mobile-menu-item" onclick="toggleMobileSubmenu('nuevos-submenu-mobile')">
-      Nuevos ♡
+      Nuevos
       <div class="mobile-submenu" id="nuevos-submenu-mobile"></div>
     </div>
     <div class="mobile-menu-item" onclick="toggleMobileSubmenu('categorias-submenu-mobile')">
-      Categorías ♡
+      Categorías
       <div class="mobile-submenu" id="categorias-submenu-mobile"></div>
     </div>
     <div class="mobile-menu-item" onclick="toggleMobileSubmenu('colecciones-submenu-mobile')">
-      Colecciones ♡
+      Colecciones
       <div class="mobile-submenu" id="colecciones-submenu-mobile"></div>
     </div>
     <div class="mobile-menu-item" onclick="toggleMobileSubmenu('redes-submenu-mobile')">
-      Redes ♡
+      Redes
       <div class="mobile-submenu" id="redes-submenu-mobile">
         <a href="https://www.instagram.com/indig0.store" target="_blank" class="mobile-submenu-item">
           <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" class="social-icon" alt=""> Instagram
@@ -156,6 +190,9 @@
           <img src="https://upload.wikimedia.org/wikipedia/commons/a/aa/Google_Maps_icon_%282020%29.svg" class="social-icon" alt=""> Dirección
         </a>
       </div>
+    </div>
+    <div class="mobile-menu-item" onclick="showOrderHistoryModal(); closeMobileMenu();">
+      Mis Órdenes
     </div>
   </div>
   <!-- YOU SHALL NOT PAASSS -->
@@ -240,7 +277,7 @@
         </button>
       </div>
       <div id="product-detail" class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Dynamic product details -->
+        <!-- dynamic product details -->
       </div>
     </section>
 
@@ -267,9 +304,145 @@
       <div class="max-w-2xl mx-auto px-4 py-8">
         <h2 class="text-2xl font-bold mb-6 text-center">Resumen de tu pedido</h2>
         <div id="checkoutSummary"></div>
+        
+        <!-- delivery - pickup Options -->
+        <h3 class="text-xl font-semibold mt-8 mb-4">Método de entrega</h3>
+        <div id="deliveryOptions" class="mb-8">
+          <div class="delivery-option">
+            <input type="radio" id="pickup-store" name="deliveryMethod" value="store" checked>
+            <label for="pickup-store" class="delivery-option-label">
+              <div class="delivery-option-icon">🏪</div>
+              <div class="delivery-option-content">
+                <div class="delivery-option-title">Retirar en tienda</div>
+                <div class="delivery-option-description">Recoge tu pedido en nuestra tienda física</div>
+              </div>
+            </label>
+          </div>
+          <div class="delivery-option">
+            <input type="radio" id="delivery-home" name="deliveryMethod" value="delivery">
+            <label for="delivery-home" class="delivery-option-label">
+              <div class="delivery-option-icon">🚚</div>
+              <div class="delivery-option-content">
+                <div class="delivery-option-title">Entrega a domicilio</div>
+                <div class="delivery-option-description">Te llevamos tu pedido hasta tu casa</div>
+              </div>
+            </label>
+          </div>
+        </div>
+        
+        <!-- delivery information form -->
+        <div id="deliveryInfoForm" class="mb-8 hidden">
+          <h4 class="text-lg font-semibold mb-4">Información de entrega</h4>
+          <div class="delivery-form-grid">
+            <div class="form-group">
+              <label for="customerName" class="form-label">Nombre completo *</label>
+              <input type="text" id="customerName" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="customerPhone" class="form-label">Teléfono *</label>
+              <input type="tel" id="customerPhone" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="customerEmail" class="form-label">Email</label>
+              <input type="email" id="customerEmail" class="form-input">
+            </div>
+            <div class="form-group full-width">
+              <label for="customerAddress" class="form-label">Dirección completa *</label>
+              <textarea id="customerAddress" class="form-textarea" rows="3" required placeholder="Calle, número, sector, ciudad, estado"></textarea>
+            </div>
+            <div class="form-group full-width">
+              <label for="deliveryInstructions" class="form-label">Instrucciones de entrega</label>
+              <textarea id="deliveryInstructions" class="form-textarea" rows="3" placeholder="Cómo llegar, puntos de referencia, instrucciones especiales..."></textarea>
+            </div>
+          </div>
+        </div>
+        
         <h3 class="text-xl font-semibold mt-8 mb-4">Método de pago</h3>
         <div id="paymentMethods" class="mb-8"></div>
-        <button id="checkoutBtn" class="cart-modal-checkout w-full">Confirmar pedido</button>
+        <button id="checkoutBtn" class="cart-modal-checkout w-full">Ir a Pagar!</button>
+      </div>
+    </section>
+
+    <!-- payment Page -->
+    <section id="payment-page" class="mb-12 hidden">
+      <div class="max-w-2xl mx-auto px-4 py-8">
+        <div class="mb-6">
+          <button onclick="navigateToHome()" class="nav-button mb-4">
+            <div class="nav-button-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="20px" width="20px" fill="white">
+                <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"></path>
+                <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"></path>
+              </svg>
+            </div>
+            <span>Volver</span>
+          </button>
+        </div>
+        
+        <h2 class="text-2xl font-bold mb-6 text-center">Procesar Pago</h2>
+        
+        <!-- cargar order id -->
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Número de Orden (editable)</label>
+          <input type="text" id="orderIdInput" placeholder="Ingresa tu número de orden" 
+                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+          <button onclick="loadOrderById()" class="mt-2 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition">
+            Cargar Orden
+          </button>
+        </div>
+        
+        <div id="paymentContent"></div>
+      </div>
+    </section>
+
+    <!-- apartado Page -->
+    <section id="apartado-page" class="mb-12 hidden">
+      <div class="max-w-2xl mx-auto px-4 py-8">
+        <div class="mb-6">
+          <button onclick="navigateToHome()" class="nav-button mb-4">
+            <div class="nav-button-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="20px" width="20px" fill="white">
+                <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"></path>
+                <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"></path>
+              </svg>
+            </div>
+            <span>Volver</span>
+          </button>
+        </div>
+        
+        <h2 class="text-2xl font-bold mb-6 text-center">Información de Apartado</h2>
+        
+        <!-- cargar orden-->
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Número de Orden (editable)</label>
+          <input type="text" id="apartadoOrderIdInput" placeholder="Ingresa tu número de orden" 
+                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+          <button onclick="loadApartadoOrderById()" class="mt-2 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition">
+            Cargar Orden
+          </button>
+        </div>
+        
+        <div id="apartadoContent"></div>
+      </div>
+    </section>
+
+    <!-- Order Details Page -->
+    <section id="order-details-page" class="mb-12 hidden">
+      <div class="max-w-2xl mx-auto px-4 py-8">
+        <div class="mb-6">
+          <button onclick="showOrderHistoryModal()" class="nav-button mb-4">
+            <div class="nav-button-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="20px" width="20px" fill="white">
+                <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"></path>
+                <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"></path>
+              </svg>
+            </div>
+            <span>Volver</span>
+          </button>
+        </div>
+        
+        <h2 class="text-2xl font-bold mb-6 text-center">Detalles de la Orden</h2>
+        
+        <div id="orderDetailsContent"></div>
       </div>
     </section>
   </main>
@@ -281,7 +454,7 @@
   <button id="scrollToTopBtn" style="display:none;position:fixed;bottom:32px;right:24px;z-index:1001;background:#ff6b9d;color:white;border:none;border-radius:50%;width:48px;height:48px;box-shadow:0 4px 15px rgba(255,107,157,0.3);font-size:2rem;align-items:center;justify-content:center;transition:opacity 0.3s;">
     ↑
   </button>
-  <!-- Cart Modal -->
+  <!-- cart Modal -->
   <div id="cartModal" class="cart-modal-overlay" style="display:none;">
     <div class="cart-modal">
       <button class="cart-modal-close" onclick="closeCartModal()">&times;</button>
@@ -416,21 +589,9 @@
   let ticking = false;
   const header = document.getElementById('main-header');
   function updateHeaderOnScroll() {
-    // check search results or other pages where header should be visible
-    const searchResults = document.getElementById('search-results');
-    const categoryPage = document.getElementById('category-page');
-    const productPage = document.getElementById('product-page');
-    
-    const shouldKeepHeaderVisible = searchResults && !searchResults.classList.contains('hidden') ||
-                                   categoryPage && !categoryPage.classList.contains('hidden') ||
-                                   productPage && !productPage.classList.contains('hidden');
-
     if (window.innerWidth < 768) {
-      // mobile: hide header completely when scrolling down (original behavior)
-      // but also keeps it visible on search results and other pages
-      if (shouldKeepHeaderVisible) {
-        header.classList.remove('mobile-hidden');
-      } else if (window.scrollY > lastScrollY && window.scrollY > 80) {
+      // mobile: hide header when scrolling down
+      if (window.scrollY > lastScrollY && window.scrollY > 80) {
         header.classList.add('mobile-hidden');
       } else {
         header.classList.remove('mobile-hidden');

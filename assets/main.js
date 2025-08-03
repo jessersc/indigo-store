@@ -1,6 +1,7 @@
 // global var
 const API_URL = "https://script.google.com/macros/s/AKfycbwaCPJPEUs7mM-QP8QuzFSgVl40nBq6Vpt7iCf1R2t_L9Bk57rBA73HeuRThY1dREhT/exec";
 let allProducts = [];
+let allProductsWithVariants = []; // includes all products including variants (models)
 let searchTimeout;
 
 // route function
@@ -10,7 +11,10 @@ function getUrlParams() {
     page: params.get('page') || 'home',
     category: params.get('category'),
     collection: params.get('collection'),
-    product: params.get('product')
+    product: params.get('product'),
+    variant: params.get('variant'),
+    method: params.get('method'),
+    order: params.get('order')
   };
 }
 
@@ -77,6 +81,7 @@ function showCheckoutPage() {
         window.renderCheckoutSummary();
         window.setupPaymentMethods();
         window.setupCheckoutButton();
+        window.setupDeliveryOptions();
       }
     };
     document.body.appendChild(script);
@@ -84,7 +89,24 @@ function showCheckoutPage() {
     window.renderCheckoutSummary();
     window.setupPaymentMethods();
     window.setupCheckoutButton();
+    window.setupDeliveryOptions();
   }
+}
+
+function showPaymentPage(method, orderNumber) {
+  hideAllPages();
+  document.getElementById('payment-page').classList.remove('hidden');
+  renderPaymentPage(method, orderNumber);
+  // set the order ID in the input
+  document.getElementById('orderIdInput').value = orderNumber;
+}
+
+function showApartadoPage(orderNumber) {
+  hideAllPages();
+  document.getElementById('apartado-page').classList.remove('hidden');
+  renderApartadoPage(orderNumber);
+  // set the order ID in the input
+  document.getElementById('apartadoOrderIdInput').value = orderNumber;
 }
 
 // page display functions
@@ -94,6 +116,9 @@ function hideAllPages() {
   document.getElementById('category-page').classList.add('hidden');
   document.getElementById('product-page').classList.add('hidden');
   document.getElementById('checkout-page').classList.add('hidden');
+  document.getElementById('payment-page').classList.add('hidden');
+  document.getElementById('apartado-page').classList.add('hidden');
+  document.getElementById('order-details-page').classList.add('hidden');
   document.getElementById('breadcrumb').classList.add('hidden');
 }
 
@@ -141,7 +166,27 @@ function showCategoryPage(name, type) {
 
 function showProductPage(productId) {
   hideAllPages();
-  const product = allProducts.find(p => p.ItemID == productId);
+  
+  // check if there's a specific variant in the URL
+  const params = getUrlParams();
+  const variantId = params.variant;
+  
+  let product;
+  if (variantId && variantId.toString().startsWith(productId.toString().split('.')[0])) {
+    // show specific variant only if it belongs to the requested product family
+    product = window.allProductsWithVariants.find(p => p.ItemID.toString() === variantId);
+  } else {
+    // show main product and clear any unrelated variant from URL
+    product = allProducts.find(p => p.ItemID.toString() === productId.toString());
+    
+    // clear variant parameter if it doesn't belong to this product
+    if (variantId && !variantId.toString().startsWith(productId.toString().split('.')[0])) {
+      const currentUrl = new URL(window.location);
+      currentUrl.searchParams.delete('variant');
+      window.history.replaceState({}, '', currentUrl.toString());
+    }
+  }
+  
   if (!product) {
     alert('Producto no encontrado');
     navigateToHome();
@@ -176,14 +221,84 @@ function renderProductDetail(product) {
   const stock = parseInt(product.Stock) || 0;
   const maxQuantity = stock <= 1 ? 1 : stock;
   const isLowStock = stock <= 1;
+  const isSoldOut = stock <= 0 || product.Stock === null || product.Stock === undefined || product.Stock === '';
+  
+  // debug log to see stock values
+  console.log('Product:', product.Product, 'Stock:', product.Stock, 'Parsed stock:', stock, 'Is sold out:', isSoldOut);
+  
+  // collect all available images from the spreadsheet - handle comma separated urls
+  let images = [];
+  if (product.Image) {
+    // split by comma and trim whitespace to handle multiple urls in one cell
+    const imageUrls = product.Image.split(',').map(url => url.trim());
+    images = imageUrls.filter(url => url && url.length > 0); // remove empty urls
+  }
+  // fallback to old method if no comma separated urls found
+  if (images.length === 0 && product.Image) {
+    images = [product.Image];
+    if (product.Image2) images.push(product.Image2);
+    if (product.Image3) images.push(product.Image3);
+  }
+  
+  // create image carousel if multiple images exist, otherwise just show single image
+  const imageCarousel = images.length > 1 ? `
+    <div class="image-carousel-container relative">
+      <button class="carousel-arrow carousel-arrow-left" onclick="changeImage('${product.ItemID}', -1)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15,18 9,12 15,6"></polyline>
+        </svg>
+      </button>
+        <div class="image-carousel" id="imageCarousel-${product.ItemID}">
+          ${images.map((img, index) => `
+            <img src="${img}" alt="${product.Product}" class="carousel-image ${index === 0 ? 'active' : ''}" data-index="${index}">
+         `).join('')}
+        </div>
+      <button class="carousel-arrow carousel-arrow-right" onclick="changeImage('${product.ItemID}', 1)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9,18 15,12 9,6"></polyline>
+        </svg>
+      </button>
+      <div class="carousel-dots">
+        ${images.map((_, index) => `
+          <button class="carousel-dot ${index === 0 ? 'active' : ''}" onclick="goToImage('${product.ItemID}', ${index})"></button>
+        `).join('')}
+      </div>
+    </div>
+  ` : `
+    <img src="${product.Image}" alt="${product.Product}" class="w-full rounded-lg shadow-lg">
+  `;
+  
+  // check if this product has variants
+  const variants = getVariantThumbnails(product.ItemID);
+  const hasVariants = variants.length > 0;
   
   container.innerHTML = `
     <div class="fade-in">
-      <img src="${product.Image}" alt="${product.Product}" class="w-full rounded-lg shadow-lg mb-4">
-      <div class="grid grid-cols-2 gap-4 mt-4">
-        ${product.Image2 ? `<img src="${product.Image2}" alt="${product.Product}" class="w-full rounded shadow">` : ''}
-        ${product.Image3 ? `<img src="${product.Image3}" alt="${product.Product}" class="w-full rounded shadow">` : ''}
-      </div>
+      ${imageCarousel}
+      ${hasVariants ? `
+        <div class="variant-thumbnails">
+          <h4>Modelos disponibles:</h4>
+          <div class="flex gap-2 justify-center">
+            ${variants.map(variant => {
+              // get first image from comma separated urls for thumbnail
+              let firstImage = variant.Image;
+              if (variant.Image && variant.Image.includes(',')) {
+                firstImage = variant.Image.split(',')[0].trim();
+              }
+              
+              const isActive = variant.ItemID.toString() === product.ItemID.toString();
+              const isMainVariant = variant.ItemID.toString() === product.ItemID.toString().split('.')[0];
+              
+              return `
+                <div class="variant-thumbnail ${isActive ? 'active' : ''}" data-variant-id="${variant.ItemID}" onclick="switchToVariant('${variant.ItemID}')">
+                  <img src="${firstImage}" alt="${variant.Product}">
+                  ${!isMainVariant ? `<p>${variant.Product}</p>` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      ` : ''}
     </div>
     <div class="fade-in">
       <!-- Product Info Card: Title, Price, Description, Payment Methods, Add to Cart -->
@@ -241,6 +356,7 @@ function renderProductDetail(product) {
           </div>
         </div>
         
+        ${!isSoldOut ? `
         <!-- Quantity and Add to Cart Section -->
         <div class="quantity-cart-section">
           <div class="quantity-controls">
@@ -264,9 +380,295 @@ function renderProductDetail(product) {
         </div>
         
         ${isLowStock ? '<p class="stock-warning">Stock limitado</p>' : ''}
+        ` : `
+        <!-- Sold Out Section -->
+        <div class="quantity-cart-section">
+          <button class="sold-out-button-large" onclick="showSoldOutMessage()">
+            SOLD OUT
+          </button>
+        </div>
+        `}
       </div>
     </div>
   `;
+}
+
+// variant processing functions
+function processProductVariants(products) {
+  const mainProducts = [];
+  const allProductsWithVariants = [...products];
+  
+  // group products by their base ID (without decimals)
+  const productGroups = {};
+  
+  products.forEach(product => {
+    const baseId = product.ItemID.toString().split('.')[0];
+    if (!productGroups[baseId]) {
+      productGroups[baseId] = [];
+    }
+    productGroups[baseId].push(product);
+  });
+  
+  // process each group
+  Object.keys(productGroups).forEach(baseId => {
+    const variants = productGroups[baseId];
+    
+    if (variants.length === 1) {
+      // single product, no variants
+      mainProducts.push(variants[0]);
+    } else {
+      // multiple variants - find the main one (without decimal)
+      const mainVariant = variants.find(v => v.ItemID.toString() === baseId);
+      if (mainVariant) {
+        // add variant info to main product
+        mainVariant.variants = variants;
+        mainProducts.push(mainVariant);
+      } else {
+        // fallback: use first variant as main
+        variants[0].variants = variants;
+        mainProducts.push(variants[0]);
+      }
+    }
+  });
+  
+  return { mainProducts, allProductsWithVariants };
+}
+
+function getProductVariants(productId) {
+  const product = window.allProductsWithVariants.find(p => p.ItemID.toString() === productId.toString());
+  if (product && product.variants) {
+    return product.variants;
+  }
+  return [product];
+}
+
+function getVariantThumbnails(productId) {
+  // find the main product that has variants (base ID without decimals)
+  const baseId = productId.toString().split('.')[0];
+  const mainProduct = window.allProductsWithVariants.find(p => p.ItemID.toString() === baseId);
+  
+  if (mainProduct && mainProduct.variants) {
+    // return all variants including the main product
+    return mainProduct.variants;
+  }
+  return [];
+}
+
+function switchToVariant(variantId) {
+  const variant = window.allProductsWithVariants.find(p => p.ItemID.toString() === variantId.toString());
+  if (variant) {
+    // update product details without re-rendering the entire page
+    const productDetail = document.getElementById('product-detail');
+    if (productDetail) {
+      // update product name
+      const productName = productDetail.querySelector('.product-detail-title');
+      if (productName) {
+        productName.textContent = variant.Product;
+      }
+      
+      // update product description
+      const productDescription = productDetail.querySelector('.product-description p');
+      if (productDescription) {
+        productDescription.textContent = variant.Description || 'Sin descripción disponible';
+      }
+      
+      // update price
+      const priceUsd = productDetail.querySelector('.price-usd');
+      const priceBs = productDetail.querySelector('.price-bs');
+      if (priceUsd) {
+        priceUsd.textContent = `$${variant.USD}`;
+      }
+      if (priceBs) {
+        priceBs.textContent = `Bs ${variant.Bs}`;
+      }
+      
+      // update stock (we'll handle this with the add to cart button)
+      const stock = parseInt(variant.Stock) || 0;
+      const isLowStock = stock <= 1;
+      const isSoldOut = stock <= 0 || variant.Stock === null || variant.Stock === undefined || variant.Stock === '';
+      
+      // debug log to see stock values when switching variants
+      console.log('Variant:', variant.Product, 'Stock:', variant.Stock, 'Parsed stock:', stock, 'Is sold out:', isSoldOut);
+      
+      // completely re-render the quantity-cart-section based on stock status
+      const quantityCartSection = productDetail.querySelector('.quantity-cart-section');
+      if (quantityCartSection) {
+        if (!isSoldOut) {
+          // render quantity controls and add to cart button
+          quantityCartSection.innerHTML = `
+            <div class="quantity-controls">
+              <button class="quantity-btn minus-btn" onclick="changeQuantity('${variant.ItemID.toString()}', -1)" ${isLowStock ? 'disabled' : ''}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </button>
+              <span class="quantity-display" id="quantity-${variant.ItemID.toString()}">1</span>
+              <button class="quantity-btn plus-btn" onclick="changeQuantity('${variant.ItemID.toString()}', 1)" ${isLowStock ? 'disabled' : ''}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </button>
+            </div>
+            <button onclick="addToCartWithQuantity('${variant.ItemID.toString()}')" 
+                    class="add-to-cart-large cart-icon">
+              Agregar al carrito
+            </button>
+          `;
+        } else {
+          // render sold out button
+          quantityCartSection.innerHTML = `
+            <button class="sold-out-button-large" onclick="showSoldOutMessage()">
+              SOLD OUT
+            </button>
+          `;
+        }
+      }
+      
+      // update stock warning if it exists
+      const stockWarning = productDetail.querySelector('.stock-warning');
+      if (stockWarning) {
+        if (isLowStock && !isSoldOut) {
+          stockWarning.style.display = 'block';
+        } else {
+          stockWarning.style.display = 'none';
+        }
+      }
+      
+      // update main image carousel
+      const imageCarousel = productDetail.querySelector('.image-carousel');
+      if (imageCarousel) {
+        // parse images from variant
+        let images = [];
+        if (variant.Image && variant.Image.includes(',')) {
+          images = variant.Image.split(',').map(url => url.trim()).filter(url => url);
+        } else if (variant.Image) {
+          images = [variant.Image];
+        } else if (variant.Image2) {
+          images = [variant.Image2];
+        } else if (variant.Image3) {
+          images = [variant.Image3];
+        }
+        
+        if (images.length > 0) {
+          // update carousel images
+          const carouselImages = imageCarousel.querySelectorAll('.carousel-image');
+          carouselImages.forEach((img, index) => {
+            if (index < images.length) {
+              img.src = images[index];
+              img.alt = variant.Product;
+              img.style.display = index === 0 ? 'block' : 'none';
+            } else {
+              img.style.display = 'none';
+            }
+          });
+          
+          // update carousel dots
+          const dotsContainer = productDetail.querySelector('.carousel-dots');
+          if (dotsContainer && images.length > 1) {
+            dotsContainer.innerHTML = images.map((_, index) => 
+              `<button class="carousel-dot ${index === 0 ? 'active' : ''}" onclick="goToImage('${variant.ItemID.toString()}', ${index})"></button>`
+            ).join('');
+          }
+          
+          // update carousel arrows
+          const leftArrow = productDetail.querySelector('.carousel-arrow-left');
+          const rightArrow = productDetail.querySelector('.carousel-arrow-right');
+          if (leftArrow) {
+            leftArrow.onclick = () => changeImage(variant.ItemID.toString(), -1);
+          }
+          if (rightArrow) {
+            rightArrow.onclick = () => changeImage(variant.ItemID.toString(), 1);
+          }
+        }
+      }
+      
+      // also update single image if no carousel
+      const singleImage = productDetail.querySelector('img:not(.carousel-image)');
+      if (singleImage && !imageCarousel) {
+        let imageUrl = variant.Image;
+        if (variant.Image && variant.Image.includes(',')) {
+          imageUrl = variant.Image.split(',')[0].trim();
+        }
+        if (imageUrl) {
+          singleImage.src = imageUrl;
+          singleImage.alt = variant.Product;
+        }
+      }
+      
+      // update variant thumbnails to show current variant as active
+      const variantThumbnails = productDetail.querySelectorAll('.variant-thumbnail');
+      variantThumbnails.forEach(thumb => {
+        thumb.classList.remove('active');
+        if (thumb.getAttribute('data-variant-id') === variantId.toString()) {
+          thumb.classList.add('active');
+        }
+      });
+    }
+    
+    // update URL to reflect the current variant
+    const currentUrl = new URL(window.location);
+    currentUrl.searchParams.set('variant', variantId);
+    window.history.pushState({}, '', currentUrl.toString());
+    
+    // update breadcrumb to show current variant name
+    const breadcrumb = document.getElementById('breadcrumb');
+    if (breadcrumb) {
+      breadcrumb.innerHTML = `
+        <a href="#" onclick="navigateToHome()">Inicio</a> / 
+        <a href="#" onclick="history.back()">Productos</a> / 
+        <strong>${variant.Product}</strong>
+      `;
+    }
+  }
+}
+
+// image carousel functions - for when products have multiple images
+function changeImage(productId, direction) {
+  const carousel = document.getElementById(`imageCarousel-${productId}`);
+  if (!carousel) return;
+  
+  const images = carousel.querySelectorAll('.carousel-image');
+  const container = carousel.closest('.image-carousel-container');
+  const dots = container.querySelectorAll('.carousel-dot');
+  
+  // find which image is currently showing
+  let currentIndex = 0;
+  images.forEach((img, index) => {
+    if (img.classList.contains('active')) {
+      currentIndex = index;
+    }
+  });
+  
+  // calculate new index with wrap around
+  let newIndex = currentIndex + direction;
+  if (newIndex < 0) newIndex = images.length - 1;
+  if (newIndex >= images.length) newIndex = 0;
+  
+  // hide current image and dot
+  images[currentIndex].classList.remove('active');
+  dots[currentIndex].classList.remove('active');
+  
+  // show new image and dot
+  images[newIndex].classList.add('active');
+  dots[newIndex].classList.add('active');
+}
+
+function goToImage(productId, index) {
+  const carousel = document.getElementById(`imageCarousel-${productId}`);
+  if (!carousel) return;
+  
+  const images = carousel.querySelectorAll('.carousel-image');
+  const container = carousel.closest('.image-carousel-container');
+  const dots = container.querySelectorAll('.carousel-dot');
+  
+  // hide all images and dots first
+  images.forEach(img => img.classList.remove('active'));
+  dots.forEach(dot => dot.classList.remove('active'));
+  
+  // show the selected image and dot
+  images[index].classList.add('active');
+  dots[index].classList.add('active');
 }
 
 function setupSorting(products) {
@@ -329,6 +731,20 @@ function handleRouting() {
     case 'checkout':
       showCheckoutPage();
       break;
+    case 'pay':
+      if (params.method && params.order) {
+        showPaymentPage(params.method, params.order);
+      } else {
+        navigateToHome();
+      }
+      break;
+    case 'apartado':
+      if (params.order) {
+        showApartadoPage(params.order);
+      } else {
+        navigateToHome();
+      }
+      break;
     default:
       showHomePage();
   }
@@ -347,55 +763,75 @@ function saveCart(cart) {
 function changeQuantity(productId, change) {
   let quantityDisplay = document.getElementById(`quantity-${productId}`);
   if (!quantityDisplay) return;
+  
   const currentQuantity = parseInt(quantityDisplay.textContent) || 1;
   let product;
+  
+  // handle both card- prefixed IDs and regular IDs
   if (productId.startsWith('card-')) {
     const realId = productId.replace('card-', '');
-    product = allProducts.find(p => p.ItemID == realId);
+    product = window.allProductsWithVariants.find(p => p.ItemID.toString() === realId.toString());
   } else {
-    product = allProducts.find(p => p.ItemID == productId);
+    product = window.allProductsWithVariants.find(p => p.ItemID.toString() === productId.toString());
   }
+  
   if (!product) return;
+  
   const stock = parseInt(product.Stock) || 0;
   const maxQuantity = stock <= 1 ? 1 : stock;
   const newQuantity = Math.max(1, Math.min(maxQuantity, currentQuantity + change));
   quantityDisplay.textContent = newQuantity;
+  
   // update button states
   const minusBtn = quantityDisplay.previousElementSibling;
   const plusBtn = quantityDisplay.nextElementSibling;
-  minusBtn.disabled = newQuantity <= 1;
-  plusBtn.disabled = newQuantity >= maxQuantity;
-  // update button styles
-  if (minusBtn.disabled) {
-    minusBtn.classList.add('disabled');
-  } else {
-    minusBtn.classList.remove('disabled');
+  
+  if (minusBtn) {
+    minusBtn.disabled = newQuantity <= 1;
+    if (minusBtn.disabled) {
+      minusBtn.classList.add('disabled');
+    } else {
+      minusBtn.classList.remove('disabled');
+    }
   }
-  if (plusBtn.disabled) {
-    plusBtn.classList.add('disabled');
-  } else {
-    plusBtn.classList.remove('disabled');
+  
+  if (plusBtn) {
+    plusBtn.disabled = newQuantity >= maxQuantity;
+    if (plusBtn.disabled) {
+      plusBtn.classList.add('disabled');
+    } else {
+      plusBtn.classList.remove('disabled');
+    }
   }
 }
 
 function addToCartWithQuantity(productId) {
   let product, quantityDisplay;
+  
+  // handle both card- prefixed IDs and regular IDs
   if (productId.startsWith('card-')) {
     const realId = productId.replace('card-', '');
-    product = allProducts.find(p => p.ItemID == realId);
+    product = window.allProductsWithVariants.find(p => p.ItemID.toString() === realId.toString());
     quantityDisplay = document.getElementById(`quantity-card-${realId}`);
   } else {
-    product = allProducts.find(p => p.ItemID == productId);
+    product = window.allProductsWithVariants.find(p => p.ItemID.toString() === productId.toString());
     quantityDisplay = document.getElementById(`quantity-${productId}`);
   }
-  if (!product || !quantityDisplay) return;
+  
+  if (!product || !quantityDisplay) {
+    console.error('Product or quantity display not found:', productId);
+    return;
+  }
+  
   const quantity = parseInt(quantityDisplay.textContent) || 1;
   const cart = getCart();
-  const existing = cart.find(p => p.ItemID === product.ItemID);
+  const existing = cart.find(p => p.ItemID.toString() === product.ItemID.toString());
+  
   if (existing) {
     const stock = parseInt(product.Stock) || 0;
     const maxQuantity = stock <= 1 ? 1 : stock;
     const newTotalQuantity = existing.quantity + quantity;
+    
     if (newTotalQuantity > maxQuantity) {
       showCartNotification('No hay suficiente stock disponible.');
       return;
@@ -405,6 +841,7 @@ function addToCartWithQuantity(productId) {
     product.quantity = quantity;
     cart.push(product);
   }
+  
   saveCart(cart);
   updateCartIconCount(); // update cart count immediately
   showCartNotification(`${quantity} ${quantity === 1 ? 'unidad' : 'unidades'} agregada${quantity === 1 ? '' : 's'} al carrito`);
@@ -413,7 +850,7 @@ function addToCartWithQuantity(productId) {
 // updated addToCart function for product cards (keeps existing behavior)
 function addToCart(product) {
   const cart = getCart();
-  const existing = cart.find(p => p.ItemID === product.ItemID);
+  const existing = cart.find(p => p.ItemID.toString() === product.ItemID.toString());
   
   if (existing) {
     const stock = parseInt(product.Stock) || 0;
@@ -454,6 +891,11 @@ function showCartNotification(message) {
       document.body.removeChild(notification);
     }, 300);
   }, 2000);
+}
+
+// sold out message function
+function showSoldOutMessage() {
+  showCartNotification('No hay stock disponible para este producto.');
 }
 
 // Cart modal logic
@@ -518,9 +960,9 @@ function renderCartModal() {
           <div class="cart-item-price">$${item.USD} | Bs ${item.Bs}</div>
         </div>
         <div class="cart-item-qty-controls">
-          <button class="cart-item-qty-btn" onclick="updateCartItemQty('${item.ItemID}', -1)">-</button>
+          <button class="cart-item-qty-btn" onclick="updateCartItemQty('${item.ItemID.toString()}', -1)">-</button>
           <span class="cart-item-qty">${item.quantity}</span>
-          <button class="cart-item-qty-btn" onclick="updateCartItemQty('${item.ItemID}', 1)">+</button>
+          <button class="cart-item-qty-btn" onclick="updateCartItemQty('${item.ItemID.toString()}', 1)">+</button>
         </div>
       </div>
     `;
@@ -530,14 +972,14 @@ function renderCartModal() {
     <div class="cart-summary-row"><span>Total USD:</span><span>$${totalUSD.toFixed(2)}</span></div>
     <div class="cart-summary-row"><span>Total Bs:</span><span>Bs ${totalBS.toFixed(2)}</span></div>
     <div class="cart-summary-total"><span>Total:</span><span>$${totalUSD.toFixed(2)} | Bs ${totalBS.toFixed(2)}</span></div>
-    <button class="cart-modal-checkout" style="width:100%;margin-top:1.5rem;" onclick="closeCartModal();navigateToCheckout();">Finalizar compra</button>
+            <button class="cart-modal-checkout" style="width:100%;margin-top:1.5rem;" onclick="closeCartModal();navigateToCheckout();">Ir a Pagar!</button>
   `;
   updateCartIconCount();
 }
 
 function updateCartItemQty(itemId, change) {
   const cart = getCart();
-  const item = cart.find(p => p.ItemID == itemId);
+  const item = cart.find(p => p.ItemID.toString() === itemId.toString());
   if (!item) return;
   const stock = parseInt(item.Stock) || 0;
   const maxQuantity = stock <= 1 ? 1 : stock;
@@ -548,7 +990,7 @@ function updateCartItemQty(itemId, change) {
   item.quantity += change;
   if (item.quantity <= 0) {
     // Remove item from cart
-    const idx = cart.findIndex(p => p.ItemID == itemId);
+    const idx = cart.findIndex(p => p.ItemID.toString() === itemId.toString());
     if (idx !== -1) cart.splice(idx, 1);
   }
   saveCart(cart);
@@ -696,13 +1138,20 @@ function renderCard(product) {
   const stock = parseInt(product.Stock) || 0;
   const maxQuantity = stock <= 1 ? 1 : stock;
   const isLowStock = stock <= 1;
+  const isSoldOut = stock <= 0 || product.Stock === null || product.Stock === undefined || product.Stock === '';
   const cardId = `card-${product.ItemID}`;
 
   const div = document.createElement("div");
   div.className = "product-card-kawaii fade-in";
+  // get first image from comma separated urls for the card
+  let firstImage = product.Image;
+  if (product.Image && product.Image.includes(',')) {
+    firstImage = product.Image.split(',')[0].trim();
+  }
+  
   div.innerHTML = `
     <div class="cursor-pointer" onclick="navigateToProduct(${product.ItemID})">
-      <img src="${product.Image}" alt="${product.Product}" class="w-full h-48 object-cover">
+      <img src="${firstImage}" alt="${product.Product}" class="w-full h-48 object-cover">
       <h3 class="product-title">${product.Product}</h3>
       <p class="product-price">
         <span class="price-usd">$${product.USD}</span>
@@ -711,36 +1160,52 @@ function renderCard(product) {
       </p>
     </div>
     
-    <!-- Quantity controls + Stock message at the top -->
-    <div class="quantity-controls mb-2 mt-2">
-      <button class="quantity-btn minus-btn" onclick="changeQuantity('card-${product.ItemID}', -1)" ${isLowStock ? 'disabled' : ''}>
+    <!-- stock warning at the top - only show for low stock, not sold out -->
+    ${isLowStock && !isSoldOut ? '<p class="stock-warning mt-2 mb-2">Stock limitado</p>' : ''}
+
+    <!-- spacer to push controls to bottom -->
+    <div style="flex-grow: 1;"></div>
+
+    <!-- quantity controls buttons centered at bottom - always visible -->
+    <div class="quantity-controls mb-2" style="justify-content: center; padding: 8px 16px;">
+      <button class="quantity-btn minus-btn" onclick="changeQuantity('card-${product.ItemID}', -1)" ${isSoldOut || isLowStock ? 'disabled' : ''}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
       </button>
-      <span class="quantity-display" id="quantity-card-${product.ItemID}">1</span>
-      <button class="quantity-btn plus-btn" onclick="changeQuantity('card-${product.ItemID}', 1)" ${isLowStock ? 'disabled' : ''}>
+      <span class="quantity-display" id="quantity-card-${product.ItemID}">${isSoldOut ? '0' : '1'}</span>
+      <button class="quantity-btn plus-btn" onclick="changeQuantity('card-${product.ItemID}', 1)" ${isSoldOut || isLowStock ? 'disabled' : ''}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
       </button>
-      ${isLowStock ? '<p class="stock-warning mt-1">Stock limitado</p>' : ''}
     </div>
 
-    <!-- Add to cart button at the bottom -->
-    <button class="add-to-cart-small cart-icon w-full" onclick="addToCartWithQuantity('card-${product.ItemID}')">
-      Agregar al carrito
-    </button>
+    <!-- add to cart button or sold out-->
+    ${isSoldOut ? 
+      `<button class="sold-out-button w-full" onclick="showSoldOutMessage()">
+        SOLD OUT
+      </button>` : 
+      `<button class="add-to-cart-small cart-icon w-full" onclick="addToCartWithQuantity('card-${product.ItemID}')">
+        Agregar al carrito
+      </button>`
+    }
   `;
   return div;
 }
 
 function renderProductMini(product) {
+  // get first image from comma separated urls for the mini card
+  let firstImage = product.Image;
+  if (product.Image && product.Image.includes(',')) {
+    firstImage = product.Image.split(',')[0].trim();
+  }
+  
   return `
     <div class="block hover:bg-gray-100 p-3 rounded-lg cursor-pointer transition-colors" onclick="navigateToProduct(${product.ItemID})">
       <div class="flex gap-3 items-center">
-        <img src="${product.Image}" class="w-12 h-12 object-cover rounded-lg">
+        <img src="${firstImage}" class="w-12 h-12 object-cover rounded-lg">
         <div class="flex-1">
           <p class="text-sm font-semibold text-gray-800 mb-1 leading-tight">${product.Product}</p>
           <p class="text-xs font-medium" style="background: linear-gradient(135deg, #ff6b9d, #ff8fab); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
@@ -813,6 +1278,1033 @@ function renderDropdownLinks(containerId, list, type) {
   });
 }
 
+// order history and tracking functions
+function getOrderHistory() {
+  const history = localStorage.getItem('orderHistory');
+  return history ? JSON.parse(history) : [];
+}
+
+function displayOrderHistory() {
+  const history = getOrderHistory();
+  if (history.length === 0) {
+    return '<div class="text-center text-gray-500 py-8">No hay órdenes en tu historial.</div>';
+  }
+  
+  return history.map(order => {
+    const orderDate = new Date(order.orderDate).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    const itemsList = order.items.map(item => 
+      `<div class="text-sm text-gray-600">• ${item.product} x${item.quantity}</div>`
+    ).join('');
+    
+    // determine if order can be reprocessed (pending or apartado status)
+    const canReprocess = order.status === 'pending' || order.status === 'apartado';
+    
+    return `
+      <div class="order-history-item" style="
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      ">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div style="font-weight: bold; color: #ff6b9d;">${order.orderNumber.split('-')[0]}-${order.orderNumber.split('-')[2]}</div>
+          <div style="
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            background: ${order.status === 'pending' ? '#fef3c7' : order.status === 'apartado' ? '#dbeafe' : '#d1fae5'};
+            color: ${order.status === 'pending' ? '#92400e' : order.status === 'apartado' ? '#1e40af' : '#065f46'};
+          ">
+            ${order.status === 'pending' ? ' Pendiente' : order.status === 'apartado' ? ' Apartado' : ' Completado'}
+          </div>
+        </div>
+        <div style="font-size: 14px; color: #6b7280; margin-bottom: 8px;">${orderDate}</div>
+        <div style="margin-bottom: 8px;">
+          ${itemsList}
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div style="font-weight: bold; color: #374151;">
+            $${order.totalUSD.toFixed(2)} | Bs ${order.totalBS.toFixed(2)}
+          </div>
+          <div style="font-size: 12px; color: #6b7280;">${order.paymentMethod}</div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button onclick="viewOrderDetails('${order.orderNumber}')" 
+                  style="
+                    padding: 6px 12px;
+                    background: #f3f4f6;
+                    border: 1px solid #d1d5db;
+                    border-radius: 6px;
+                    font-size: 12px;
+                    color: #374151;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                  " onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+            Ver detalles
+          </button>
+          
+          <button onclick="contactSupport('${order.orderNumber}')" 
+                  style="
+                    padding: 6px 12px;
+                    background: #dbeafe;
+                    border: 1px solid #93c5fd;
+                    border-radius: 6px;
+                    font-size: 12px;
+                    color: #1e40af;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                  " onmouseover="this.style.background='#bfdbfe'" onmouseout="this.style.background='#dbeafe'">
+            Más información
+          </button>
+          
+          ${canReprocess ? `
+            <button onclick="reprocessPayment('${order.orderNumber}')" 
+                    style="
+                      padding: 6px 12px;
+                      background: #fef3c7;
+                      border: 1px solid #fbbf24;
+                      border-radius: 6px;
+                      font-size: 12px;
+                      color: #92400e;
+                      cursor: pointer;
+                      transition: all 0.2s;
+                    " onmouseover="this.style.background='#fde68a'" onmouseout="this.style.background='#fef3c7'">
+              Reprocesar pago
+            </button>
+          ` : ''}
+          
+          <button onclick="deleteOrder('${order.orderNumber}')" 
+                  style="
+                    padding: 6px 12px;
+                    background: #fee2e2;
+                    border: 1px solid #fca5a5;
+                    border-radius: 6px;
+                    font-size: 12px;
+                    color: #dc2626;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                  " onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">
+            Eliminar
+          </button>
+        </div>
+        
+        <div style="margin-top: 8px; font-size: 11px; color: #9ca3af; font-family: monospace;">
+          ${order.orderNumber}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function showOrderHistoryModal() {
+  const modal = document.createElement('div');
+  modal.className = 'order-history-modal-overlay';
+  modal.innerHTML = `
+    <div class="order-history-modal">
+      <button class="order-history-modal-close" onclick="closeOrderHistoryModal()">&times;</button>
+      <h2 class="order-history-modal-title">Historial de Órdenes</h2>
+      <div id="orderHistoryContent">
+        ${displayOrderHistory()}
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // close modal when clicking outside (like cart modal)
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      closeOrderHistoryModal();
+    }
+  });
+}
+
+function closeOrderHistoryModal() {
+  const modal = document.querySelector('.order-history-modal-overlay');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+// expose functions globally
+window.showOrderHistoryModal = showOrderHistoryModal;
+window.closeOrderHistoryModal = closeOrderHistoryModal;
+
+// payment processing functions
+function renderPaymentPage(method, orderNumber) {
+  const paymentContent = document.getElementById('paymentContent');
+  if (!paymentContent) return;
+  
+  // get order from history
+  const order = getOrderFromHistory(orderNumber);
+  if (!order) {
+    paymentContent.innerHTML = '<div class="text-center text-red-500">Orden no encontrada.</div>';
+    return;
+  }
+  
+  const methodLabels = {
+    'paypal': 'PayPal',
+    'zelle': 'Zelle',
+    'binance': 'Binance',
+    'pago-movil': 'Pago Móvil'
+  };
+  
+  const methodLabel = methodLabels[method] || method;
+  
+  paymentContent.innerHTML = `
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+      <h3 class="text-xl font-bold mb-4 text-center">${methodLabel}</h3>
+      
+      <!-- Order Summary -->
+      <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+        <h4 class="font-semibold mb-2">Resumen de la Orden</h4>
+        <div class="text-sm text-gray-600">
+          <div><strong>Orden:</strong> ${order.orderNumber.split('-')[0]}-${order.orderNumber.split('-')[2]}</div>
+          <div><strong>Transacción:</strong> ${order.orderNumber}</div>
+          <div><strong>Total:</strong> $${order.totalUSD.toFixed(2)} | Bs ${order.totalBS.toFixed(2)}</div>
+          <div><strong>Fecha:</strong> ${new Date(order.orderDate).toLocaleDateString('es-ES')}</div>
+        </div>
+      </div>
+      
+      <!-- Payment Information -->
+      <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+        <h4 class="font-semibold mb-3 text-blue-800">💳 Información de Pago</h4>
+        ${method === 'pago-movil' ? `
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="font-medium text-gray-700">Banco:</span>
+              <span class="text-gray-900">Mercantil</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="font-medium text-gray-700">Número:</span>
+              <span class="text-gray-900">0412-849-5036</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="font-medium text-gray-700">Cédula:</span>
+              <span class="text-gray-900">28256608</span>
+            </div>
+          </div>
+        ` : method === 'paypal' ? `
+          <div class="space-y-3 text-sm">
+            <div class="text-center">
+              <span class="font-medium text-gray-700">PayPal Me:</span>
+            </div>
+            <div class="text-center">
+              <a href="https://www.paypal.me/indigostore" target="_blank" class="text-blue-600 hover:text-blue-800 underline break-all">
+                https://www.paypal.me/indigostore
+              </a>
+            </div>
+            <div class="text-center">
+              <a href="https://www.paypal.me/indigostore" target="_blank" 
+                 class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.067 8.478c.492.315.844.825.844 1.478 0 .653-.352 1.163-.844 1.478-.492.315-1.163.478-1.844.478H4.777c-.681 0-1.352-.163-1.844-.478C2.441 11.816 2.089 11.306 2.089 10.653c0-.653.352-1.163.844-1.478.492-.315 1.163-.478 1.844-.478h13.446c.681 0 1.352.163 1.844.478z"/>
+                </svg>
+                Abrir PayPal
+              </a>
+            </div>
+          </div>
+        ` : method === 'binance' ? `
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between">
+              <span class="font-medium text-gray-700">Binance ID:</span>
+              <span class="text-gray-900">381425060</span>
+            </div>
+            <div class="text-center">
+              <a href="https://www.binance.com" target="_blank" 
+                 class="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
+                <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                Abrir Binance
+              </a>
+            </div>
+          </div>
+        ` : method === 'zelle' ? `
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between">
+              <span class="font-medium text-gray-700">Email:</span>
+              <span class="text-gray-900">info@venegroupservices.com</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="font-medium text-gray-700">Nombre:</span>
+              <span class="text-gray-900">Venegroup Services Inc</span>
+            </div>
+            <div class="text-center">
+              <a href="https://www.zellepay.com" target="_blank" 
+                 class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                Abrir Zelle
+              </a>
+            </div>
+          </div>
+        ` : `
+          <p class="text-blue-700 text-sm">Información de pago no disponible para este método.</p>
+        `}
+        <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p class="text-yellow-800 text-sm font-medium">
+            ⚠️ Realiza el pago antes de subir el comprobante
+          </p>
+        </div>
+      </div>
+      
+      <!-- Payment Confirmation -->
+      <div class="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+        <h4 class="font-semibold mb-3 text-green-800">✅ Confirmar Pago</h4>
+        <div class="flex items-center mb-3">
+          <input type="checkbox" id="paymentConfirmed" class="mr-3 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+          <label for="paymentConfirmed" class="text-sm text-gray-700">
+            Confirmo que he realizado el pago según la información proporcionada
+          </label>
+        </div>
+        <p class="text-xs text-green-700">
+          Solo podrás subir el comprobante después de confirmar que has realizado el pago.
+        </p>
+      </div>
+      
+      <!-- Image Upload -->
+      <div class="mb-6" id="imageUploadSection">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Subir Comprobante de Pago (Screenshot)
+        </label>
+        <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center opacity-50 pointer-events-none" id="uploadArea">
+          <input type="file" id="paymentImage" accept="image/*" class="hidden" onchange="previewPaymentImage(this)" disabled>
+          <label for="paymentImage" class="cursor-not-allowed">
+            <div class="text-gray-400 mb-2">
+              <svg class="mx-auto h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div class="text-sm text-gray-600">
+              <span class="font-medium text-gray-400">Confirma el pago primero</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">PNG, JPG, GIF hasta 10MB</p>
+          </label>
+        </div>
+        <div id="imagePreview" class="mt-4 hidden">
+          <img id="previewImg" class="max-w-full h-auto rounded-lg border" alt="Preview">
+          <button onclick="removePaymentImage()" class="mt-2 px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600">
+            Remover imagen
+          </button>
+        </div>
+      </div>
+      
+      <!-- Transaction ID Input -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          ID de Transacción (opcional)
+        </label>
+        <input type="text" id="transactionId" placeholder="Ingresa el ID de transacción si lo tienes" 
+               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+      </div>
+      
+      <!-- Submit Button -->
+      <button id="submitPaymentBtn" onclick="submitPayment('${method}', '${orderNumber}')" 
+              class="w-full bg-gray-400 text-white py-3 px-6 rounded-lg transition font-semibold cursor-not-allowed" disabled>
+        Finalizar compra
+      </button>
+    </div>
+  `;
+  
+  // Add event listener for payment confirmation
+  setTimeout(() => {
+    const paymentConfirmed = document.getElementById('paymentConfirmed');
+    const uploadArea = document.getElementById('uploadArea');
+    const paymentImage = document.getElementById('paymentImage');
+    
+    if (paymentConfirmed && uploadArea && paymentImage) {
+      paymentConfirmed.addEventListener('change', function() {
+        if (this.checked) {
+          uploadArea.classList.remove('opacity-50', 'pointer-events-none');
+          uploadArea.classList.add('opacity-100');
+          paymentImage.disabled = false;
+          uploadArea.querySelector('label').classList.remove('cursor-not-allowed');
+          uploadArea.querySelector('label').classList.add('cursor-pointer');
+          uploadArea.querySelector('.text-gray-400').classList.remove('text-gray-400');
+          uploadArea.querySelector('.text-gray-400').classList.add('text-pink-600', 'hover:text-pink-500');
+          uploadArea.querySelector('.text-pink-600').textContent = 'Haz clic para subir o arrastra y suelta';
+        } else {
+          uploadArea.classList.add('opacity-50', 'pointer-events-none');
+          uploadArea.classList.remove('opacity-100');
+          paymentImage.disabled = true;
+          uploadArea.querySelector('label').classList.add('cursor-not-allowed');
+          uploadArea.querySelector('label').classList.remove('cursor-pointer');
+          uploadArea.querySelector('.text-pink-600').classList.remove('text-pink-600', 'hover:text-pink-500');
+          uploadArea.querySelector('.text-pink-600').classList.add('text-gray-400');
+          uploadArea.querySelector('.text-gray-400').textContent = 'Confirma el pago primero';
+        }
+      });
+    }
+  }, 100);
+}
+
+function renderApartadoPage(orderNumber) {
+  const apartadoContent = document.getElementById('apartadoContent');
+  if (!apartadoContent) return;
+  
+  // get order from history
+  const order = getOrderFromHistory(orderNumber);
+  if (!order) {
+    apartadoContent.innerHTML = '<div class="text-center text-red-500">Orden no encontrada.</div>';
+    return;
+  }
+  
+  apartadoContent.innerHTML = `
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+      <h3 class="text-xl font-bold mb-4 text-center">Información de Apartado</h3>
+      
+      <!-- Order Summary -->
+      <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+        <h4 class="font-semibold mb-2">Resumen de la Orden</h4>
+        <div class="text-sm text-gray-600">
+          <div><strong>Orden:</strong> ${order.orderNumber.split('-')[0]}-${order.orderNumber.split('-')[2]}</div>
+          <div><strong>Transacción:</strong> ${order.orderNumber}</div>
+          <div><strong>Total:</strong> $${order.totalUSD.toFixed(2)} | Bs ${order.totalBS.toFixed(2)}</div>
+          <div><strong>Fecha:</strong> ${new Date(order.orderDate).toLocaleDateString('es-ES')}</div>
+          <div><strong>Estado:</strong> <span class="text-blue-600 font-semibold">Apartado</span></div>
+        </div>
+      </div>
+      
+      <!-- Items List -->
+      <div class="mb-6">
+        <h4 class="font-semibold mb-2">Productos Apartados</h4>
+        <div class="space-y-2">
+          ${order.items.map(item => `
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
+              <div>
+                <div class="font-medium">${item.product}</div>
+                <div class="text-sm text-gray-600">Cantidad: ${item.quantity}</div>
+              </div>
+              <div class="text-right">
+                <div class="font-medium">$${item.priceUSD} | Bs ${item.priceBS}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <!-- Address Information -->
+      <div class="mb-6">
+        <h4 class="font-semibold mb-2">Dirección para Recoger</h4>
+        <div class="p-4 bg-blue-50 rounded-lg">
+          <p class="text-blue-800 font-medium">Indigo Store</p>
+          <p class="text-blue-700 text-sm">Dirección: [Dirección se mostrará aquí]</p>
+          <p class="text-blue-700 text-sm">Horario: [Horario se mostrará aquí]</p>
+        </div>
+      </div>
+      
+      <!-- Google Maps Widget -->
+      <div class="mb-6">
+        <h4 class="font-semibold mb-2">Ubicación</h4>
+        <div class="bg-gray-200 rounded-lg p-4 text-center">
+          <p class="text-gray-600">Widget de Google Maps se mostrará aquí</p>
+          <p class="text-sm text-gray-500 mt-2">Dirección: https://maps.app.goo.gl/MQ2BxeCVe8wEMx1B7</p>
+        </div>
+      </div>
+      
+      <!-- Instructions -->
+      <div class="p-4 bg-yellow-50 rounded-lg">
+        <h4 class="font-semibold mb-2 text-yellow-800">Instrucciones</h4>
+        <ul class="text-sm text-yellow-700 space-y-1">
+          <li>• Tu orden ha sido apartada exitosamente</li>
+          <li>• Presenta tu número de orden al recoger</li>
+          <li>• Tienes 24 horas para recoger tu pedido</li>
+          <li>• Para cualquier consulta, contáctanos por WhatsApp</li>
+        </ul>
+      </div>
+    </div>
+  `;
+}
+
+function getOrderFromHistory(orderNumber) {
+  const history = getOrderHistory();
+  return history.find(order => order.orderNumber === orderNumber);
+}
+
+function loadOrderById() {
+  const orderId = document.getElementById('orderIdInput').value.trim();
+  if (!orderId) {
+    alert('Por favor ingresa un número de orden');
+    return;
+  }
+  
+  const order = getOrderFromHistory(orderId);
+  if (!order) {
+    alert('Orden no encontrada');
+    return;
+  }
+  
+  // get payment method from order
+  const methodMap = {
+    'PayPal': 'paypal',
+    'Zelle': 'zelle',
+    'Binance': 'binance',
+    'Pago Móvil': 'pago-movil'
+  };
+  
+  const method = methodMap[order.paymentMethod] || 'paypal';
+  renderPaymentPage(method, orderId);
+}
+
+function loadApartadoOrderById() {
+  const orderId = document.getElementById('apartadoOrderIdInput').value.trim();
+  if (!orderId) {
+    alert('Por favor ingresa un número de orden');
+    return;
+  }
+  
+  const order = getOrderFromHistory(orderId);
+  if (!order) {
+    alert('Orden no encontrada');
+    return;
+  }
+  
+  renderApartadoPage(orderId);
+}
+
+function previewPaymentImage(input) {
+  const file = input.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('previewImg').src = e.target.result;
+      document.getElementById('imagePreview').classList.remove('hidden');
+      
+      // enable the submit button
+      const submitBtn = document.getElementById('submitPaymentBtn');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+        submitBtn.classList.add('bg-pink-500', 'hover:bg-pink-600');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function removePaymentImage() {
+  document.getElementById('paymentImage').value = '';
+  document.getElementById('imagePreview').classList.add('hidden');
+  
+  // disable the submit button
+  const submitBtn = document.getElementById('submitPaymentBtn');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.classList.remove('bg-pink-500', 'hover:bg-pink-600');
+    submitBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+  }
+}
+
+function submitPayment(method, orderNumber) {
+  const transactionId = document.getElementById('transactionId').value.trim();
+  const imageFile = document.getElementById('paymentImage').files[0];
+  
+  if (!imageFile) {
+    alert('Por favor sube una imagen del comprobante de pago');
+    return;
+  }
+  
+  // get order from history
+  const order = getOrderFromHistory(orderNumber);
+  if (!order) {
+    alert('Orden no encontrada');
+    return;
+  }
+  
+  // Disable submit button to prevent double submission
+  const submitBtn = document.getElementById('submitPaymentBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Procesando...';
+  
+  // Convert image to base64
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const imageData = e.target.result;
+    const imageType = imageFile.name.split('.').pop().toLowerCase();
+    
+    // Send image to Google Apps Script
+    sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionId, method, order);
+  };
+  
+  reader.readAsDataURL(imageFile);
+}
+
+function sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionId, method, order) {
+  // Google Apps Script web app URL
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
+  
+  const orderData = {
+    orderNumber: orderNumber,
+    orderDate: new Date(order.orderDate).toLocaleString('es-ES'),
+    paymentMethod: method,
+    products: order.items.map(item => item.product).join(', '),
+    quantities: order.items.map(item => item.quantity).join(', '),
+    totalBS: order.totalBS.toFixed(2),
+    totalUSD: order.totalUSD.toFixed(2),
+    transactionId: transactionId,
+    status: 'processing',
+    imageData: imageData,
+    imageType: imageType,
+    deliveryMethod: order.deliveryMethod || '',
+    deliveryInfo: order.deliveryInfo || null,
+    customerName: order.deliveryInfo ? order.deliveryInfo.name : '',
+    customerPhone: order.deliveryInfo ? order.deliveryInfo.phone : '',
+    customerEmail: order.deliveryInfo ? order.deliveryInfo.email : '',
+    customerAddress: order.deliveryInfo ? order.deliveryInfo.address : '',
+    deliveryInstructions: order.deliveryInfo ? order.deliveryInfo.instructions : ''
+  };
+  
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(orderData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // create whatsapp message
+      const methodLabels = {
+        'paypal': 'PayPal',
+        'zelle': 'Zelle',
+        'binance': 'Binance',
+        'pago-movil': 'Pago Móvil'
+      };
+      
+      const methodLabel = methodLabels[method] || method;
+      const orderInfo = parseOrderNumber(orderNumber);
+      
+      let message = `¡Hola! He completado mi pago.\n\n`;
+      message += `Orden: ${orderInfo.shortNumber}\n`;
+      message += `Fecha: ${orderInfo.formattedDate}\n`;
+      message += `Transacción: ${orderNumber}\n`;
+      message += `Método de pago: ${methodLabel}\n`;
+      
+      if (transactionId) {
+        message += `ID de transacción: ${transactionId}\n`;
+      }
+      
+      message += `\nTotal: $${order.totalUSD.toFixed(2)} | Bs ${order.totalBS.toFixed(2)}`;
+      message += `\n\nHe subido el comprobante de pago. Por favor confirma mi orden.`;
+      
+      // update order status to 'processing'
+      updateOrderStatus(orderNumber, 'processing');
+      
+      // show success message
+      alert('¡Comprobante enviado exitosamente! Redirigiendo a WhatsApp...');
+      
+      // send whatsapp message
+      const url = `https://wa.me/584128503608?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank');
+      
+      // redirect to home after a short delay
+      setTimeout(() => {
+        navigateToHome();
+      }, 2000);
+    } else {
+      alert('Error al enviar el comprobante: ' + (data.error || 'Error desconocido'));
+      // Re-enable button
+      const submitBtn = document.getElementById('submitPaymentBtn');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Finalizar compra';
+    }
+  })
+  .catch(error => {
+    console.error('Error sending payment:', error);
+    alert('Error al enviar el comprobante. Por favor intenta de nuevo.');
+    // Re-enable button
+    const submitBtn = document.getElementById('submitPaymentBtn');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Finalizar compra';
+  });
+}
+
+function updateOrderStatus(orderNumber, status) {
+  const history = getOrderHistory();
+  const orderIndex = history.findIndex(order => order.orderNumber === orderNumber);
+  
+  if (orderIndex !== -1) {
+    history[orderIndex].status = status;
+    localStorage.setItem('orderHistory', JSON.stringify(history));
+  }
+}
+
+// utility function for parsing order numbers (copied from checkout.js)
+function parseOrderNumber(orderNumber) {
+  // parse order number format: ORD-YYYYMMDD-HHMMSS-SEQUENTIAL-SESSION-RANDOM
+  const parts = orderNumber.split('-');
+  if (parts.length !== 6) return null;
+  
+  const [prefix, dateTime, sequential, session, random] = parts;
+  
+  // parse date and time
+  const year = dateTime.substring(0, 4);
+  const month = dateTime.substring(4, 6);
+  const day = dateTime.substring(6, 8);
+  const hour = dateTime.substring(9, 11);
+  const minute = dateTime.substring(11, 13);
+  const second = dateTime.substring(13, 15);
+  
+  const orderDate = new Date(year, month - 1, day, hour, minute, second);
+  
+  return {
+    prefix,
+    orderDate,
+    sequential: parseInt(sequential),
+    session,
+    random: parseInt(random),
+    formattedDate: orderDate.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }),
+    shortNumber: `${prefix}-${sequential}` // shorter version for display
+  };
+}
+
+// expose functions globally
+window.loadOrderById = loadOrderById;
+window.loadApartadoOrderById = loadApartadoOrderById;
+window.previewPaymentImage = previewPaymentImage;
+window.removePaymentImage = removePaymentImage;
+window.submitPayment = submitPayment;
+
+// Add missing toggleImageUpload function
+function toggleImageUpload() {
+  const checkbox = document.getElementById('paymentConfirmed');
+  const imageSection = document.getElementById('imageUploadSection');
+  const fileInput = document.getElementById('paymentImage');
+  const submitBtn = document.getElementById('submitPaymentBtn');
+  
+  if (checkbox && checkbox.checked) {
+    imageSection.classList.remove('opacity-50', 'pointer-events-none');
+    if (fileInput) fileInput.disabled = false;
+    if (submitBtn) submitBtn.disabled = false;
+  } else {
+    imageSection.classList.add('opacity-50', 'pointer-events-none');
+    if (fileInput) fileInput.disabled = true;
+    if (submitBtn) submitBtn.disabled = true;
+  }
+}
+
+window.toggleImageUpload = toggleImageUpload;
+window.renderPaymentPage = renderPaymentPage;
+window.renderApartadoPage = renderApartadoPage;
+window.showPaymentPage = showPaymentPage;
+window.showApartadoPage = showApartadoPage;
+window.updateUrl = updateUrl;
+window.handleRouting = handleRouting;
+
+// order history action functions
+function viewOrderDetails(orderNumber) {
+  const order = getOrderFromHistory(orderNumber);
+  if (!order) {
+    alert('Orden no encontrada');
+    return;
+  }
+  
+  // close the modal first
+  closeOrderHistoryModal();
+  
+  // show order details page
+  showOrderDetailsPage(orderNumber);
+}
+
+function contactSupport(orderNumber) {
+  const order = getOrderFromHistory(orderNumber);
+  if (!order) {
+    alert('Orden no encontrada');
+    return;
+  }
+  
+  const orderInfo = parseOrderNumber(orderNumber);
+  const orderDate = new Date(order.orderDate).toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  
+  const itemsList = order.items.map(item => 
+    `• ${item.product} x${item.quantity} - $${item.priceUSD} | Bs ${item.priceBS}`
+  ).join('\n');
+  
+  let message = `¡Hola! Necesito más información sobre mi compra.\n\n`;
+  message += `Orden: ${orderInfo.shortNumber}\n`;
+  message += `Fecha: ${orderDate}\n`;
+  message += `Transacción: ${orderNumber}\n`;
+  message += `Estado: ${order.status === 'pending' ? 'Pendiente' : order.status === 'apartado' ? 'Apartado' : 'Completado'}\n`;
+  message += `Método de pago: ${order.paymentMethod}\n\n`;
+  message += `Productos:\n${itemsList}\n\n`;
+  message += `Total: $${order.totalUSD.toFixed(2)} | Bs ${order.totalBS.toFixed(2)}\n\n`;
+  message += `Por favor, ¿puedes darme más información sobre el estado de mi pedido?`;
+  
+  // send whatsapp message
+  const url = `https://wa.me/584128503608?text=${encodeURIComponent(message)}`;
+  window.open(url, '_blank');
+}
+
+function reprocessPayment(orderNumber) {
+  const order = getOrderFromHistory(orderNumber);
+  if (!order) {
+    alert('Orden no encontrada');
+    return;
+  }
+  
+  // determine payment method from order
+  const methodMap = {
+    'PayPal': 'paypal',
+    'Zelle': 'zelle',
+    'Binance': 'binance',
+    'Pago Móvil': 'pago-movil'
+  };
+  
+  const method = methodMap[order.paymentMethod] || 'paypal';
+  
+  // close the modal first
+  closeOrderHistoryModal();
+  
+  // redirect to payment page
+  updateUrl({ page: 'pay', method: method, order: orderNumber });
+  if (window.showPaymentPage) {
+    window.showPaymentPage(method, orderNumber);
+  }
+}
+
+function deleteOrder(orderNumber) {
+  const order = getOrderFromHistory(orderNumber);
+  if (!order) {
+    alert('Orden no encontrada');
+    return;
+  }
+  
+  // check if order can be deleted (only pending or apartado orders)
+  if (order.status === 'processing' || order.status === 'completed') {
+    alert('No se puede eliminar una orden que ya está siendo procesada o completada.');
+    return;
+  }
+  
+  const confirmDelete = confirm(`¿Estás seguro de que quieres eliminar la orden ${orderNumber.split('-')[0]}-${orderNumber.split('-')[2]}?\n\nEsta acción no se puede deshacer.`);
+  
+  if (confirmDelete) {
+    // remove order from history
+    const history = getOrderHistory();
+    const updatedHistory = history.filter(order => order.orderNumber !== orderNumber);
+    localStorage.setItem('orderHistory', JSON.stringify(updatedHistory));
+    
+    // refresh the modal
+    const content = document.getElementById('orderHistoryContent');
+    if (content) {
+      content.innerHTML = displayOrderHistory();
+    }
+    
+    alert('Orden eliminada exitosamente.');
+  }
+}
+
+function showOrderDetailsPage(orderNumber) {
+  hideAllPages();
+  document.getElementById('order-details-page').classList.remove('hidden');
+  renderOrderDetails(orderNumber);
+}
+
+function renderOrderDetails(orderNumber) {
+  const order = getOrderFromHistory(orderNumber);
+  if (!order) {
+    document.getElementById('orderDetailsContent').innerHTML = '<div class="text-center text-red-500">Orden no encontrada.</div>';
+    return;
+  }
+  
+  const orderInfo = parseOrderNumber(orderNumber);
+  const orderDate = new Date(order.orderDate).toLocaleDateString('es-ES', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  
+  const statusColors = {
+    'pending': { bg: '#fef3c7', color: '#92400e', text: 'Pendiente' },
+    'apartado': { bg: '#dbeafe', color: '#1e40af', text: 'Apartado' },
+    'processing': { bg: '#fef3c7', color: '#92400e', text: 'Procesando' },
+    'completed': { bg: '#d1fae5', color: '#065f46', text: 'Completado' }
+  };
+  
+  const status = statusColors[order.status] || statusColors.pending;
+  
+  document.getElementById('orderDetailsContent').innerHTML = `
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <!-- Order Header -->
+      <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-800">${orderInfo.shortNumber}</h3>
+          <div style="
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            background: ${status.bg};
+            color: ${status.color};
+          ">
+            ${status.text}
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div><strong>Fecha:</strong> ${orderDate}</div>
+          <div><strong>Método de pago:</strong> ${order.paymentMethod}</div>
+          <div><strong>Transacción:</strong> ${orderNumber}</div>
+          <div><strong>Total:</strong> $${order.totalUSD.toFixed(2)} | Bs ${order.totalBS.toFixed(2)}</div>
+        </div>
+      </div>
+      
+      <!-- Products List -->
+      <div class="mb-6">
+        <h4 class="font-semibold mb-3 text-gray-800">Productos</h4>
+        <div class="space-y-3">
+          ${order.items.map(item => `
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+              <div>
+                <div class="font-medium">${item.product}</div>
+                <div class="text-sm text-gray-600">Cantidad: ${item.quantity}</div>
+              </div>
+              <div class="text-right">
+                <div class="font-medium">$${item.priceUSD} | Bs ${item.priceBS}</div>
+                <div class="text-sm text-gray-600">Subtotal: $${(parseFloat(item.priceUSD) * item.quantity).toFixed(2)} | Bs ${(parseFloat(item.priceBS) * item.quantity).toFixed(2)}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <!-- Delivery Information -->
+      ${order.deliveryMethod === 'delivery' ? `
+        <div class="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+          <h4 class="font-semibold mb-3 text-green-800">🚚 Información de Entrega</h4>
+          <div class="space-y-3">
+            ${order.deliveryInfo ? `
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-gray-700">Nombre:</span>
+                <span>${order.deliveryInfo.name || 'No especificado'}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-gray-700">Teléfono:</span>
+                <span>${order.deliveryInfo.phone || 'No especificado'}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-gray-700">Email:</span>
+                <span>${order.deliveryInfo.email || 'No especificado'}</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="font-medium text-gray-700">Dirección:</span>
+                <span>${order.deliveryInfo.address || 'No especificado'}</span>
+              </div>
+              ${order.deliveryInfo.instructions ? `
+                <div class="flex items-start gap-2">
+                  <span class="font-medium text-gray-700">Instrucciones:</span>
+                  <span>${order.deliveryInfo.instructions}</span>
+                </div>
+              ` : ''}
+            ` : `
+              <div class="text-gray-500 italic">
+                Información de entrega no disponible para esta orden.
+              </div>
+            `}
+          </div>
+        </div>
+      ` : ''}
+      
+      <!-- Pickup Information for Cash Orders -->
+      ${order.paymentMethod === 'Efectivo' ? `
+        <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <h4 class="font-semibold mb-3 text-blue-800">📍 Dirección para Recoger</h4>
+          <div class="space-y-3">
+            <div class="flex items-center gap-2">
+              <span class="font-medium text-gray-700">Tienda:</span>
+              <span>Indigo Store</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <span class="font-medium text-gray-700">Dirección:</span>
+              <span>Carrera 19 con Avenida Vargas, CC Capital Plaza, Local 80</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-medium text-gray-700">Horario:</span>
+              <span>9:00 AM - 5:00 PM, Lunes a Sábado</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-medium text-gray-700">Tiempo límite:</span>
+              <span class="text-orange-600 font-semibold">3 días para retirar</span>
+            </div>
+          </div>
+          
+          <!-- Google Maps Widget -->
+          <div class="mt-4">
+            <h5 class="font-medium mb-2 text-gray-700">Ubicación:</h5>
+            <div class="google-maps-widget">
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d448.8496132252689!2d-69.30971028957845!3d10.066832717819146!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e876772ee64127d%3A0xc32c2c566cc7dab7!2sCapital%20Plaza!5e1!3m2!1sen!2sus!4v1754191275022!5m2!1sen!2sus"
+                width="100%" 
+                height="200" 
+                style="border:0; border-radius: 12px;" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+            </div>
+          </div>
+        </div>
+      ` : ''}
+      
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap gap-3">
+        <button onclick="contactSupport('${orderNumber}')" 
+                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+          Más información sobre mi compra
+        </button>
+        
+        ${(order.status === 'pending' || order.status === 'apartado') ? `
+          <button onclick="reprocessPayment('${orderNumber}')" 
+                  class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition">
+            No se ha procesado mi pago
+          </button>
+        ` : ''}
+        
+        ${(order.status === 'pending' || order.status === 'apartado') ? `
+          <button onclick="deleteOrder('${orderNumber}')" 
+                  class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+            Eliminar orden
+          </button>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+// expose new functions globally
+window.viewOrderDetails = viewOrderDetails;
+window.contactSupport = contactSupport;
+window.reprocessPayment = reprocessPayment;
+window.deleteOrder = deleteOrder;
+window.showOrderDetailsPage = showOrderDetailsPage;
+
 // inicializacion
 fetch(API_URL)
   .then(res => {
@@ -826,7 +2318,11 @@ fetch(API_URL)
     const valid = products.filter(p => p.ItemID && p.Product);
     console.log('Valid products:', valid.length);
     
-    allProducts = valid;
+    // process variants and separate main products from variants
+    const { mainProducts, allProductsWithVariants } = processProductVariants(valid);
+    
+    allProducts = mainProducts; // only main products for search/indexes
+    window.allProductsWithVariants = allProductsWithVariants; // all products including variants for detail view
 
     // new products
     const nuevos = valid.slice(-8);
@@ -942,3 +2438,721 @@ fetch(API_URL)
     // if error not overloading
     if (window.hideLoadingOverlay) window.hideLoadingOverlay();
   });
+
+function syncOrderStatusWithSpreadsheet(orderNumber) {
+  // Google Apps Script web app URL
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
+  
+  fetch(`${GOOGLE_SCRIPT_URL}?action=getOrderStatus&orderNumber=${orderNumber}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.success && data.status) {
+        updateOrderStatus(orderNumber, data.status);
+        displayOrderHistory();
+      }
+    })
+    .catch(error => {
+      console.error('Error syncing order status:', error);
+    });
+}
+
+function syncAllOrderStatuses() {
+  const history = getOrderHistory();
+  if (history.length === 0) return;
+  
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
+  
+  fetch(`${GOOGLE_SCRIPT_URL}?action=getAllOrderStatuses`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ orderNumbers: history.map(order => order.orderNumber) })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success && data.statuses) {
+      let hasChanges = false;
+      
+      data.statuses.forEach(item => {
+        const localOrder = history.find(order => order.orderNumber === item.orderNumber);
+        if (localOrder && localOrder.status !== item.status) {
+          updateOrderStatus(item.orderNumber, item.status);
+          hasChanges = true;
+        }
+      });
+      
+      if (hasChanges) {
+        displayOrderHistory();
+      }
+    }
+  })
+  .catch(error => {
+    console.error('Error syncing all order statuses:', error);
+  });
+}
+
+function deleteOrder(orderNumber) {
+  const history = getOrderHistory();
+  const order = history.find(order => order.orderNumber === orderNumber);
+  
+  if (!order) {
+    alert('Orden no encontrada');
+    return;
+  }
+  
+  // check if order can be deleted locally
+  if (order.status === 'pendiente') {
+    // can delete locally
+    const confirmed = confirm('¿Estás seguro de que quieres eliminar esta orden?');
+    if (confirmed) {
+      // remove from local storage
+      const updatedHistory = history.filter(order => order.orderNumber !== orderNumber);
+      localStorage.setItem('orderHistory', JSON.stringify(updatedHistory));
+      
+      // delete from spreadsheet also
+      deleteOrderFromSpreadsheet(orderNumber);
+      
+      // refresh display
+      displayOrderHistory();
+      alert('Orden eliminada exitosamente!');
+    }
+  } else {
+    // Status is not 'pendiente', can only be deleted from spreadsheet
+    alert(`Esta orden no puede ser eliminada localmente. El estado actual es: ${order.status}\n\nSolo puede ser eliminada desde la hoja de cálculo.`);
+  }
+}
+
+function deleteOrderFromSpreadsheet(orderNumber) {
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
+  
+  fetch(`${GOOGLE_SCRIPT_URL}?action=deleteOrder&orderNumber=${orderNumber}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        console.log('Order deleted from spreadsheet:', orderNumber);
+      } else {
+        console.error('Error deleting order from spreadsheet:', data.error);
+      }
+    })
+    .catch(error => {
+      console.error('Error deleting order from spreadsheet:', error);
+    });
+}
+
+function loadOrderById() {
+  const orderNumber = document.getElementById('orderNumberInput').value.trim();
+  
+  if (!orderNumber) {
+    alert('Por favor ingresa un número de orden');
+    return;
+  }
+  
+  const localOrder = getOrderFromHistory(orderNumber);
+  
+  if (localOrder) {
+    showOrderDetailsPage(orderNumber);
+    return;
+  }
+  
+  loadOrderFromSpreadsheet(orderNumber);
+}
+
+function loadOrderFromSpreadsheet(orderNumber) {
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
+  
+  fetch(`${GOOGLE_SCRIPT_URL}?action=getOrder&orderNumber=${orderNumber}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.success && data.order) {
+        const localOrder = convertSpreadsheetOrderToLocal(data.order);
+        
+        const history = getOrderHistory();
+        history.push(localOrder);
+        localStorage.setItem('orderHistory', JSON.stringify(history));
+        
+        showOrderDetailsPage(orderNumber);
+        alert('Orden cargada exitosamente desde la hoja de cálculo!');
+      } else {
+        alert('Orden no encontrada en la hoja de cálculo');
+      }
+    })
+    .catch(error => {
+      console.error('Error loading order from spreadsheet:', error);
+      alert('Error al cargar la orden desde la hoja de cálculo');
+    });
+}
+
+function convertSpreadsheetOrderToLocal(spreadsheetOrder) {
+  return {
+    orderNumber: spreadsheetOrder.orderNumber,
+    orderDate: new Date(spreadsheetOrder.orderDate),
+    items: parseOrderItems(spreadsheetOrder.products, spreadsheetOrder.quantities),
+    totalUSD: parseFloat(spreadsheetOrder.totalUSD),
+    totalBS: parseFloat(spreadsheetOrder.totalBS),
+    paymentMethod: spreadsheetOrder.paymentMethod,
+    status: spreadsheetOrder.status,
+    deliveryMethod: spreadsheetOrder.deliveryMethod,
+    deliveryInfo: spreadsheetOrder.deliveryInfo ? JSON.parse(spreadsheetOrder.deliveryInfo) : null,
+    imageLink: spreadsheetOrder.imageLink
+  };
+}
+
+function parseOrderItems(productsStr, quantitiesStr) {
+  if (!productsStr || !quantitiesStr) return [];
+  
+  const products = productsStr.split(', ');
+  const quantities = quantitiesStr.split(', ');
+  
+  return products.map((product, index) => ({
+    product: product,
+    quantity: parseInt(quantities[index] || 1)
+  }));
+}
+
+function getPaymentMethodEmoji(method) {
+  const emojis = {
+    'paypal': '💙',
+    'zelle': '💚',
+    'binance': '🟡',
+    'pago-movil': '💜',
+    'efectivo': '💵'
+  };
+  return emojis[method] || '💳';
+}
+
+function getDeliveryMethodEmoji(method) {
+  const emojis = {
+    'retirar en tienda': '🏪',
+    'entrega a domicilio': '🏠'
+  };
+  return emojis[method] || '📦';
+}
+
+function getStatusEmoji(status) {
+  const emojis = {
+    'pendiente': '⏳',
+    'processing': '🔄',
+    'completed': '✅',
+    'cancelled': '❌'
+  };
+  return emojis[status.toLowerCase()] || '📋';
+}
+
+function reprocessPayment(orderNumber) {
+  const order = getOrderFromHistory(orderNumber);
+  if (!order) {
+    alert('Orden no encontrada');
+    return;
+  }
+  
+  showReprocessPaymentModal(orderNumber, order);
+}
+
+function showReprocessPaymentModal(orderNumber, order) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-content reprocess-payment-modal">
+      <div class="modal-header">
+        <h3>🔄 Reprocesar Pago - Orden ${parseOrderNumber(orderNumber).shortNumber} (◕‿◕)</h3>
+        <button onclick="closeReprocessPaymentModal()" class="close-btn">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="order-summary-section">
+          <h4>📋 Resumen de la Orden</h4>
+          <p><strong>💰 Total:</strong> $${order.totalUSD.toFixed(2)} | Bs ${order.totalBS.toFixed(2)}</p>
+          <p><strong>💳 Método anterior:</strong> ${getPaymentMethodEmoji(order.paymentMethod)} ${getPaymentMethodLabel(order.paymentMethod)}</p>
+        </div>
+        
+        <div class="payment-method-section">
+          <h4>💳 Nuevo Método de Pago</h4>
+          <div class="payment-methods-grid">
+            <label class="payment-method-option">
+              <input type="radio" name="newPaymentMethod" value="paypal" ${order.paymentMethod === 'paypal' ? 'checked' : ''}>
+              <span class="payment-method-label">💙 PayPal</span>
+            </label>
+            <label class="payment-method-option">
+              <input type="radio" name="newPaymentMethod" value="zelle" ${order.paymentMethod === 'zelle' ? 'checked' : ''}>
+              <span class="payment-method-label">💚 Zelle</span>
+            </label>
+            <label class="payment-method-option">
+              <input type="radio" name="newPaymentMethod" value="binance" ${order.paymentMethod === 'binance' ? 'checked' : ''}>
+              <span class="payment-method-label">🟡 Binance</span>
+            </label>
+            <label class="payment-method-option">
+              <input type="radio" name="newPaymentMethod" value="pago-movil" ${order.paymentMethod === 'pago-movil' ? 'checked' : ''}>
+              <span class="payment-method-label">💜 Pago Móvil</span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="payment-info-section" id="newPaymentInfo">
+          <!-- Payment info will be populated based on selected method -->
+        </div>
+        
+        <div class="image-upload-section">
+          <h4>📸 Nuevo Comprobante de Pago</h4>
+          <div class="file-upload-container">
+            <input type="file" id="newPaymentImage" accept="image/*" onchange="previewNewPaymentImage(this)">
+            <label for="newPaymentImage" class="file-upload-label">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7,10 12,15 17,10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              📁 Seleccionar imagen
+            </label>
+          </div>
+          <div id="newImagePreview" class="image-preview" style="display: none;">
+            <img id="newPreviewImg" src="" alt="Preview">
+            <button onclick="removeNewPaymentImage()" class="remove-image-btn">×</button>
+          </div>
+        </div>
+        
+        <div class="transaction-id-section">
+          <label for="newTransactionId">🆔 ID de Transacción (opcional):</label>
+          <input type="text" id="newTransactionId" placeholder="Ingresa el ID de transacción si lo tienes">
+        </div>
+        
+        <div class="modal-actions">
+          <button onclick="closeReprocessPaymentModal()" class="btn btn-secondary">❌ Cancelar</button>
+          <button onclick="submitReprocessedPayment('${orderNumber}')" class="btn btn-primary" id="submitReprocessBtn" disabled>
+            ✅ Actualizar Pago
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  const currentMethod = document.querySelector('input[name="newPaymentMethod"]:checked').value;
+  showNewPaymentInfo(currentMethod);
+  
+  document.querySelectorAll('input[name="newPaymentMethod"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      showNewPaymentInfo(e.target.value);
+    });
+  });
+  
+  document.getElementById('newPaymentImage').addEventListener('change', function() {
+    const submitBtn = document.getElementById('submitReprocessBtn');
+    if (this.files[0]) {
+      submitBtn.disabled = false;
+    } else {
+      submitBtn.disabled = true;
+    }
+  });
+}
+
+function showNewPaymentInfo(method) {
+  const infoContainer = document.getElementById('newPaymentInfo');
+  
+  const paymentInfo = {
+    'paypal': {
+      title: '💙 PayPal',
+      info: 'https://www.paypal.me/indigostore',
+      button: true,
+      buttonText: '🌐 Ir a PayPal',
+      buttonUrl: 'https://www.paypal.me/indigostore'
+    },
+    'zelle': {
+      title: '💚 Zelle',
+      info: '📧 info@venegroupservices.com<br>🏢 Venegroup Services Inc',
+      button: false
+    },
+    'binance': {
+      title: '🟡 Binance',
+      info: '🆔 Binance ID: 381425060',
+      button: true,
+      buttonText: '📱 Abrir Binance',
+      buttonUrl: 'https://www.binance.com'
+    },
+    'pago-movil': {
+      title: '💜 Pago Móvil',
+      info: '🏦 Banco: Mercantil<br>📱 Número: 0412-849-5036<br>🆔 Cédula: 28256608',
+      button: false
+    }
+  };
+  
+  const info = paymentInfo[method];
+  
+  infoContainer.innerHTML = `
+    <h4>${info.title}</h4>
+    <div class="payment-details">
+      <p>${info.info}</p>
+      ${info.button ? `<button onclick="window.open('${info.buttonUrl}', '_blank')" class="btn btn-outline">${info.buttonText}</button>` : ''}
+    </div>
+  `;
+}
+
+function submitReprocessedPayment(orderNumber) {
+  const newPaymentMethod = document.querySelector('input[name="newPaymentMethod"]:checked').value;
+  const newImageFile = document.getElementById('newPaymentImage').files[0];
+  const newTransactionId = document.getElementById('newTransactionId').value.trim();
+  
+  if (!newImageFile) {
+    alert('Por favor sube una imagen del nuevo comprobante de pago');
+    return;
+  }
+  
+  const submitBtn = document.getElementById('submitReprocessBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = '🔄 Procesando...';
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const imageData = e.target.result;
+    const imageType = newImageFile.name.split('.').pop().toLowerCase();
+    
+    sendReprocessedPaymentToGoogleSheets(imageData, orderNumber, imageType, newTransactionId, newPaymentMethod);
+  };
+  
+  reader.readAsDataURL(newImageFile);
+}
+
+function sendReprocessedPaymentToGoogleSheets(imageData, orderNumber, imageType, transactionId, newPaymentMethod) {
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
+  
+  const order = getOrderFromHistory(orderNumber);
+  if (!order) {
+    alert('❌ Orden no encontrada (｡•́︿•̀｡)');
+    return;
+  }
+  
+  const reprocessData = {
+    action: 'reprocessPayment',
+    orderNumber: orderNumber,
+    newPaymentMethod: newPaymentMethod,
+    newTransactionId: transactionId,
+    imageData: imageData,
+    imageType: imageType,
+    orderDate: new Date(order.orderDate).toLocaleString('es-ES'),
+    products: order.items.map(item => item.product).join(', '),
+    quantities: order.items.map(item => item.quantity).join(', '),
+    totalBS: order.totalBS.toFixed(2),
+    totalUSD: order.totalUSD.toFixed(2),
+    deliveryMethod: order.deliveryMethod || '',
+    deliveryInfo: order.deliveryInfo || null,
+    customerName: order.deliveryInfo ? order.deliveryInfo.name : '',
+    customerPhone: order.deliveryInfo ? order.deliveryInfo.phone : '',
+    customerEmail: order.deliveryInfo ? order.deliveryInfo.email : '',
+    customerAddress: order.deliveryInfo ? order.deliveryInfo.address : '',
+    deliveryInstructions: order.deliveryInfo ? order.deliveryInfo.instructions : ''
+  };
+  
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(reprocessData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // update local order
+      updateLocalOrderPayment(orderNumber, newPaymentMethod, transactionId);
+      
+      closeReprocessPaymentModal();
+      
+      alert('¡Pago reprocesado exitosamente! La información ha sido actualizada.');
+      
+      displayOrderHistory();
+      
+      const methodLabels = {
+        'paypal': 'PayPal',
+        'zelle': 'Zelle',
+        'binance': 'Binance',
+        'pago-movil': 'Pago Móvil'
+      };
+      
+      const methodLabel = methodLabels[newPaymentMethod] || newPaymentMethod;
+      const orderInfo = parseOrderNumber(orderNumber);
+      
+      let message = `🔄 ¡Hola! He reprocesado mi pago.\n\n`;
+      message += `🛒 Orden: ${orderInfo.shortNumber}\n`;
+      message += `📅 Fecha: ${orderInfo.formattedDate}\n`;
+      message += `🆔 Transacción: ${orderNumber}\n`;
+      message += `💳 Nuevo método de pago: ${methodLabel}\n`;
+      
+      if (transactionId) {
+        message += `🆔 Nuevo ID de transacción: ${transactionId}\n`;
+      }
+      
+      message += `\n💰 Total: $${order.totalUSD.toFixed(2)} | Bs ${order.totalBS.toFixed(2)}`;
+      message += `\n\n📸 He subido el nuevo comprobante de pago. Por favor confirma mi orden.`;
+      
+      const url = `https://wa.me/584128503608?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank');
+      
+    } else {
+      alert('Error al reprocesar el pago: ' + (data.error || 'Error desconocido'));
+      const submitBtn = document.getElementById('submitReprocessBtn');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Actualizar Pago';
+    }
+  })
+  .catch(error => {
+    console.error('Error reprocessing payment:', error);
+    alert('Error al reprocesar el pago. Por favor intenta de nuevo.');
+    const submitBtn = document.getElementById('submitReprocessBtn');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Actualizar Pago';
+  });
+}
+
+function updateLocalOrderPayment(orderNumber, newPaymentMethod, newTransactionId) {
+  const history = getOrderHistory();
+  const orderIndex = history.findIndex(order => order.orderNumber === orderNumber);
+  
+  if (orderIndex !== -1) {
+    history[orderIndex].paymentMethod = newPaymentMethod;
+    if (newTransactionId) {
+      history[orderIndex].transactionId = newTransactionId;
+    }
+    history[orderIndex].status = 'processing';
+    localStorage.setItem('orderHistory', JSON.stringify(history));
+  }
+}
+
+function previewNewPaymentImage(input) {
+  const preview = document.getElementById('newImagePreview');
+  const previewImg = document.getElementById('newPreviewImg');
+  
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      previewImg.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function removeNewPaymentImage() {
+  const input = document.getElementById('newPaymentImage');
+  const preview = document.getElementById('newImagePreview');
+  
+  input.value = '';
+  preview.style.display = 'none';
+  
+  document.getElementById('submitReprocessBtn').disabled = true;
+}
+
+function closeReprocessPaymentModal() {
+  const modal = document.querySelector('.reprocess-payment-modal').parentElement;
+  if (modal) {
+    modal.remove();
+  }
+}
+
+function syncAllOrderStatuses() {
+  const history = getOrderHistory();
+  if (history.length === 0) return;
+  
+
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
+  
+  fetch(`${GOOGLE_SCRIPT_URL}?action=getAllOrderStatuses`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ orderNumbers: history.map(order => order.orderNumber) })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success && data.statuses) {
+      let hasChanges = false;
+      
+      // update local statuses
+      data.statuses.forEach(item => {
+        const localOrder = history.find(order => order.orderNumber === item.orderNumber);
+        if (localOrder && localOrder.status !== item.status) {
+          updateOrderStatus(item.orderNumber, item.status);
+          hasChanges = true;
+        }
+      });
+      
+      // refresh display if there were changes
+      if (hasChanges) {
+        displayOrderHistory();
+        alert('Estados sincronizados exitosamente!');
+      } else {
+        alert('Todos los estados están actualizados!');
+      }
+    }
+  })
+  .catch(error => {
+    console.error('Error syncing all order statuses:', error);
+    alert('Error al sincronizar estados');
+  });
+}
+
+function showCartNotification(message) {
+  const notification = document.createElement('div');
+  notification.className = 'cart-notification';
+  notification.innerHTML = `
+    <div class="notification-content">
+      <span class="notification-icon">🛒</span>
+      <span class="notification-text">${message}</span>
+    </div>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // remove notification after 3 seconds
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.parentNode.removeChild(notification);
+    }
+  }, 3000);
+}
+
+function showSoldOutMessage() {
+  showCartNotification('❌ Producto agotado (｡•́︿•̀｡)');
+}
+
+// Enhanced checkout functions with emojis
+function showOrderSuccessNotification(orderNumber, isCashPayment = false) {
+  const message = isCashPayment 
+    ? `✅ ¡Apartado exitoso! Orden: ${orderNumber} (◕‿◕)`
+    : `✅ ¡Orden creada exitosamente! Orden: ${orderNumber} (◕‿◕)`;
+  
+  showCartNotification(message);
+}
+  
+  // iniatial disabled upload image
+  const imageSection = document.getElementById('imageUploadSection');
+  if (imageSection) {
+    imageSection.classList.add('opacity-50', 'pointer-events-none');
+  }
+
+function submitPayment(method, orderNumber) {
+  const transactionId = document.getElementById('transactionId').value.trim();
+  const imageFile = document.getElementById('paymentImage').files[0];
+  
+  if (!imageFile) {
+    alert('Por favor sube una imagen del comprobante de pago');
+    return;
+  }
+  
+  // get order from history
+  const order = getOrderFromHistory(orderNumber);
+  if (!order) {
+    alert('Orden no encontrada');
+    return;
+  }
+  
+  // orevents double submission
+  const submitBtn = document.getElementById('submitPaymentBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = '🔄 Procesando...';
+  
+  // convert image to base64
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const imageData = e.target.result;
+    const imageType = imageFile.name.split('.').pop().toLowerCase();
+    
+    // image - app script
+    sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionId, method, order);
+  };
+  
+  reader.readAsDataURL(imageFile);
+}
+
+// sends to googlesheets
+function sendImageToGoogleSheets(imageData, orderNumber, imageType, transactionId, method, order) {
+  // google script web app url
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby_X6j5zz4J1vi2cTcudshKXtZkYuMkxa543CK_bBCDjLeBgyUrmJl-B-Qw3hcXa7yC/exec';
+  
+  const orderData = {
+    orderNumber: orderNumber,
+    orderDate: new Date(order.orderDate).toLocaleString('es-ES'),
+    paymentMethod: method,
+    products: order.items.map(item => item.product).join(', '),
+    quantities: order.items.map(item => item.quantity).join(', '),
+    totalBS: order.totalBS.toFixed(2),
+    totalUSD: order.totalUSD.toFixed(2),
+    transactionId: transactionId,
+    status: 'processing',
+    imageData: imageData,
+    imageType: imageType,
+    deliveryMethod: order.deliveryMethod || '',
+    deliveryInfo: order.deliveryInfo || null,
+    customerName: order.deliveryInfo ? order.deliveryInfo.name : '',
+    customerPhone: order.deliveryInfo ? order.deliveryInfo.phone : '',
+    customerEmail: order.deliveryInfo ? order.deliveryInfo.email : '',
+    customerAddress: order.deliveryInfo ? order.deliveryInfo.address : '',
+    deliveryInstructions: order.deliveryInfo ? order.deliveryInfo.instructions : ''
+  };
+  
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(orderData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // create whatsapp message
+      const methodLabels = {
+        'paypal': '💙 PayPal',
+        'zelle': '💚 Zelle',
+        'binance': '🟡 Binance',
+        'pago-movil': '💜 Pago Móvil'
+      };
+      
+      const methodLabel = methodLabels[method] || method;
+      const orderInfo = parseOrderNumber(orderNumber);
+      
+      let message = `🔄 ¡Hola! He completado mi pago.\n\n`;
+      message += `🛒 Orden: ${orderInfo.shortNumber}\n`;
+      message += `📅 Fecha: ${orderInfo.formattedDate}\n`;
+      message += `🆔 Transacción: ${orderNumber}\n`;
+      message += `💳 Método de pago: ${methodLabel}\n`;
+      
+      if (transactionId) {
+        message += `🆔 ID de transacción: ${transactionId}\n`;
+      }
+      
+      message += `\n💰 Total: $${order.totalUSD.toFixed(2)} | Bs ${order.totalBS.toFixed(2)}`;
+      message += `\n\n📸 He subido el comprobante de pago. Por favor confirma mi orden.`;
+      
+      // update order status to 'processing'
+      updateOrderStatus(orderNumber, 'processing');
+      
+      // show success message
+      alert('¡Comprobante enviado exitosamente! Redirigiendo a WhatsApp...');
+      
+      // send whatsapp message
+      const url = `https://wa.me/584128503608?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank');
+      
+      // redirects to home after delay
+      setTimeout(() => {
+        navigateToHome();
+      }, 2000);
+    } else {
+      alert('Error al enviar el comprobante: ' + (data.error || 'Error desconocido'));
+      // reenable button
+      const submitBtn = document.getElementById('submitPaymentBtn');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Finalizar compra';
+    }
+  })
+  .catch(error => {
+    console.error('Error sending payment:', error);
+    alert('Error al enviar el comprobante. Por favor intenta de nuevo.');
+    // renable button
+    const submitBtn = document.getElementById('submitPaymentBtn');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Finalizar compra';
+  });
+}
