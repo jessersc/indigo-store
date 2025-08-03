@@ -577,25 +577,25 @@ function showOrderSuccessNotification(orderNumber, isCashPayment = false) {
   }, 5000);
 }
 
-// Enhanced show cart notification with emojis
 function showCartNotification(message) {
   const notification = document.createElement('div');
   notification.className = 'cart-notification';
-  notification.innerHTML = `
-    <div class="notification-content">
-      <span class="notification-icon">🛒</span>
-      <span class="notification-text">${message}</span>
-    </div>
-  `;
+  notification.textContent = message;
   
   document.body.appendChild(notification);
   
-  // remove notification after 6 seconds
   setTimeout(() => {
-    if (notification.parentNode) {
-      notification.parentNode.removeChild(notification);
-    }
-  }, 6000);
+    notification.classList.add('show');
+  }, 100);
+  
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 300);
+  }, 2000);
 }
 
 

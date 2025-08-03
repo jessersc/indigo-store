@@ -1,10 +1,8 @@
-// global var
 const API_URL = "https://script.google.com/macros/s/AKfycbwaCPJPEUs7mM-QP8QuzFSgVl40nBq6Vpt7iCf1R2t_L9Bk57rBA73HeuRThY1dREhT/exec";
 let allProducts = [];
-let allProductsWithVariants = []; // includes all products including variants (models)
+let allProductsWithVariants = [];
 let searchTimeout;
 
-// route function
 function getUrlParams() {
   const params = new URLSearchParams(window.location.search);
   return {
@@ -41,7 +39,6 @@ function navigateToCollection(collectionName) {
 }
 
 function navigateToProduct(productId) {
-  // Close mobile menu if on mobile
   if (window.innerWidth <= 768 && window.closeMobileMenu) {
     window.closeMobileMenu();
   }
@@ -63,27 +60,24 @@ function showCheckoutPage() {
   hideAllPages();
   document.getElementById('checkout-page').classList.remove('hidden');
   
-  // Check if cart is empty and hide button immediately
   const cart = getCart();
   const checkoutBtn = document.getElementById('checkoutBtn');
   if (checkoutBtn && cart.length === 0) {
     checkoutBtn.style.display = 'none';
   }
   
-  // Initialize checkout page since script is now loaded directly
+  if (window.renderCheckoutSummary) {
+    window.renderCheckoutSummary();
+    window.setupPaymentMethods();
+    window.setupCheckoutButton();
+    window.setupDeliveryOptions();
+  } else {
+    setTimeout(() => {
       if (window.renderCheckoutSummary) {
         window.renderCheckoutSummary();
         window.setupPaymentMethods();
         window.setupCheckoutButton();
         window.setupDeliveryOptions();
-  } else {
-    // Fallback: try to initialize after a short delay
-    setTimeout(() => {
-      if (window.renderCheckoutSummary) {
-    window.renderCheckoutSummary();
-    window.setupPaymentMethods();
-    window.setupCheckoutButton();
-    window.setupDeliveryOptions();
       }
     }, 100);
   }
@@ -93,7 +87,6 @@ function showPaymentPage(method, orderNumber) {
   hideAllPages();
   document.getElementById('payment-page').classList.remove('hidden');
   renderPaymentPage(method, orderNumber);
-  // set the order ID in the input
   document.getElementById('orderIdInput').value = orderNumber;
 }
 
@@ -101,11 +94,9 @@ function showApartadoPage(orderNumber) {
   hideAllPages();
   document.getElementById('apartado-page').classList.remove('hidden');
   renderApartadoPage(orderNumber);
-  // set the order ID in the input
   document.getElementById('apartadoOrderIdInput').value = orderNumber;
 }
 
-// page display functions
 function hideAllPages() {
   document.getElementById('main-content').classList.add('hidden');
   document.getElementById('search-results').classList.add('hidden');
@@ -121,7 +112,6 @@ function hideAllPages() {
 function showHomePage() {
   hideAllPages();
   document.getElementById('main-content').classList.remove('hidden');
-  // Clear search
   document.getElementById('search').value = '';
 }
 
@@ -129,11 +119,9 @@ function showCategoryPage(name, type) {
   hideAllPages();
   document.getElementById('category-page').classList.remove('hidden');
   
-  // update titles
   const title = document.getElementById('category-title');
   title.textContent = name;
   
-  // breadcrumbs
   const breadcrumb = document.getElementById('breadcrumb');
   const typeText = type === 'category' ? 'Categoría' : 'Colección';
   breadcrumb.innerHTML = `
@@ -143,39 +131,31 @@ function showCategoryPage(name, type) {
   `;
   breadcrumb.classList.remove('hidden');
   
-  // filtred produtcs
   const field = type === 'category' ? 'Category' : 'Collection';
   const filtered = allProducts.filter(product => {
     const values = (product[field] || '').split(',').map(v => v.trim().toLowerCase());
     return values.includes(name.toLowerCase());
   });
   
-  // stock count update
   document.getElementById('product-count').textContent = `${filtered.length} productos encontrados`;
   
-  // product render
   renderCategoryProducts(filtered);
   
-  // s
   setupSorting(filtered);
 }
 
 function showProductPage(productId) {
   hideAllPages();
   
-  // check if there's a specific variant in the URL
   const params = getUrlParams();
   const variantId = params.variant;
   
   let product;
   if (variantId && variantId.toString().startsWith(productId.toString().split('.')[0])) {
-    // show specific variant only if it belongs to the requested product family
     product = window.allProductsWithVariants.find(p => p.ItemID.toString() === variantId);
   } else {
-    // show main product and clear any unrelated variant from URL
     product = allProducts.find(p => p.ItemID.toString() === productId.toString());
     
-    // clear variant parameter if it doesn't belong to this product
     if (variantId && !variantId.toString().startsWith(productId.toString().split('.')[0])) {
       const currentUrl = new URL(window.location);
       currentUrl.searchParams.delete('variant');
@@ -191,7 +171,6 @@ function showProductPage(productId) {
   
   document.getElementById('product-page').classList.remove('hidden');
   
-  // above
   const breadcrumb = document.getElementById('breadcrumb');
   breadcrumb.innerHTML = `
     <a href="#" onclick="navigateToHome()">Inicio</a> / 
@@ -893,19 +872,16 @@ function addToCart(product) {
   showCartNotification("Agregado al carrito");
 }
 
-// cart notification function
 function showCartNotification(message) {
   const notification = document.createElement('div');
   notification.className = 'cart-notification';
   notification.textContent = message;
   document.body.appendChild(notification);
   
-  // show notification
   setTimeout(() => {
     notification.classList.add('show');
   }, 100);
   
-  // hide and remove notification
   setTimeout(() => {
     notification.classList.remove('show');
     setTimeout(() => {
@@ -914,12 +890,10 @@ function showCartNotification(message) {
   }, 2000);
 }
 
-// sold out message function
 function showSoldOutMessage() {
   showCartNotification('No hay stock disponible para este producto.');
 }
 
-// Cart modal logic
 function openCartModal() {
   renderCartModal();
   document.getElementById('cartModal').style.display = 'flex';
@@ -1491,6 +1465,11 @@ window.navigateToCollection = navigateToCollection;
 window.openCartModal = openCartModal;
 window.closeCartModal = closeCartModal;
 window.updateCartItemQty = updateCartItemQty;
+window.showReprocessPaymentModal = showReprocessPaymentModal;
+window.closeReprocessPaymentModal = closeReprocessPaymentModal;
+window.submitReprocessedPayment = submitReprocessedPayment;
+window.previewNewPaymentImage = previewNewPaymentImage;
+window.removeNewPaymentImage = removeNewPaymentImage;
 
 // payment processing functions
 function renderPaymentPage(method, orderNumber) {
@@ -2022,24 +2001,8 @@ function reprocessPayment(orderNumber) {
     return;
   }
   
-  // determine payment method from order
-  const methodMap = {
-    'PayPal': 'paypal',
-    'Zelle': 'zelle',
-    'Binance': 'binance',
-    'Pago Móvil': 'pago-movil'
-  };
-  
-  const method = methodMap[order.paymentMethod] || 'paypal';
-  
-  // close the modal first
-  closeOrderHistoryModal();
-  
-  // redirect to payment page
-  updateUrl({ page: 'pay', method: method, order: orderNumber });
-  if (window.showPaymentPage) {
-    window.showPaymentPage(method, orderNumber);
-  }
+  // show payment method selection modal
+  showReprocessPaymentModal(orderNumber, order);
 }
 
 function deleteOrder(orderNumber) {
@@ -2852,4 +2815,193 @@ function sendImageSeparately(imageData, orderNumber, imageType) {
       console.error('Image upload failed:', response.error);
     }
   });
+}
+
+// Reprocess Payment Modal Functions
+function showReprocessPaymentModal(orderNumber, order) {
+  const modal = document.createElement('div');
+  modal.className = 'reprocess-payment-modal-overlay';
+  modal.innerHTML = `
+    <div class="reprocess-payment-modal">
+      <div class="modal-header">
+        <h3>🔄 Reprocesar Pago</h3>
+        <button onclick="closeReprocessPaymentModal()" class="close-btn">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <!-- Order Summary Section -->
+        <div class="order-summary-section">
+          <h4>📋 Resumen de la Orden</h4>
+          <p><strong>Orden:</strong> ${orderNumber.split('-')[0]}-${orderNumber.split('-')[2]}</p>
+          <p><strong>Total:</strong> $${order.totalUSD.toFixed(2)} | Bs ${order.totalBS.toFixed(2)}</p>
+          <p><strong>Método anterior:</strong> ${order.paymentMethod}</p>
+        </div>
+        
+        <!-- Payment Method Selection -->
+        <div class="payment-method-section">
+          <h4>💳 Seleccionar Nuevo Método de Pago</h4>
+          <div class="payment-methods-grid">
+            <label class="payment-method-option">
+              <input type="radio" name="newPaymentMethod" value="paypal" id="paypal-option">
+              <span class="payment-method-label">PayPal</span>
+            </label>
+            <label class="payment-method-option">
+              <input type="radio" name="newPaymentMethod" value="zelle" id="zelle-option">
+              <span class="payment-method-label">Zelle</span>
+            </label>
+            <label class="payment-method-option">
+              <input type="radio" name="newPaymentMethod" value="binance" id="binance-option">
+              <span class="payment-method-label">Binance</span>
+            </label>
+            <label class="payment-method-option">
+              <input type="radio" name="newPaymentMethod" value="pago-movil" id="pago-movil-option">
+              <span class="payment-method-label">Pago Móvil</span>
+            </label>
+          </div>
+        </div>
+        
+        <!-- Image Upload Section -->
+        <div class="image-upload-section">
+          <h4>📸 Subir Nuevo Comprobante</h4>
+          <div class="file-upload-container">
+            <input type="file" id="newPaymentImage" accept="image/*" onchange="previewNewPaymentImage(this)" style="display: none;">
+            <label for="newPaymentImage" class="file-upload-label">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7,10 12,15 17,10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Haz clic para subir o arrastra y suelta</span>
+            </label>
+          </div>
+          <div id="newImagePreview" class="image-preview" style="display: none;">
+            <img id="newPreviewImg" class="max-w-full h-auto rounded-lg border" alt="Preview">
+            <button onclick="removeNewPaymentImage()" class="remove-image-btn">×</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Modal Actions -->
+      <div class="modal-actions">
+        <button onclick="closeReprocessPaymentModal()" class="btn btn-secondary">❌ Cancelar</button>
+        <button onclick="submitReprocessedPayment('${orderNumber}')" class="btn btn-primary" id="submitReprocessBtn" disabled>
+          🔄 Reprocesar Pago
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // close modal when clicking outside
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      closeReprocessPaymentModal();
+    }
+  });
+  
+  // add event listeners for payment method selection
+  const paymentMethodInputs = modal.querySelectorAll('input[name="newPaymentMethod"]');
+  paymentMethodInputs.forEach(input => {
+    input.addEventListener('change', function() {
+      const imageFile = document.getElementById('newPaymentImage').files[0];
+      const submitBtn = document.getElementById('submitReprocessBtn');
+      if (this.checked && imageFile) {
+        submitBtn.disabled = false;
+      }
+    });
+  });
+}
+
+function closeReprocessPaymentModal() {
+  const modal = document.querySelector('.reprocess-payment-modal-overlay');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+function previewNewPaymentImage(input) {
+  const file = input.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('newPreviewImg').src = e.target.result;
+      document.getElementById('newImagePreview').style.display = 'block';
+      
+      // enable submit button if payment method is selected
+      const selectedMethod = document.querySelector('input[name="newPaymentMethod"]:checked');
+      const submitBtn = document.getElementById('submitReprocessBtn');
+      if (selectedMethod) {
+        submitBtn.disabled = false;
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function removeNewPaymentImage() {
+  document.getElementById('newPaymentImage').value = '';
+  document.getElementById('newImagePreview').style.display = 'none';
+  const submitBtn = document.getElementById('submitReprocessBtn');
+  submitBtn.disabled = true;
+}
+
+function submitReprocessedPayment(orderNumber) {
+  const selectedMethod = document.querySelector('input[name="newPaymentMethod"]:checked');
+  const imageFile = document.getElementById('newPaymentImage').files[0];
+  
+  if (!selectedMethod) {
+    alert('Por favor selecciona un método de pago');
+    return;
+  }
+  
+  if (!imageFile) {
+    alert('Por favor sube una imagen del comprobante de pago');
+    return;
+  }
+  
+  const newPaymentMethod = selectedMethod.value;
+  
+  // disable submit button
+  const submitBtn = document.getElementById('submitReprocessBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = '🔄 Procesando...';
+  
+  // convert image to base64
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const imageData = e.target.result;
+    const imageType = imageFile.name.split('.').pop().toLowerCase();
+    
+    // send reprocessed payment data
+    const reprocessData = {
+      action: 'reprocessPayment',
+      orderNumber: orderNumber.split('-')[0] + '-' + orderNumber.split('-')[2],
+      newPaymentMethod: newPaymentMethod,
+      imageData: imageData,
+      imageType: imageType
+    };
+    
+    sendToGoogleSheets(reprocessData, function(response) {
+      if (response.success) {
+        alert('¡Pago reprocesado exitosamente!');
+        closeReprocessPaymentModal();
+        
+        // update local order status
+        updateOrderStatus(orderNumber, 'processing');
+        
+        // refresh order history if modal is open
+        const orderHistoryContent = document.getElementById('orderHistoryContent');
+        if (orderHistoryContent) {
+          orderHistoryContent.innerHTML = displayOrderHistory();
+        }
+      } else {
+        alert('Error al reprocesar el pago: ' + (response.error || 'Error desconocido'));
+        submitBtn.disabled = false;
+        submitBtn.textContent = '🔄 Reprocesar Pago';
+      }
+    });
+  };
+  
+  reader.readAsDataURL(imageFile);
 }

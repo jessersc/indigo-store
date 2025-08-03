@@ -66,6 +66,7 @@
             <path d="M12 21c0-1 1-3 3-3s3 2 3 3-1 3-3 3-3-2-3-3"></path>
           </svg>
         </button>
+
         <button id="cartIconBtnMobile" class="cart-icon-header flex items-center justify-center" style="background:none;border:none;cursor:pointer;padding:8px;">
           <svg fill="#ff6b9d" stroke="#ff6b9d" width="28px" height="28px" viewBox="144 144 512 512" xmlns="http://www.w3.org/2000/svg">
             <g clip-path="url(#a)">
@@ -468,9 +469,7 @@
   <script src="assets/mob.js"></script>
   <script src="assets/checkout.js"></script>
   <script>
-  // Attach cart modal event listeners after DOM is loaded
   document.addEventListener('DOMContentLoaded', function() {
-    // Attach openCartModal to cart icons
     if (document.getElementById('cartIconBtn')) {
       document.getElementById('cartIconBtn').onclick = openCartModal;
     }
@@ -478,7 +477,6 @@
       document.getElementById('cartIconBtnMobile').onclick = openCartModal;
     }
 
-    // Add event listener to close cart modal when clicking outside the modal box
     const cartModalOverlay = document.getElementById('cartModal');
     if (cartModalOverlay) {
       cartModalOverlay.addEventListener('click', function(e) {
@@ -490,7 +488,6 @@
   });
   </script>
   <script>
-  // sscroll to top buttono logic
   const scrollBtn = document.getElementById('scrollToTopBtn');
   window.addEventListener('scroll', function() {
     if (window.scrollY > 200) {
@@ -502,7 +499,6 @@
   scrollBtn.onclick = function() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-  // hmburger menu logic
   const hamburgerBtn = document.getElementById('hamburgerBtn');
   const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
   const mobileMenuDrawer = document.getElementById('mobileMenuDrawer');
@@ -518,7 +514,6 @@
   }
   hamburgerBtn.onclick = openMobileMenu;
   mobileMenuOverlay.onclick = closeMobileMenu;
-  // show hide ham menu
   function updateMenuDisplay() {
     if (window.innerWidth < 768) {
       document.querySelector('.nav-menu').style.display = 'none';
@@ -539,14 +534,12 @@
   }
   window.addEventListener('resize', updateMenuDisplay);
   document.addEventListener('DOMContentLoaded', updateMenuDisplay);
-  // fixed search
   const searchIconBtn = document.getElementById('searchIconBtn');
   const desktopSearchBar = document.getElementById('desktopSearchBar');
   const mobileSearchBar = document.getElementById('mobileSearchBar');
   const mobileSearchInput = document.getElementById('search-mobile');
   searchIconBtn.onclick = function(e) {
     if (window.innerWidth < 768) {
-      // show mobile search bar, hide desktop
       if (mobileSearchBar.style.display === 'block') {
         mobileSearchBar.style.display = 'none';
       } else {
@@ -554,9 +547,8 @@
         setTimeout(() => mobileSearchInput && mobileSearchInput.focus(), 100);
       }
       desktopSearchBar.style.display = 'none';
-      e.stopPropagation(); // stop event from closing the bar
+      e.stopPropagation();
     } else {
-      // full view behavior
       desktopSearchBar.style.display = (desktopSearchBar.style.display === 'block') ? 'none' : 'block';
       if (desktopSearchBar.style.display === 'block') {
         setTimeout(() => document.getElementById('search').focus(), 100);
@@ -564,7 +556,6 @@
       e.stopPropagation();
     }
   };
-  // handle closing mobile search bar
   function setupMobileSearchCloseHandler() {
     document.addEventListener('click', function(e) {
       if (window.innerWidth < 768 && mobileSearchBar.style.display === 'block') {
@@ -575,7 +566,6 @@
     });
   }
 
-  // add this new function to hide mobile search results
   function hideMobileSearchResults() {
     const mobileSearchBar = document.getElementById('mobileSearchBar');
     const mobileSearchResults = document.getElementById('mobile-search-results');
@@ -587,18 +577,14 @@
     }
   }
 
-  // expose the function globally so it can be called from other scripts
   window.hideMobileSearchResults = hideMobileSearchResults;
 
   document.addEventListener('DOMContentLoaded', setupMobileSearchCloseHandler);
-  // mobile sub logic
   function toggleMobileSubmenu(id) {
     const submenu = document.getElementById(id);
     if (submenu) submenu.classList.toggle('active');
   }
-  // safe, take from main logic
   document.addEventListener('DOMContentLoaded', function() {
-    // copy main logi values here if necessary
     const copyDropdown = (desktopId, mobileId) => {
       const desktop = document.getElementById(desktopId);
       const mobile = document.getElementById(mobileId);
@@ -608,20 +594,17 @@
     copyDropdown('cat-dropdown', 'categorias-submenu-mobile');
     copyDropdown('col-dropdown', 'colecciones-submenu-mobile');
   });
-  // header shrink logic - mobile and desktop
   let lastScrollY = window.scrollY;
   let ticking = false;
   const header = document.getElementById('main-header');
   function updateHeaderOnScroll() {
     if (window.innerWidth < 768) {
-      // mobile: hide header when scrolling down
       if (window.scrollY > lastScrollY && window.scrollY > 80) {
         header.classList.add('mobile-hidden');
       } else {
         header.classList.remove('mobile-hidden');
       }
     } else {
-      // desktop: shrink header when scrolling down
       if (window.scrollY > 50) {
         header.classList.add('scrolled');
       } else {
@@ -638,7 +621,6 @@
     }
   });
   window.addEventListener('resize', updateHeaderOnScroll);
-  // populate mobile menu
   function syncMobileMenus() {
     const copyDropdown = (desktopId, mobileId) => {
       const desktop = document.getElementById(desktopId);
@@ -649,7 +631,6 @@
     copyDropdown('cat-dropdown', 'categorias-submenu-mobile');
     copyDropdown('col-dropdown', 'colecciones-submenu-mobile');
 
-    // click handlers for nuevos
     const nuevosLinks = document.querySelectorAll('#nuevos-submenu-mobile a');
     nuevosLinks.forEach(link => {
       link.onclick = function(e) {
@@ -660,7 +641,6 @@
       };
     });
     
-    // click handlers for categorias
     const catLinks = document.querySelectorAll('#categorias-submenu-mobile a');
     catLinks.forEach(link => {
       link.onclick = function(e) {
@@ -671,7 +651,6 @@
       };
     });
     
-    // click handlers for colecciones
     const colLinks = document.querySelectorAll('#colecciones-submenu-mobile a');
     colLinks.forEach(link => {
       link.onclick = function(e) {
@@ -682,7 +661,6 @@
       };
     });
     
-    // click handlers for product items in nuevos
     const productLinks = document.querySelectorAll('#nuevos-submenu-mobile .mobile-submenu-item[data-id]');
     productLinks.forEach(link => {
       link.onclick = function(e) {
@@ -695,10 +673,8 @@
       };
     });
   }
-  // expose syncMobileMenus call api
   window.syncMobileMenus = syncMobileMenus;
   document.addEventListener('DOMContentLoaded', syncMobileMenus);
-  // hide loading
   function hideLoadingOverlay() {
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) {
@@ -707,7 +683,6 @@
     }
   }
 
-  // closee menuu
   if (window.innerWidth < 768) {
     document.addEventListener('click', function(e) {
       const drawer = document.getElementById('mobileMenuDrawer');
@@ -720,12 +695,9 @@
     });
   }
 
-  // add global click handler for mobile search results
   document.addEventListener('click', function(e) {
-    // check if clicked element is a mobile search result item
     if (e.target.closest('#mobile-search-results .product-card-kawaii') || 
         e.target.closest('#mobile-search-results a')) {
-      // hide mobile search results when a product is clicked
       hideMobileSearchResults();
     }
   });
