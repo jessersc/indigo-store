@@ -1,0 +1,158 @@
+orderNumber,orderDate,paymentMethod,products,quantities,totalUSD,totalBS,status,deliveryMethod,customerName,customerPhone,customerEmail,DcustomerAddress,deliveryInstructions,OTRO,Column 1
+ORD-000003,2025-09-16T23:48:04.730Z,Pago Móvil,"Sobres de Cartas Haikyu!!, Collares Match de Ren y Nana 🔒, Vivienne Westwood Mini Purple Orb, Vivienne Westwood Petite Orb Necklace, Vivienne Westwood Mini Black Orb, Madoka Kaname","3, 1, 1, 1, 1, 1",$86.50 ,"$13,217.00 ",pending,delivery,alex weiss,4128495036,heyleen123@gmail.com,,,2025-09-16T23:48:06.117Z,payment_initiated
+ORD-000001,2025-09-16T23:49:32.883Z,Pago Móvil,"Collar Blue Orb Vivienne Westwood, Mazo de Tarot Jojo’s Bizarre Adventure, Zarcillos Broken Heart 💔 (Polnareff Jojo’s Bizarre Adventure), Sayaka Miki","3, 3, 1, 1",$97.50 ,"$14,901.00 ",pending,delivery,Alex Weiss,4128495036,heyleen123@gmail.com,,,2025-09-16T23:49:34.599Z,payment_initiated
+ORD-000002,2025-09-16T23:50:17.232Z,Efectivo,"Collar Blue Orb Vivienne Westwood, Mazo de Tarot Jojo’s Bizarre Adventure, Zarcillos Broken Heart 💔 (Polnareff Jojo’s Bizarre Adventure), Sayaka Miki","3, 3, 1, 1",$97.50 ,"$14,901.00 ",pending,delivery,Alex Weiss,4128495036,heyleen123@gmail.com,,,2025-09-16T23:50:18.663Z,payment_initiated
+ORD-000003,2025-09-16T23:50:50.989Z,Pago Móvil,"Collar Blue Orb Vivienne Westwood, Mazo de Tarot Jojo’s Bizarre Adventure, Zarcillos Broken Heart 💔 (Polnareff Jojo’s Bizarre Adventure), Sayaka Miki","3, 3, 1, 1",$97.50 ,"$14,901.00 ",pending,delivery,Alex Weiss,4128495036,heyleen123@gmail.com,,,2025-09-16T23:50:52.426Z,payment_initiated
+ORD-000001,2025-09-16T23:51:59.267Z,Pago Móvil,"Llavero de Hello Kitty Hawaiiana🌺, Kuromi","1, 1",$13.50 ,"$2,063.00 ",pending,store,,,,,,2025-09-16T23:52:01.313Z,payment_initiated
+ORD-000002,2025-09-16T23:53:13.400Z,PayPal,"Llavero de Hello Kitty Hawaiiana🌺, Kuromi","1, 1",$13.50 ,"$2,063.00 ",pending,store,,,,,,2025-09-16T23:53:14.374Z,payment_initiated
+ORD-000004,2025-09-16T23:53:53.441Z,PayPal,"Collar Blue Orb Vivienne Westwood, Mazo de Tarot Jojo’s Bizarre Adventure, Zarcillos Broken Heart 💔 (Polnareff Jojo’s Bizarre Adventure), Sayaka Miki","3, 3, 1, 1",$97.50 ,"$14,901.00 ",pending,delivery,Alex Weiss,4128495036,heyleen123@gmail.com,,,2025-09-16T23:53:55.597Z,payment_initiated
+ORD-000005,2025-09-16T23:56:28.256Z,PayPal,Ganchitos de Alas☁️,1,$4.00 ,$611.00 ,pending,store,,,,,,completed,payment_completed
+ORD-000004,2025-09-18T21:19:35.366Z,Zinli,"Sobres de Cartas Haikyu!!, Collares Match de Ren y Nana 🔒, Vivienne Westwood Mini Purple Orb, Vivienne Westwood Petite Orb Necklace, Vivienne Westwood Mini Black Orb, Madoka Kaname","3, 1, 1, 1, 1, 1",$86.50 ,"$13,217.00 ",pending,store,,,,,,2025-09-18T21:19:36.924Z,payment_initiated
+ORD-000001,2025-09-19T15:03:14.793Z,Cashea,Armour Ring Vivienne Westwood,1,$8.00 ,"$1,309.00 ",pending,store,,,,,,2025-09-19T15:03:17.636Z,payment_initiated
+ORD-000001,2025-09-19T15:07:14.307Z,PayPal,Vivienne Westwood Three Row Pearl Necklace,1,$12.00 ,"$1,964.00 ",pending,store,,,,,,2025-09-19T15:07:15.769Z,payment_initiated
+ORD-000002,2025-09-19T15:27:54.641Z,Cashea,Black ,2,$8.00 ,"$1,310.00 ",pending,store,,,,,,2025-09-19T15:27:56.469Z,payment_initiated
+ORD-000006,2025-09-20T23:49:32.709Z,Efectivo,Ganchitos de Alas☁️,1,$4.00 ,$611.00 ,pending,store,,,,,,2025-09-20T23:49:34.938Z,payment_initiated
+ORD-000001,2025-09-25T23:10:27.445Z,Debito,Pearl Choker Vivienne Westwood ۶ৎ,1,$9.00 ,"$1,473.00 ",pending,store,,,,,,2025-09-25T23:10:32.143Z,payment_initiated
+ORD-000065,2025-09-30T18:17:54.629Z,Cashea,"Zarcillos Vivienne Westwood, Aretes Vivienne Westwood, Zarcillos Pearl Drop Vivienne Westwood, Vivienne Westwood Heart Earrings ✧˖°","3, 2, 1, 2",$77.00 ,"$12,600.00 ",pending,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,,2025-09-30T18:17:54.664Z,payment_initiated
+ORD-000066,2025-09-30T18:25:40.000Z,Cashea,"Pearl Choker Vivienne Westwood ۶ৎ, Vivienne Westwood Three Row Pearl Necklace, Armour Ring Vivienne Westwood","7, 2, 2005",$127.00 ,"$20,784.00 ",pending,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,,2025-09-30T18:25:40.791Z,payment_initiated
+ORD-000067,2025-09-30T18:40:39.785Z,Cashea,"Vivienne Westwood Three Row Pearl Necklace, Pearl Choker Vivienne Westwood ۶ৎ, Armour Ring Vivienne Westwood","2, 5, 2006",$117.00 ,"$19,147.00 ",pending,store,,,,,,2025-09-30T18:40:43.588Z,payment_initiated
+ORD-000067,2025-09-30T18:40:39.785Z,Cashea,"Vivienne Westwood Three Row Pearl Necklace, Pearl Choker Vivienne Westwood ۶ৎ, Armour Ring Vivienne Westwood","2, 5, 2006",$117.00 ,"$19,147.00 ",pending,store,,,,,,2025-09-30T18:41:41.901Z,payment_initiated
+ORD-000068,2025-09-30T18:42:23.453Z,Cashea,"Collar de Powder y Ekko - Arcane 🔹, Relicario, Collar de Perla Auténtica (ostra)🦪","5, 5, 2002",$97.00 ,"$15,876.00 ",pending,store,,,,,,2025-09-30T18:42:23.766Z,payment_initiated
+ORD-000069,2025-09-30T18:46:20.305Z,Cashea,"Vivienne Westwood Three Row Pearl Necklace, Pearl Choker Vivienne Westwood ۶ৎ, Armour Ring Vivienne Westwood, Collar Pink Orb Vivienne Westwood","2, 6, 1, 4",$166.00 ,"$27,167.00 ",pending,store,,,,,,2025-09-30T18:46:20.375Z,payment_initiated
+ORD-000070,2025-09-30T18:47:10.906Z,Cashea,Zarcillos Broken Heart 💔 (Polnareff Jojo’s Bizarre Adventure),5,$32.50 ,"$5,320.00 ",pending,store,,,,,,2025-09-30T18:47:10.867Z,payment_initiated
+ORD-000070,2025-09-30T18:47:10.906Z,Cashea,Zarcillos Broken Heart 💔 (Polnareff Jojo’s Bizarre Adventure),5,$32.50 ,"$5,320.00 ",pending,store,,,,,,2025-09-30T18:51:29.058Z,payment_initiated
+ORD-000071,2025-09-30T18:51:53.988Z,Cashea,"Armour Ring Vivienne Westwood, Vivienne Westwood Three Row Pearl Necklace, Pearl Choker Vivienne Westwood ۶ৎ","6, 2, 2004",$108.00 ,"$17,674.00 ",pending,store,,,,,,2025-09-30T18:51:53.959Z,payment_initiated
+ORD-000072,2025-09-30T18:56:30.896Z,Cashea,"Vivienne Westwood Three Row Pearl Necklace, Collar Luciérnagas The last of Us","2, 8",$96.00 ,"$15,712.00 ",pending,store,,,,,,2025-09-30T18:56:31.002Z,payment_initiated
+ORD-000005,2025-09-30T21:15:27.847Z,Efectivo,"Pearl Choker Vivienne Westwood ۶ৎ, Classic Orb Vivienne Westwood⟡ ݁₊ ., Vivienne Westwood Three Row Pearl Necklace, Vivienne Westwood Bat Orb‎𖤐","2, 2, 2, 2",$76.80 ,"$12,570.00 ",pending,delivery,alex weiss,4128495036,heyleen123@gmail.com,,,2025-09-30T21:15:30.067Z,payment_initiated
+ORD-000006,2025-09-30T21:16:09.097Z,Pago Móvil,"Pearl Choker Vivienne Westwood ۶ৎ, Classic Orb Vivienne Westwood⟡ ݁₊ ., Vivienne Westwood Three Row Pearl Necklace, Vivienne Westwood Bat Orb‎𖤐","2, 2, 2, 2",$76.80 ,"$12,570.00 ",pending,delivery,alex weiss,4128495036,heyleen123@gmail.com,,,2025-09-30T21:16:11.634Z,payment_initiated
+ORD-000007,2025-09-30T21:17:06.464Z,Cashea,"Pearl Choker Vivienne Westwood ۶ৎ, Classic Orb Vivienne Westwood⟡ ݁₊ ., Vivienne Westwood Three Row Pearl Necklace, Vivienne Westwood Bat Orb‎𖤐","2, 2, 2, 2",$76.80 ,"$12,570.00 ",pending,delivery,alex weiss,4128495036,heyleen123@gmail.com,,,2025-09-30T21:17:07.651Z,payment_initiated
+ORD-000001,2025-10-02T00:18:18.125Z,PayPal,Peluche de Turbo Ruca 2.0,1,$21.00 ,"$3,436.00 ",pending,store,,,,,,2025-10-02T00:18:20.162Z,payment_initiated
+ORD-000003,2025-10-06T14:42:35.602Z,Cashea,Relicario,1,$6.50 ,"$1,205.00 ",pending,store,,,,,,2025-10-06T14:42:38.611Z,payment_initiated
+ORD-000086,2025-10-06T14:55:10.972Z,paypal,"Vivienne Westwood Three Row Pearl Necklace, Armour Ring Vivienne Westwood, Dripping Moon","2, 6, 2001",$77.50 ,"$14,368.00 ",completed,store,,,,,,2025-10-06T14:55:14.282Z,payment_initiated
+ORD-000093,2025-10-06T15:16:40.826Z,paypal,"Vivienne Westwood Three Row Pearl Necklace, Armour Ring Vivienne Westwood","2, 4",$56.00 ,"$10,382.00 ",completed,store,,,,,,2025-10-06T15:16:43.678Z,payment_completed
+ORD-000096,2025-10-06T15:21:51.388Z,paypal,"Sobres de Cartas Haikyu!!, Collar de Powder y Ekko - Arcane 🔹, Collar de Perla Auténtica (ostra)🦪, Collares Match de Ren y Nana 🔒","3, 3, 2, 4",128.5,23823,completed,store,,,,,,2025-10-06T15:21:54.255Z,payment_completed
+ORD-000098,2025-10-06T15:35:14.217Z,paypal,"Vivienne Westwood Three Row Pearl Necklace, Vivienne Westwood Bat Orb‎𖤐, Pearl Choker Vivienne Westwood ۶ৎ, Classic Orb Vivienne Westwood⟡ ݁₊ ., Vivienne Westwood Pearl Drop Necklace","1, 3, 4, 3, 3",166.2,30816,completed,store,,,,,,2025-10-06T15:35:16.899Z,payment_completed
+ORD-000099,2025-10-06T15:38:39.241Z,paypal,"Collar de Powder y Ekko - Arcane 🔹, Collar de Perla Auténtica (ostra)🦪","1, 1",22.5,4171,completed,store,,,,,,2025-10-06T15:38:43.536Z,payment_completed
+ORD-000101,2025-10-06T15:46:50.666Z,efectivo,Mazo de Tarot Hora de Aventura,1,16,2966,pending,store,,,,,,2025-10-06T15:46:53.677Z,payment_initiated
+ORD-000104,2025-10-06T16:08:17.588Z,paypal,Lámpara de Espada Minecraft,1,35,6489,completed,store,,,,,,2025-10-06T16:08:29.419Z,payment_initiated
+ORD-000105,2025-10-06T16:08:48.317Z,paypal,Pearl Choker Vivienne Westwood ۶ৎ,1,9,1669,completed,store,,,,,,2025-10-06T16:08:51.393Z,payment_initiated
+ORD-000107,2025-10-06T16:11:14.151Z,binance,Zarcillos Vivienne Westwood,1,12,2225,pending,store,,,,,,2025-10-06T16:11:17.250Z,payment_initiated
+ORD-000108,2025-10-06T16:13:33.041Z,paypal,Peluche de Hachiware,1,20,3708,completed,store,,,,,,2025-10-06T16:13:35.820Z,payment_completed
+ORD-000109,2025-10-06T16:20:49.056Z,paypal,Armour Ring Vivienne Westwood,1,8,1483,completed,store,,,,,,2025-10-06T16:20:51.889Z,payment_completed
+ORD-000110,2025-10-06T16:24:49.794Z,paypal,Mazo de Tarot Jojo’s Bizarre Adventure,1,17,3152,completed,store,,,,,,2025-10-06T16:24:52.626Z,payment_completed
+ORD-000111,2025-10-06T16:29:17.369Z,paypal,Collar de One Piece🏴‍☠,1,6.5,1205,completed,store,,,,,,2025-10-06T16:29:20.067Z,payment_completed
+ORD-000112,2025-10-06T16:33:41.956Z,paypal,Beanie BMO (Hora de Aventura) ⚔️,1,13,2410,completed,store,,,,,,2025-10-06T16:33:44.754Z,payment_completed
+ORD-000113,2025-10-06T16:38:43.692Z,paypal,Collar de Powder y Ekko - Arcane 🔹,1,6.5,1205,completed,store,,,,,,2025-10-06T16:38:46.518Z,payment_completed
+ORD-000114,2025-10-06T16:39:29.189Z,paypal,Death Note + Collar ,1,15,2781,completed,delivery,Yesser Cano,4022151687,canoyesser@gmail.com,,,2025-10-06T16:39:32.776Z,payment_completed
+ORD-000117,2025-10-06T16:57:16.420Z,paypal,"Vivienne Westwood Three Row Pearl Necklace, Vivienne Westwood Bat Orb‎𖤐, Pearl Choker Vivienne Westwood ۶ৎ, Vivienne Westwood Pearl Drop Necklace, Vivienne Westwood Ariella Necklace ⋆౨ৎ˚⟡˖ ࣪","2, 3, 3, 3, 2",163,30223,completed,delivery,Yesser Cano,4022151687,canoyesser@gmail.com,,,2025-10-06T16:57:19.330Z,payment_completed
+ORD-000118,2025-10-06T17:05:15.235Z,paypal,Collares Match de Ren y Nana 🔒,1,17,3152,completed,delivery,Yesser Cano,4022151687,canoyesser@gmail.com,"0301000 - Anaco, Anzoátegui, mrw",,2025-10-06T17:05:23.605Z,payment_completed
+ORD-000120,2025-10-06T17:09:21.494Z,zelle,Zarcillos de Zoro - One Piece,1,6.5,1205,pending,delivery,Yesser Cano,4022151687,canoyesser@gmail.com,"0803000 - Puerto Cabello, Carabobo, mrw",,2025-10-06T17:09:24.721Z,payment_initiated
+ORD-000122,2025-10-06T17:10:35.827Z,binance,Zarcillos de Zoro - One Piece,1,6.5,1205,pending,store,,,,,,2025-10-06T17:10:39.490Z,payment_initiated
+ORD-000124,2025-10-06T17:11:22.153Z,efectivo,Collar de Powder y Ekko - Arcane 🔹,1,6.5,1205,pending,delivery,Yesser Cano,4022151687,canoyesser@gmail.com,"7845 West Sample Road
+SB 133958",,2025-10-06T17:11:29.669Z,payment_initiated
+ORD-000126,2025-10-06T17:13:43.509Z,efectivo,Collar de Powder y Ekko - Arcane 🔹,1,6.5,1205,pending,delivery,Yesser Cano,4022151687,canoyesser@gmail.com,"7845 West Sample Road
+SB 133958",,2025-10-06T17:13:46.488Z,payment_initiated
+ORD-000128,2025-10-06T17:14:23.373Z,efectivo,Correa de Corazón ♥️,1,12,2225,pending,store,,,,,,2025-10-06T17:14:26.631Z,payment_initiated
+ORD-000130,2025-10-06T17:19:04.358Z,efectivo,Classic Orb Vivienne Westwood⟡ ݁₊ .,1,8.4,1557,pending,store,,,,,,2025-10-06T17:19:07.362Z,payment_initiated
+ORD-000132,2025-10-06T17:22:25.185Z,binance,Classic Orb Vivienne Westwood⟡ ݁₊ .,1,8.4,1557,pending,store,,,,,,2025-10-06T17:22:28.109Z,payment_initiated
+ORD-000134,2025-10-06T17:26:06.501Z,binance,Classic Orb Vivienne Westwood⟡ ݁₊ .,1,8.4,1557,pending,store,,,,,,2025-10-06T17:26:09.897Z,payment_initiated
+ORD-000136,2025-10-06T17:26:49.305Z,efectivo,Classic Orb Vivienne Westwood⟡ ݁₊ .,1,8.4,1557,pending,store,,,,,,2025-10-06T17:26:52.617Z,payment_initiated
+ORD-000136,2025-10-06T17:26:49.305Z,efectivo,Classic Orb Vivienne Westwood⟡ ݁₊ .,1,8.4,1557,pending,store,,,,,,2025-10-06T17:27:47.463Z,payment_initiated
+ORD-000138,2025-10-06T17:29:06.147Z,zinli,Beanie BMO (Hora de Aventura) ⚔️,1,13,2410,pending,store,,,,,,2025-10-06T17:29:08.998Z,payment_initiated
+ORD-000141,2025-10-06T17:30:59.201Z,binance,Pearl Choker Vivienne Westwood ۶ৎ,1,9,1669,pending,store,,,,,,2025-10-06T17:31:02.339Z,payment_initiated
+ORD-000143,2025-10-06T17:32:45.518Z,binance,Vivienne Westwood Three Row Pearl Necklace,1,12,2225,pending,store,,,,,,2025-10-06T17:32:48.382Z,payment_initiated
+ORD-000145,2025-10-06T17:39:02.728Z,efectivo,Vivienne Westwood Three Row Pearl Necklace,1,12,2225,pending,store,,,,,,2025-10-06T17:39:05.772Z,payment_initiated
+ORD-000147,2025-10-06T17:46:34.680Z,efectivo,Vivienne Westwood Three Row Pearl Necklace,1,12,2225,pending,store,Yesser Cano,,,,,2025-10-06T17:46:37.734Z,payment_initiated
+ORD-000149,2025-10-06T17:48:54.020Z,efectivo,Vivienne Westwood Three Row Pearl Necklace,1,12,2225,pending,store,Yesser Cano,,,,,2025-10-06T17:48:56.945Z,payment_initiated
+ORD-000151,2025-10-06T17:49:44.082Z,binance,Relicario,1,6.5,1205,pending,store,Yesser Cano,,,,,2025-10-06T17:49:47.588Z,payment_initiated
+ORD-000153,2025-10-06T17:57:05.453Z,zinli,Zarcillos de Zoro - One Piece,1,6.5,1205,pending,store,Yesser Cano,4022151687,canoyesser@gmail.com,,,2025-10-06T17:57:10.001Z,payment_initiated
+ORD-000155,2025-10-06T17:57:27.205Z,efectivo,Pearl Choker Vivienne Westwood ۶ৎ,1,9,1669,pending,store,Yesser Cano,4022151687,canoyesser@gmail.com,,,2025-10-06T17:57:31.900Z,payment_initiated
+ORD-000157,2025-10-06T17:58:39.664Z,efectivo,Pearl Choker Vivienne Westwood ۶ৎ,1,9,1669,pending,store,Yesser Cano,4022151687,canoyesser@gmail.com,,,2025-10-06T17:58:42.640Z,payment_initiated
+ORD-000159,2025-10-06T17:59:07.896Z,efectivo,Vivienne Westwood Three Row Pearl Necklace,1,12,2225,pending,delivery,Yesser Cano,4022151687,canoyesser@gmail.com,"0302000 - El Tigre, Anzoátegui, mrw",,2025-10-06T17:59:10.747Z,payment_initiated
+ORD-000161,2025-10-06T18:01:54.678Z,efectivo,Collar de Corazón Sangriento 🩸,1,15,2781,pending,store,Yesser Cano,4022151687,canoyesser@gmail.com,,,2025-10-06T18:01:57.951Z,payment_initiated
+ORD-000164?idNumber=46015623,2025-10-13T10:38:13.157Z,cashea,"Pearl Choker Vivienne Westwood ۶ৎ, Armour Ring Vivienne Westwood","3, 4",59,10939,completed,store,,,,,,2025-10-13T10:38:14.854Z,payment_completed
+ORD-000165,2025-10-13T10:41:32.276Z,cashea,Correa de Doble Ojal,3,36,6675,completed,store,,,,,,2025-10-13T10:41:34.414Z,payment_completed
+ORD-000166,2025-10-13T10:52:57.748Z,cashea,"Armour Ring Vivienne Westwood, Collar Pink Orb Vivienne Westwood","6, 3",108,20022,completed,store,,,,,,2025-10-13T10:52:59.916Z,payment_completed
+ORD-000167,2025-10-13T11:02:15.696Z,cashea,Armour Ring Vivienne Westwood,9,72,13347,completed,delivery,Cano,4022151687,canoyesser@gmail.com,"0200000 - Puerto Ayacucho, Amazonas, mrw",,2025-10-13T11:02:18.288Z,payment_completed
+ORD-000168,2025-10-13T11:04:53.130Z,cashea,Collar de Powder y Ekko - Arcane 🔹,7,45.5,8435,completed,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,se llega a la derecha donde sta la panaderia,2025-10-13T11:04:54.829Z,payment_completed
+ORD-000169,2025-10-13T11:07:12.521Z,cashea,"Zarcillos Pearl Drop Vivienne Westwood, Vivienne Westwood Heart Earrings ✧˖°","2, 6",71,13164,completed,delivery,Cano,4022151687,canoyesser@gmail.com,"1308000 - Babilom, Lara, mrw",,2025-10-13T11:07:14.517Z,payment_initiated
+ORD-000170,2025-10-13T11:11:27.476Z,cashea,Armour Ring Vivienne Westwood,7,56,10381,completed,delivery,Cano,4022151687,canoyesser@gmail.com,"1308000 - Babilom, Lara, mrw",,2025-10-13T11:11:29.165Z,payment_completed
+ORD-000171,2025-10-13T11:15:35.560Z,cashea,Pearl Choker Vivienne Westwood ۶ৎ,9,81,15021,completed,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,nooooooooo,2025-10-13T11:15:37.572Z,payment_completed
+ORD-000172,2025-10-13T11:17:23.845Z,cashea,Collar Sakura Card Carptor🌙,6,39,7230,completed,delivery,Cano,4022151687,canoyesser@gmail.com,"0401000 - Guasdualito, Apure, zoom",,2025-10-13T11:17:26.447Z,payment_initiated
+ORD-000173,2025-10-13T11:37:08.930Z,cashea,Zarcillos Broken Heart 💔 (Polnareff Jojo’s Bizarre Adventure),8,52,9640,completed,delivery,Cano,4022151687,canoyesser@gmail.com,"1506000 - Higuerote, Miranda, mrw",,2025-10-13T11:37:10.879Z,payment_completed
+ORD-000174,2025-10-13T11:58:31.631Z,cashea,Collar Sakura Card Carptor🌙,11,71.5,13255,completed,delivery,Cano,4022151687,canoyesser@gmail.com,"0512000 - La Encrucijada, Aragua, mrw",,2025-10-13T11:58:33.602Z,payment_completed
+ORD-000175,2025-10-13T12:03:24.053Z,cashea,Collar de Powder y Ekko - Arcane 🔹,9,58.5,10845,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,nooo,completed,payment_completed
+ORD-000176,2025-10-13T12:11:31.031Z,cashea,Beanie BMO (Hora de Aventura) ⚔️,5,65,12050,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_completed
+ORD-000176,2025-10-13T12:11:47.635Z,cashea,Beanie BMO (Hora de Aventura) ⚔️,5,65,12050,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,"1307000 - Barquisimeto Nueva Segovia, Lara, zoom",,completed,payment_initiated
+ORD-000177,2025-10-13T12:31:39.272Z,credito,Vivienne Westwood Bat Orb‎𖤐,2,18,3338,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000177,2025-10-13T12:39:35.402Z,credito,Vivienne Westwood Bat Orb‎𖤐,2,18,3338,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000178,2025-10-13T12:47:46.839Z,credito,Armour Ring Vivienne Westwood,4,32,5932,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,nooo,completed,payment_completed
+ORD-000178,2025-10-13T12:49:35.732Z,credito,Armour Ring Vivienne Westwood,4,32,5932,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,nooo,pending,payment_initiated
+ORD-000178,2025-10-13T12:49:51.807Z,credito,Armour Ring Vivienne Westwood,4,32,5932,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,nooo,pending,payment_initiated
+ORD-000179,2025-10-13T12:51:38.754Z,credito,Pearl Choker Vivienne Westwood ۶ৎ,5,45,8345,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_completed
+ORD-000180,2025-10-13T12:54:29.538Z,credito,Zarcillos Broken Heart 💔 (Polnareff Jojo’s Bizarre Adventure),6,39,7230,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_completed
+ORD-000181,2025-10-13T12:56:48.066Z,credito,Collar Reliquias de La Muerte - Harry Potter,4,26,4820,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_completed
+ORD-000182,2025-10-13T12:59:16.285Z,credito,Brazalete de Púas,4,22,4080,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,,completed,payment_completed
+ORD-000182,2025-10-13T12:59:37.375Z,credito,Brazalete de Púas,4,22,4080,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,,completed,payment_initiated
+ORD-000183,2025-10-13T13:00:31.865Z,pago-movil,Classic Orb Vivienne Westwood⟡ ݁₊ .,3,25.2,4671,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,,completed,payment_completed
+ORD-000183,2025-10-13T13:01:22.392Z,pago-movil,Classic Orb Vivienne Westwood⟡ ݁₊ .,3,25.2,4671,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,,completed,payment_initiated
+ORD-000184,2025-10-13T13:03:23.506Z,credito,11,1,15,2781,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000184,2025-10-13T13:09:56.830Z,credito,11,1,15,2781,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000185,2025-10-13T13:10:37.895Z,pago-movil,Classic Orb Vivienne Westwood⟡ ݁₊ .,4,33.6,6228,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,,completed,payment_completed
+ORD-000185,2025-10-13T13:12:41.403Z,pago-movil,Classic Orb Vivienne Westwood⟡ ݁₊ .,4,33.6,6228,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,,completed,payment_initiated
+ORD-000186,2025-10-13T13:14:23.724Z,pago-movil,Armour Ring Vivienne Westwood,3,24,4449,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000187,2025-10-13T13:17:48.644Z,pago-movil,Classic Orb Vivienne Westwood⟡ ݁₊ .,3,25.2,4671,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_completed
+ORD-000187,2025-10-13T13:19:22.634Z,pago-movil,Classic Orb Vivienne Westwood⟡ ݁₊ .,3,25.2,4671,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_initiated
+ORD-000188,2025-10-13T13:20:02.548Z,pago-movil,Relicario,2,13,2410,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_completed
+ORD-000188,2025-10-13T13:20:15.854Z,pago-movil,Relicario,2,13,2410,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_initiated
+ORD-000189,2025-10-13T13:29:24.464Z,pago-movil,Pearl Choker Vivienne Westwood ۶ৎ,4,36,6676,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_completed
+ORD-000189,2025-10-13T13:29:51.618Z,pago-movil,Pearl Choker Vivienne Westwood ۶ৎ,4,36,6676,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_initiated
+ORD-000190,2025-10-13T13:30:22.405Z,debito,Armour Ring Vivienne Westwood,5,40,7415,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,,pending,payment_initiated
+ORD-000191,2025-10-13T13:33:03.635Z,credito,Collar de Powder y Ekko - Arcane 🔹,4,26,4820,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,,completed,payment_completed
+ORD-000191,2025-10-13T13:33:50.896Z,credito,Collar de Powder y Ekko - Arcane 🔹,4,26,4820,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,,completed,payment_initiated
+ORD-000192,2025-10-13T14:05:12.963Z,paypal,Collares Match de Ren y Nana 🔒,4,68,12608,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_completed
+ORD-000192,2025-10-13T14:05:34.453Z,paypal,Collares Match de Ren y Nana 🔒,4,68,12608,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,"1510000 - Guatire Oasis, Miranda, mrw",,completed,payment_initiated
+ORD-000193,2025-10-13T14:07:11.649Z,zelle,Armour Ring Vivienne Westwood,1,8,1483,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000194,2025-10-13T14:07:13.814Z,zelle,Armour Ring Vivienne Westwood,1,8,1483,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000195,2025-10-13T14:19:33.489Z,pago-movil,Llave,1,6.5,1205,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000195,2025-10-13T14:30:23.002Z,pago-movil,Llave,1,6.5,1205,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000195,2025-10-13T14:40:33.953Z,pago-movil,Llave,1,6.5,1205,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000196,2025-10-13T15:54:48.493Z,paypal,"Star, Dripping Moon","1, 2",16.5,3060,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,,pending,payment_initiated
+ORD-000197,2025-10-13T15:55:13.317Z,credito,"Star, Dripping Moon","1, 2",16.5,3060,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000198,2025-10-13T15:55:33.731Z,cashea,"Star, Dripping Moon","1, 2",16.5,3060,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000199,2025-10-13T15:55:49.532Z,cashea,"Star, Dripping Moon","3, 2",27.5,5100,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000200,2025-10-13T15:56:11.411Z,credito,"Star, Dripping Moon","3, 2",27.5,5100,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000201,2025-10-13T15:56:29.358Z,paypal,"Star, Dripping Moon","3, 2",27.5,5100,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000201,2025-10-13T16:01:26.742Z,paypal,"Star, Dripping Moon","3, 2",27.5,5100,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000202,2025-10-13T16:02:23.089Z,paypal,"Star, Dripping Moon","3, 2",27.5,5100,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_completed
+ORD-000202,2025-10-13T16:02:57.258Z,paypal,"Star, Dripping Moon","3, 2",27.5,5100,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_initiated
+ORD-000203,2025-10-13T16:50:21.735Z,credito,Classic Orb Vivienne Westwood⟡ ݁₊ .,5,42,7785,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000004,2025-10-13T16:51:39.038Z,credito,"Classic Orb Vivienne Westwood⟡ ݁₊ ., Choker de Corazones Metálico ⋆౨ৎ˚⟡˖ ࣪","3, 1",31.7,5876,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000005,2025-10-13T16:52:33.989Z,cashea,"Classic Orb Vivienne Westwood⟡ ݁₊ ., Choker de Corazones Metálico ⋆౨ৎ˚⟡˖ ࣪","3, 1",31.7,5876,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000204,2025-10-13T16:53:14.827Z,cashea,Classic Orb Vivienne Westwood⟡ ݁₊ .,7,58.8,10899,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_completed
+ORD-000006,2025-10-13T16:53:28.099Z,efectivo,"Classic Orb Vivienne Westwood⟡ ݁₊ ., Choker de Corazones Metálico ⋆౨ৎ˚⟡˖ ࣪","3, 1",31.7,5876,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000007,2025-10-13T16:53:38.463Z,cashea,"Classic Orb Vivienne Westwood⟡ ݁₊ ., Choker de Corazones Metálico ⋆౨ৎ˚⟡˖ ࣪","3, 1",31.7,5876,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000204,2025-10-13T16:54:59.906Z,cashea,Classic Orb Vivienne Westwood⟡ ݁₊ .,7,58.8,10899,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_initiated
+ORD-000205,2025-10-13T16:55:31.141Z,credito,Classic Orb Vivienne Westwood⟡ ݁₊ .,7,58.8,10899,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,,pending,payment_initiated
+ORD-000008,2025-10-13T16:56:49.685Z,pago-movil,"Classic Orb Vivienne Westwood⟡ ݁₊ ., Choker de Corazones Metálico ⋆౨ৎ˚⟡˖ ࣪","3, 1",31.7,5876,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000009,2025-10-13T16:58:48.979Z,paypal,"Classic Orb Vivienne Westwood⟡ ݁₊ ., Choker de Corazones Metálico ⋆౨ৎ˚⟡˖ ࣪","3, 1",31.7,5876,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000010,2025-10-13T17:07:54.752Z,cashea,"Classic Orb Vivienne Westwood⟡ ݁₊ ., Choker de Corazones Metálico ⋆౨ৎ˚⟡˖ ࣪","3, 1",31.7,5876,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000011,2025-10-13T17:08:26.713Z,credito,"Classic Orb Vivienne Westwood⟡ ݁₊ ., Choker de Corazones Metálico ⋆౨ৎ˚⟡˖ ࣪","3, 1",31.7,5876,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000012,2025-10-13T17:09:53.008Z,pago-movil,"Classic Orb Vivienne Westwood⟡ ݁₊ ., Choker de Corazones Metálico ⋆౨ৎ˚⟡˖ ࣪","3, 1",31.7,5876,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000013,2025-10-13T17:14:12.838Z,cashea,"Classic Orb Vivienne Westwood⟡ ݁₊ ., Choker de Corazones Metálico ⋆౨ৎ˚⟡˖ ࣪","3, 1",31.7,5876,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000014,2025-10-13T17:15:42.199Z,cashea,"Correa Vivienne Westwood, Correa de Doble Ojal","2, 3",76,14091,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000015,2025-10-13T17:17:01.325Z,credito,"Correa Vivienne Westwood, Correa de Doble Ojal","2, 3",76,14091,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_completed
+ORD-000015,2025-10-13T17:17:29.911Z,credito,"Correa Vivienne Westwood, Correa de Doble Ojal","2, 3",76,14091,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_initiated
+ORD-000016,2025-10-14T01:25:18.661Z,cashea,Llaveros Plushies de Pokémon (˶˃ ᵕ ˂˶) .ᐟ.ᐟ,3,27,5007,28256608,delivery,Cano,4022151687,canoyesser@gmail.com,Calle 67 sur #46-16,,pending,payment_initiated
+ORD-000001,2025-11-07T07:02:12.251Z,efectivo,Collares Match de Corazón y Espada ⚔️ (Acero Inoxidable),1,14.5,2688,14879598,delivery,Hildemaro Andrés Dávila Garfis ,#ERROR!,slimehistoria@gmail.com,Urbanización Villa paris E ,Después de la redoma de agua viva ,pending,payment_initiated
+ORD-000001,2025-11-12T12:02:20.291Z,cashea,"Collares Match de Duki 🔥, Anillos de Duki ","1, 1",16.5,3059,27196098,store,Alexander,4146029847,,,,pending,payment_initiated
+ORD-000002,2025-11-12T12:03:24.141Z,cashea,"Collares Match de Duki 🔥, Anillos de Duki , Peluche de Gengar","1, 1, 2001",39,7230,27196098,delivery,Alexander,4146029847,,,,pending,payment_initiated
+ORD-000017,2025-11-14T21:52:50.012Z,cashea,"Mofusands Plush Llaveros Originales, Collares Match de Ren y Nana 🔒, Mazo de Tarot Jojo’s Bizarre Adventure, Collar Howl - Studio Ghibli, Collar de One Piece🏴‍☠, Collar Sakura Card Carptor🌙, Reloj de Bolsillo Sakura Cardcaptor, Classic Orb Vivienne Westwood⟡ ݁₊ ., Collar de Berserk ","1, 5, 5, 4, 4, 1, 3, 2, 1",305.8,56693,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000001,2025-11-23T22:26:07.138Z,pago-movil,Cooky,1,18.5,3430,31671811,delivery,Carlos Andres Medina Gonzalez,4245038516,canemg031106@gmail.com,,,pending,payment_initiated
+ORD-000001,2025-11-28T00:17:53.415Z,cashea,Anillos de Mariposa ,1,4,742,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000002,2025-11-28T00:18:08.724Z,cashea,Anillos de Mariposa ,9,36,6678,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000003,2025-11-28T00:18:25.502Z,cashea,Anillos de Mariposa ,9,36,6678,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000003,2025-11-28T00:18:25.502Z,cashea,Anillos de Mariposa ,9,36,6678,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000004,2025-11-28T00:19:43.559Z,cashea,Anillos de Mariposa ,9,36,6678,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000005,2025-11-28T00:21:25.344Z,paypal,Anillos de Mariposa ,9,36,6678,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,pending,payment_initiated
+ORD-000005,2025-11-28T00:21:50.852Z,paypal,Anillos de Mariposa ,9,36,6678,28256608,store,Cano,4022151687,canoyesser@gmail.com,,,completed,payment_initiated

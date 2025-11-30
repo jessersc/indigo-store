@@ -1,0 +1,1182 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Indigo Store</title>
+  <!-- Favicon will be loaded from Supabase -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⏳</text></svg>" type="image/svg+xml" id="favicon-placeholder" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/style.css?v=3.0"/>
+  <link rel="stylesheet" href="assets/mercantil-styles.css"/>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'kawaii-pink': '#FF69B4',
+            'kawaii-light-pink': '#FFB6C1',
+            'kawaii-purple': '#DDA0DD',
+            'kawaii-lavender': '#E6E6FA'
+          },
+          fontFamily: {
+            'kawaii': ['Nunito', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Hide assets initially to prevent flash of default assets */
+    .assets-loading {
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+    
+    .assets-loaded {
+      opacity: 1 !important;
+      visibility: visible !important;
+      transition: opacity 0.3s ease-in-out;
+    }
+    
+    /* Logo size override - bigger on desktop, normal on mobile */
+    .logo-bigger {
+      height: 5rem !important; /* 80px - mobile default */
+      width: auto !important;
+      object-fit: contain !important;
+    }
+    
+    /* Tablet and up */
+    @media (min-width: 641px) {
+      .logo-bigger {
+        height: 6rem !important; /* 96px on tablet */
+      }
+    }
+    
+    /* Desktop and up */
+    @media (min-width: 769px) {
+      .logo-bigger {
+        height: 12rem !important; /* 192px on desktop */
+      }
+    }
+    
+    /* Large desktop */
+    @media (min-width: 1024px) {
+      .logo-bigger {
+        height: 14rem !important; /* 224px on large desktop */
+      }
+    }
+    
+    .gradient-bg {
+      background-color: #FFCCB6;
+      background-image: linear-gradient(to bottom, #FF769D, #FFCCB6);    }
+    .hover-lift {
+      transition: transform 0.3s ease;
+    }
+    .hover-lift:hover {
+      transform: translateY(-2px);
+    }
+    .kawaii-shadow {
+      box-shadow: 0 8px 32px rgba(255, 182, 193, 0.3);
+    }
+    
+    /* Cashea button mobile responsiveness */
+    #cashea-button-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 50px;
+    }
+    
+    /* Ensure Cashea SDK button is responsive */
+    #cashea-button-container > * {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    
+    /* Mobile-specific Cashea button styles */
+    @media (max-width: 640px) {
+      #cashea-button-container {
+        padding: 0;
+        margin: 0;
+      }
+      
+      #cashea-button-container button,
+      #cashea-button-container > div {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 12px 16px !important;
+        font-size: 14px !important;
+      }
+      
+      #cashea-payment-widget {
+        padding: 12px !important;
+        margin: 0 !important;
+      }
+    }
+    .glass-effect {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .product-image {
+      background: linear-gradient(135deg, #f8f9ff 0%, #fdf2f8 100%);
+    }
+    .payment-button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .size-selector {
+      transition: all 0.3s ease;
+    }
+    .size-selector:hover {
+      transform: scale(1.05);
+    }
+    .selected-size {
+      background: linear-gradient(135deg, #FF69B4, #DDA0DD);
+      color: white;
+      border: 2px solid #FF69B4;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+  <!-- <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"> -->
+
+</head>
+<body class="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
+
+  <div class="bg-kawaii-pink text-white text-center py-2 text-sm font-medium assets-loading" id="header-banner">
+    <p>🌟 ¡¡Aceptamos pagos con Cashea!! 🌟</p>
+  </div>
+
+  <!-- loading -->
+  <div id="loadingOverlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#ffd2e9;z-index:3000;display:flex;align-items:center;justify-content:center;transition:opacity 0.4s;">
+    <!-- From Uiverse.io by alexruix -->
+    <div class="loader">
+      <span class="loader-text">Cargando...</span>
+      <span class="load"></span>
+    </div>
+  </div>
+  <header class="bg-white/80 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b-2 border-kawaii-pink py-1 px-4" id="main-header">
+    <div class="flex flex-row items-center max-w-7xl mx-auto flex-nowrap h-12">
+      <!-- hamburger for mobile (left) -->
+      <button id="hamburgerBtn" class="mobile-menu-toggle mr-2 hidden md:hidden" style="background:none;border:none;cursor:pointer;padding:4px;">
+        <span style="display:block;width:20px;height:2px;background:#ff6b9d;margin:3px 0;border-radius:2px;"></span>
+        <span style="display:block;width:20px;height:2px;background:#ff6b9d;margin:3px 0;border-radius:2px;"></span>
+        <span style="display:block;width:20px;height:2px;background:#ff6b9d;margin:3px 0;border-radius:2px;"></span>
+      </button>
+      
+      <div class="flex-1 flex justify-center md:justify-start">
+        <a href="#" onclick="navigateToHome()" class="hover:opacity-80 transition flex items-center space-x-5">
+          <img src="assets/logotipo.png" alt="Indigo Store Logo" class="logo-responsive logo-bigger assets-loading" />
+        </a>
+      </div>
+      
+      <!-- mobile icons (right) -->
+      <div class="flex items-center gap-1 flex-shrink-0" id="mobileIcons">
+        <button id="searchIconBtn" style="display:none;background:none;border:none;cursor:pointer;padding:4px;">
+          <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 50 50"><path d="M 21 3 C 11.622998 3 4 10.623005 4 20 C 4 29.376995 11.622998 37 21 37 C 24.712383 37 28.139151 35.791079 30.9375 33.765625 L 44.085938 46.914062 L 46.914062 44.085938 L 33.886719 31.058594 C 36.443536 28.083 38 24.223631 38 20 C 38 10.623005 30.377002 3 21 3 z M 21 5 C 29.296122 5 36 11.703883 36 20 C 36 28.296117 29.296122 35 21 35 C 12.703878 35 6 28.296117 6 20 C 6 11.703883 12.703878 5 21 5 z"></path></svg>
+        </button>
+        <button id="orderHistoryBtnMobile" onclick="showOrderHistoryModal()" style="
+          display:none;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 4px;
+          border-radius: 6px;
+          color: #ff6b9d;
+          transition: all 0.2s;
+        " onmouseover="this.style.background='rgba(255,107,157,0.1)'" onmouseout="this.style.background='none'">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12l2 2 4-4"></path>
+            <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
+            <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
+            <path d="M12 3c0 1-1 3-3 3s-3-2-3-3 1-3 3-3 3 2 3 3"></path>
+            <path d="M12 21c0-1 1-3 3-3s3 2 3 3-1 3-3 3-3-2-3-3"></path>
+          </svg>
+        </button>
+        <button id="cartIconBtnMobile" class="cart-icon-header flex items-center justify-center" style="display:none;background:none;border:none;cursor:pointer;padding:4px;">
+          <svg fill="#ff6b9d" stroke="#ff6b9d" width="20px" height="20px" viewBox="144 144 512 512" xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#a)">
+              <defs>
+                <clipPath id="a">
+                  <path d="m148.09 190h503.81v420h-503.81z"/>
+                </clipPath>
+              </defs>
+              <g clip-path="url(#a)">
+                <path d="m246.17 257.25-6.9961-41.984h-25.105c-3.7422-14.445-16.777-25.191-32.387-25.191-18.523 0-33.586 15.062-33.586 33.586 0 18.523 15.062 33.586 33.586 33.586 15.609 0 28.641-10.746 32.395-25.191h10.867l4.1992 25.191-0.32031 0.003906 43.422 218.45c-20.699 1.5781-37.938 17.516-39.969 37.566-1.1914 11.797 2.6875 23.613 10.648 32.395 7.9648 8.8086 19.316 13.871 31.125 13.871h16.793c0 27.785 22.598 50.383 50.383 50.383s50.383-22.598 50.383-50.383h92.363c0 27.785 22.598 50.383 50.383 50.383 27.785 0 50.383-22.598 50.383-50.383h33.586c4.6445 0 8.3984-3.7539 8.3984-8.3984s-3.7539-8.3984-8.3984-8.3984h-36.527c-6.9375-19.539-25.551-33.586-47.441-33.586-21.891 0-40.508 14.047-47.441 33.586h-98.242c-6.9375-19.539-25.551-33.586-47.441-33.586-21.891 0-40.508 14.047-47.441 33.586l-19.738 0.003906c-7.0703 0-13.871-3.0391-18.676-8.3398-4.8438-5.3672-7.1211-12.27-6.3906-19.445 1.2773-12.672 12.98-22.586 26.645-22.586h6.6406 0.32812 327.43c23.102-0.011719 41.883-18.797 41.883-41.887v-193.23zm-64.488-16.797c-9.2617 0-16.793-7.5312-16.793-16.793 0-9.2617 7.5312-16.793 16.793-16.793 9.2617 0 16.793 7.5312 16.793 16.793 0.003906 9.2617-7.5312 16.793-16.793 16.793zm352.67 285.49c18.523 0 33.586 15.062 33.586 33.586 0 18.523-15.062 33.586-33.586 33.586-18.523 0-33.586-15.062-33.586-33.586 0-18.52 15.062-33.586 33.586-33.586zm-193.12 0c18.523 0 33.586 15.062 33.586 33.586 0 18.523-15.062 33.586-33.586 33.586-18.523 0-33.586-15.062-33.586-33.586-0.003907-18.52 15.062-33.586 33.586-33.586zm293.89-75.461c0 13.828-11.25 25.082-25.082 25.082h-320.69l-40.055-201.52h385.83z"/>
+              </g>
+            </g>
+          </svg>
+        </button>
+      </div>
+      <nav class="nav-menu flex-wrap justify-center flex-grow">
+        <div class="dropdown">
+          <span class="dropdown-toggle">Categorías ♡</span>
+          <div class="dropdown-content" id="cat-dropdown"></div>
+        </div>
+        <div class="dropdown">
+          <span class="dropdown-toggle">Colecciones ♡</span>
+          <div class="dropdown-content" id="col-dropdown"></div>
+        </div>
+        <div class="dropdown">
+          <span class="dropdown-toggle">Promociones ♡</span>
+          <div class="dropdown-content" id="promo-dropdown"></div>
+        </div>
+        <div class="dropdown">
+          <span class="dropdown-toggle">Redes ♡</span>
+          <div class="dropdown-content">
+            <a href="https://www.instagram.com/indig0.store" target="_blank" class="social-link flex items-center gap-3 p-2 rounded-lg hover:bg-pink-50 transition">
+              <img src="assets/ig.png" class="social-icon w-6 h-6 assets-loading" alt="Instagram Icon"> Instagram
+            </a>
+            <a href="https://www.tiktok.com/@indig0.store" target="_blank" class="social-link flex items-center gap-3 p-2 rounded-lg hover:bg-pink-50 transition">
+              <img src="assets/tt.png" class="social-icon w-6 h-6 assets-loading" alt="TikTok Icon"> TikTok
+            </a>
+            <a href="https://www.whatsapp.com/catalog/584128503608/?app_absent=0" target="_blank" class="social-link flex items-center gap-3 p-2 rounded-lg hover:bg-pink-50 transition">
+              <img src="assets/wa.png" class="social-icon w-6 h-6 assets-loading" alt="WhatsApp Icon"> WhatsApp
+            </a>
+            <a href="https://maps.app.goo.gl/MQ2BxeCVe8wEMx1B7" target="_blank" class="social-link flex items-center gap-3 p-2 rounded-lg hover:bg-pink-50 transition">
+              <img src="assets/pin.png" class="social-icon w-6 h-6 assets-loading" alt="Pin Icon"> Dirección
+            </a>
+          </div>
+        </div>
+      </nav>
+      <div class="relative w-full sm:w-64 flex items-center" id="desktopSearchBar">
+        <input id="search" type="text" placeholder="Buscar producto..." class="search-kawaii w-full text-sm" />
+        <div id="search-loading" class="absolute right-4 top-1/2 transform -translate-y-1/2 hidden">
+          <div class="w-4 h-4 loading-kawaii"></div>
+        </div>
+      </div>
+      <!-- cart icon desktop, always to the right of search bar -->
+      <div class="flex items-center ml-2 gap-2" id="desktopCartWrapper">
+        <button id="orderHistoryBtn" onclick="showOrderHistoryModal()" style="
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 4px;
+          border-radius: 6px;
+          color: #ff6b9d;
+          transition: all 0.2s;
+        " onmouseover="this.style.background='rgba(255,107,157,0.1)'" onmouseout="this.style.background='none'">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12l2 2 4-4"></path>
+            <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"></path>
+            <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"></path>
+            <path d="M12 3c0 1-1 3-3 3s-3-2-3-3 1-3 3-3 3 2 3 3"></path>
+            <path d="M12 21c0-1 1-3 3-3s3 2 3 3-1 3-3 3-3-2-3-3"></path>
+          </svg>
+        </button>
+        <button id="cartIconBtn" class="cart-icon-header flex items-center justify-center" style="background:none;border:none;cursor:pointer;padding:4px;">
+          <svg fill="#ff6b9d" stroke="#ff6b9d" width="24px" height="24px" viewBox="144 144 512 512" xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#a)">
+              <defs>
+                <clipPath id="a">
+                  <path d="m148.09 190h503.81v420h-503.81z"/>
+                </clipPath>
+              </defs>
+              <g clip-path="url(#a)">
+                <path d="m246.17 257.25-6.9961-41.984h-25.105c-3.7422-14.445-16.777-25.191-32.387-25.191-18.523 0-33.586 15.062-33.586 33.586 0 18.523 15.062 33.586 33.586 33.586 15.609 0 28.641-10.746 32.395-25.191h10.867l4.1992 25.191-0.32031 0.003906 43.422 218.45c-20.699 1.5781-37.938 17.516-39.969 37.566-1.1914 11.797 2.6875 23.613 10.648 32.395 7.9648 8.8086 19.316 13.871 31.125 13.871h16.793c0 27.785 22.598 50.383 50.383 50.383s50.383-22.598 50.383-50.383h92.363c0 27.785 22.598 50.383 50.383 50.383 27.785 0 50.383-22.598 50.383-50.383h33.586c4.6445 0 8.3984-3.7539 8.3984-8.3984s-3.7539-8.3984-8.3984-8.3984h-36.527c-6.9375-19.539-25.551-33.586-47.441-33.586-21.891 0-40.508 14.047-47.441 33.586h-98.242c-6.9375-19.539-25.551-33.586-47.441-33.586-21.891 0-40.508 14.047-47.441 33.586l-19.738 0.003906c-7.0703 0-13.871-3.0391-18.676-8.3398-4.8438-5.3672-7.1211-12.27-6.3906-19.445 1.2773-12.672 12.98-22.586 26.645-22.586h6.6406 0.32812 327.43c23.102-0.011719 41.883-18.797 41.883-41.887v-193.23zm-64.488-16.797c-9.2617 0-16.793-7.5312-16.793-16.793 0-9.2617 7.5312-16.793 16.793-16.793 9.2617 0 16.793 7.5312 16.793 16.793 0.003906 9.2617-7.5312 16.793-16.793 16.793zm352.67 285.49c18.523 0 33.586 15.062 33.586 33.586 0 18.523-15.062 33.586-33.586 33.586-18.523 0-33.586-15.062-33.586-33.586 0-18.52 15.062-33.586 33.586-33.586zm-193.12 0c18.523 0 33.586 15.062 33.586 33.586 0 18.523-15.062 33.586-33.586 33.586-18.523 0-33.586-15.062-33.586-33.586-0.003907-18.52 15.062-33.586 33.586-33.586zm293.89-75.461c0 13.828-11.25 25.082-25.082 25.082h-320.69l-40.055-201.52h385.83z"/>
+              </g>
+            </g>
+          </svg>
+        </button>
+    </div>
+    <!-- mobile search bar hidden -->
+    <div id="mobileSearchBar" style="display:none;padding:8px 0 0 0;background:white;border-radius:0 0 16px 16px;box-shadow:0 4px 20px rgba(255,107,157,0.15);">
+      <div class="relative">
+        <input id="search-mobile" type="text" placeholder="Buscar producto..." class="search-kawaii w-full text-sm px-4 py-3" />
+        <button id="clearMobileSearch" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-pink-400 transition-colors" style="display:none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div id="mobile-search-results" class="max-h-96 overflow-y-auto p-4"></div>
+    </div>
+  </header>
+  <!-- mob meny onverlay -->
+  <div id="mobileMenuOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:1001;"></div>
+  <!-- mob menu drag -->
+  <div id="mobileMenuDrawer" style="display:none;position:fixed;top:0;left:0;width:80vw;max-width:320px;height:100vh;background:#fff;z-index:1002;box-shadow:2px 0 20px rgba(255,107,157,0.1);padding:32px 16px;overflow-y:auto;">
+    <div class="mobile-menu-item" onclick="toggleMobileSubmenu('categorias-submenu-mobile')">
+      Categorías ♡
+      <div class="mobile-submenu" id="categorias-submenu-mobile"></div>
+    </div>
+    <div class="mobile-menu-item" onclick="toggleMobileSubmenu('colecciones-submenu-mobile')">
+      Colecciones ♡
+      <div class="mobile-submenu" id="colecciones-submenu-mobile"></div>
+    </div>
+    <div class="mobile-menu-item" onclick="toggleMobileSubmenu('promociones-submenu-mobile')">
+      Promociones ♡
+      <div class="mobile-submenu" id="promociones-submenu-mobile"></div>
+    </div>
+    <div class="mobile-menu-item" onclick="toggleMobileSubmenu('redes-submenu-mobile')">
+      Redes ♡
+      <div class="mobile-submenu" id="redes-submenu-mobile">
+        <a href="https://www.instagram.com/indig0.store" target="_blank" class="mobile-submenu-item">
+          <img src="assets/ig.png" class="social-icon w-6 h-6 assets-loading" alt="Instagram Icon"> Instagram
+        </a>
+        <a href="https://www.tiktok.com/@indig0.store" target="_blank" class="mobile-submenu-item">
+          <img src="assets/tt.png" class="social-icon w-6 h-6 assets-loading" alt="TikTok Icon"> TikTok
+        </a>
+        <a href="https://www.whatsapp.com/catalog/584128503608/?app_absent=0" target="_blank" class="mobile-submenu-item">
+          <img src="assets/wa.png" class="social-icon w-6 h-6 assets-loading" alt="WhatsApp Icon"> WhatsApp
+        </a>
+        <a href="https://maps.app.goo.gl/MQ2BxeCVe8wEMx1B7" target="_blank" class="mobile-submenu-item">
+          <img src="assets/pin.png" class="social-icon w-6 h-6 assets-loading" alt="Google Pin Icon"> Dirección
+        </a>
+      </div>
+    </div>
+    <div class="mobile-menu-item" onclick="showOrderHistoryModal(); closeMobileMenu();">
+      Mis Órdenes
+    </div>
+  </div>
+  <!-- YOU SHALL NOT PAASSS -->
+
+  <!-- Hero Section -->
+  <section id="hero-section" class="relative overflow-hidden gradient-bg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div class="text-center lg:text-left">
+          <h2 class="text-5xl lg:text-6xl font-bold text-white mb-6 font-kawaii">
+            PRODUCTOS
+            <br>
+            <span class="text-yellow-300">NUEVOS</span>
+          </h2>
+          <p class="text-white/90 text-xl mb-8 max-w-md">
+            Descubre nuestros últimos accesorios, peluches y productos de estilo de vida que traen alegría a tu día a día!
+          </p>
+          <button onclick="navigateToNewProducts()" class="bg-white text-kawaii-pink px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-colors kawaii-shadow hover-lift">
+            COMPRAR AHORA
+          </button>
+        </div>
+        
+        <div class="relative flex justify-center px-4">
+          <!-- Hero Products Carousel -->
+          <div class="w-full max-w-sm mx-auto bg-white/20 rounded-2xl p-4 md:p-6 glass-effect">
+            <div class="relative overflow-hidden">
+              <!-- Carousel Container -->
+              <div id="heroCarousel" class="flex transition-transform duration-700 ease-in-out">
+                <!-- Products will be dynamically inserted here -->
+              </div>
+              
+              <!-- Navigation Arrows -->
+              <button id="heroCarouselPrev" class="absolute left-2 md:left-4 bottom-8 bg-kawaii-pink hover:bg-kawaii-pink/90 text-white rounded-full p-1.5 md:p-2 shadow-lg transition-all hover-lift">
+                <svg width="16" height="16" class="md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m15 18-6-6 6-6"/>
+                </svg>
+              </button>
+              <button id="heroCarouselNext" class="absolute right-2 md:right-4 bottom-8 bg-kawaii-pink hover:bg-kawaii-pink/90 text-white rounded-full p-1.5 md:p-2 shadow-lg transition-all hover-lift">
+                <svg width="16" height="16" class="md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m9 18 6-6-6-6"/>
+                </svg>
+              </button>
+            </div>
+            
+            <!-- Carousel Indicators -->
+            <div id="heroCarouselIndicators" class="flex justify-center mt-3 md:mt-4 space-x-2">
+              <!-- Indicators will be dynamically inserted here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Floating Elements -->
+    <div class="absolute top-10 left-4 md:top-20 md:left-10 animate-float" style="animation-delay: 0.5s; z-index: 10;">
+      <span class="text-kawaii-light-pink text-2xl md:text-3xl opacity-60" style="text-shadow: 0 2px 4px rgba(0,0,0,0.1);">✨</span>
+    </div>
+    <div class="absolute top-32 right-4 md:top-40 md:right-20 animate-bounce-custom" style="animation-delay: 1s; z-index: 10;">
+      <span class="text-yellow-300 text-xl md:text-2xl opacity-60" style="text-shadow: 0 2px 4px rgba(0,0,0,0.1);">⭐</span>
+    </div>
+    <div class="absolute bottom-10 left-4 md:bottom-20 md:left-20 animate-float" style="animation-delay: 1.5s; z-index: 10;">
+      <span class="text-kawaii-purple text-xl md:text-2xl opacity-60" style="text-shadow: 0 2px 4px rgba(0,0,0,0.1);">✨</span>
+    </div>
+    <div class="absolute top-16 right-16 md:top-24 md:right-32 animate-bounce-custom" style="animation-delay: 2s; z-index: 10;">
+      <span class="text-kawaii-light-pink text-lg md:text-xl opacity-50" style="text-shadow: 0 2px 4px rgba(0,0,0,0.1);">✨</span>
+    </div>
+    <div class="absolute bottom-32 right-8 md:bottom-40 md:right-16 animate-float" style="animation-delay: 2.5s; z-index: 10;">
+      <span class="text-yellow-300 text-lg md:text-xl opacity-50" style="text-shadow: 0 2px 4px rgba(0,0,0,0.1);">🌟</span>
+    </div>
+  </section>
+
+  <main class="max-w-7xl mx-auto px-4">
+    <!-- breadcrumb -->
+    <nav id="breadcrumb" class="breadcrumb-kawaii mb-6 mt-6 hidden">
+      <!-- dynamic contnte is showed here -->
+    </nav>
+
+    <!-- search results -->
+    <section id="search-results" class="mb-12 hidden">
+      <div class="flex items-center gap-4 mb-6">
+        <button id="clear-search" class="nav-button">
+          <div class="nav-button-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="20px" width="20px" fill="white">
+              <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"></path>
+              <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"></path>
+            </svg>
+          </div>
+          <span>Volver</span>
+        </button>
+      </div>
+      
+      <!-- pink header como kawaiishop -->
+      <div class="category-header -mx-4 mb-8">
+        <div class="max-w-7xl mx-auto px-4">
+          <h1>Resultados de búsqueda</h1>
+        </div>
+      </div>
+      
+      <div id="search-products" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+      <p id="no-results" class="text-center text-gray-500 mt-8 text-lg hidden">No se encontraron productos.</p>
+    </section>
+
+    <!-- categorias - colleciones page -->
+    <section id="category-page" class="mb-12 hidden">
+      <!-- pink header como kawaiishop -->
+      <div class="category-header -mx-4 mb-8">
+        <div class="max-w-7xl mx-auto px-4">
+          <h1 id="category-title"></h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 mb-6">
+        <button onclick="navigateToHome()" class="nav-button">
+          <div class="nav-button-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="20px" width="20px" fill="white">
+              <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"></path>
+              <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"></path>
+            </svg>
+          </div>
+          <span>Inicio</span>
+        </button>
+      </div>
+
+      <div class="filter-sort-bar">
+        <span id="product-count" class="product-count"></span>
+        <select id="sort-select" class="sort-select">
+          <option value="">Ordenar por...</option>
+          <option value="name-asc">Nombre A-Z</option>
+          <option value="name-desc">Nombre Z-A</option>
+          <option value="price-asc">Precio menor a mayor</option>
+          <option value="price-desc">Precio mayor a menor</option>
+        </select>
+      </div>
+
+      <div id="category-products-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+    </section>
+
+    <!-- producto dteail page-->
+    <section id="product-page" class="mb-12 hidden">
+      <div class="flex items-center gap-4 mb-6">
+        <button onclick="history.back()" class="nav-button">
+          <div class="nav-button-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="20px" width="20px" fill="white">
+              <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"></path>
+              <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"></path>
+            </svg>
+          </div>
+          <span>Atrás</span>
+        </button>
+      </div>
+      <div id="product-detail">
+        <div class="product-detail-frame">
+          <div class="product-image-section">
+            <!-- dynamic product images -->
+          </div>
+          <div class="product-info-section">
+            <!-- dynamic product details -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- home Page -->
+    <div id="main-content">
+
+      <!-- Categories Section -->
+      <section id="categorias" class="py-16 bg-white mb-12 fade-in">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4 font-kawaii">COMPRAR POR CATEGORÍA</h2>
+            <p class="text-gray-600 text-lg">Encuentra tu estilo perfecto</p>
+          </div>
+          
+          <div class="relative">
+            <!-- Categories Grid -->
+            <div id="categories-container" class="overflow-hidden">
+              <div id="category-buttons" class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8 transition-transform duration-500 ease-in-out">
+                <!-- Categories will be dynamically inserted here -->
+              </div>
+            </div>
+            
+            <!-- Navigation Arrows -->
+            <button id="categories-prev" class="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 bg-kawaii-pink hover:bg-kawaii-pink/90 text-white rounded-full p-3 shadow-lg transition-colors">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m15 18-6-6 6-6"/>
+              </svg>
+            </button>
+            <button id="categories-next" class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 bg-kawaii-pink hover:bg-kawaii-pink/90 text-white rounded-full p-3 shadow-lg transition-colors">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </button>
+          </div>
+          
+          <div id="category-products" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+        </div>
+      </section>
+
+      <!-- Collections Section -->
+      <section id="colecciones" class="py-16 bg-white mb-12 fade-in">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4 font-kawaii">COMPRAR POR COLECCIÓN</h2>
+            <p class="text-gray-600 text-lg">¡Explora nuestras colecciones temáticas!</p>
+          </div>
+          
+          <div class="relative">
+            <!-- Collections Grid -->
+            <div id="collections-container" class="overflow-hidden">
+              <div id="collections-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8 transition-transform duration-500 ease-in-out">
+                <!-- Collections will be dynamically inserted here -->
+              </div>
+            </div>
+            
+            <!-- Navigation Arrows -->
+            <button id="collections-prev" class="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 bg-kawaii-pink hover:bg-kawaii-pink/90 text-white rounded-full p-3 shadow-lg transition-colors">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m15 18-6-6 6-6"/>
+              </svg>
+            </button>
+            <button id="collections-next" class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 bg-kawaii-pink hover:bg-kawaii-pink/90 text-white rounded-full p-3 shadow-lg transition-colors">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m9 18 6-6-6-6"/>
+              </svg>
+            </button>
+          </div>
+          
+          <div id="collection-products" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+        </div>
+      </section>
+
+    </div>
+    <section id="checkout-page" class="mb-12 hidden">
+      <div class="max-w-2xl mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold mb-6 text-center">Resumen de tu pedido</h2>
+        <div id="checkoutSummary"></div>
+        
+        <!-- delivery - pickup Options -->
+        <h3 class="text-xl font-semibold mt-8 mb-4">Método de entrega</h3>
+        <div id="deliveryOptions" class="mb-8">
+          <div class="delivery-option">
+            <input type="radio" id="pickup-store" name="deliveryMethod" value="store" checked>
+            <label for="pickup-store" class="delivery-option-label">
+              <div class="delivery-option-icon">🏪</div>
+              <div class="delivery-option-content">
+                <div class="delivery-option-title">Retirar en tienda</div>
+                <div class="delivery-option-description">Recoge tu pedido en nuestra tienda física</div>
+              </div>
+            </label>
+          </div>
+          <div class="delivery-option">
+            <input type="radio" id="delivery-home" name="deliveryMethod" value="delivery">
+            <label for="delivery-home" class="delivery-option-label">
+              <div class="delivery-option-icon">🚚</div>
+              <div class="delivery-option-content">
+                <div class="delivery-option-title">Entrega a domicilio</div>
+                <div class="delivery-option-description">Te llevamos tu pedido hasta tu casa</div>
+              </div>
+            </label>
+          </div>
+          <div class="delivery-option">
+            <input type="radio" id="delivery-national" name="deliveryMethod" value="delivery">
+            <label for="delivery-national" class="delivery-option-label">
+              <div class="delivery-option-icon">📦</div>
+              <div class="delivery-option-content">
+                <div class="delivery-option-title">Envío Nacionales</div>
+                <div class="delivery-option-description">Envío a cualquier parte del país</div>
+              </div>
+            </label>
+          </div>
+        </div>
+        
+        <!-- delivery information form -->
+        <div id="deliveryInfoForm" class="mb-8 hidden">
+          <h4 class="text-lg font-semibold mb-4">Información de entrega</h4>
+          
+          <!-- Common fields for both delivery types -->
+          <div class="delivery-form-grid mb-6">
+            <div class="form-group">
+              <label for="customerName" class="form-label">Nombre completo *</label>
+              <input type="text" id="customerName" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="customerPhone" class="form-label">Teléfono *</label>
+              <input type="tel" id="customerPhone" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="customerCedula" class="form-label">Cédula *</label>
+              <input type="text" id="customerCedula" class="form-input" required placeholder="Solo números" pattern="[0-9]*" inputmode="numeric">
+            </div>
+            <div class="form-group">
+              <label for="customerEmail" class="form-label">Email</label>
+              <input type="email" id="customerEmail" class="form-input">
+            </div>
+          </div>
+
+          <!-- Home delivery specific fields -->
+          <div id="homeDeliveryFields" class="delivery-section">
+            <h5 class="text-md font-medium mb-3 text-blue-600">📦 Entrega a Domicilio</h5>
+            <div class="delivery-form-grid">
+              <div class="form-group full-width">
+                <label for="customerAddress" class="form-label">Dirección completa *</label>
+                <textarea id="customerAddress" class="form-textarea" rows="3" placeholder="Calle, número, sector, ciudad, estado"></textarea>
+              </div>
+              <div class="form-group full-width">
+                <label for="deliveryInstructions" class="form-label">Instrucciones de entrega</label>
+                <textarea id="deliveryInstructions" class="form-textarea" rows="3" placeholder="Cómo llegar, puntos de referencia, instrucciones especiales..."></textarea>
+              </div>
+              <div class="form-group full-width">
+                <label for="emailText" class="form-label">Texto adicional (opcional)</label>
+                <textarea id="emailText" class="form-textarea" rows="2" placeholder="Información adicional que deseas agregar..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- National shipping specific fields -->
+          <div id="nationalShippingFields" class="delivery-section hidden">
+            <h5 class="text-md font-medium mb-3 text-green-600">🚚 Envíos Nacionales</h5>
+            <div class="delivery-form-grid">
+              <div class="form-group">
+                <label for="courierSelect" class="form-label">Empresa de envío *</label>
+                <select id="courierSelect" class="form-input" required>
+                  <option value="">Selecciona una empresa</option>
+                  <option value="mrw">MRW</option>
+                  <option value="zoom">Zoom</option>
+                  <option value="tealca">Tealca</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="stateSelect" class="form-label">Estado *</label>
+                <select id="stateSelect" class="form-input" required disabled>
+                  <option value="">Primero selecciona una empresa</option>
+                </select>
+              </div>
+              <div class="form-group full-width">
+                <label for="officeSelect" class="form-label">Oficina *</label>
+                <select id="officeSelect" class="form-input" required disabled>
+                  <option value="">Primero selecciona un estado</option>
+                </select>
+              </div>
+              <div class="form-group full-width">
+                <label for="emailText" class="form-label">Texto adicional (opcional)</label>
+                <textarea id="emailTextNational" class="form-textarea" rows="2" placeholder="Información adicional que deseas agregar..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <h3 class="text-xl font-semibold mt-8 mb-4">Método de pago</h3>
+        <div id="paymentMethods" class="mb-8"></div>
+        <button id="checkoutBtn" class="cart-modal-checkout w-full">Continuar con la compra</button>
+      </div>
+    </section>
+
+    <!-- payment Page -->
+    <section id="payment-page" class="mb-12 hidden">
+      <div class="max-w-2xl mx-auto px-4 py-8">
+        <div class="mb-6">
+          <button onclick="navigateToHome()" class="nav-button mb-4">
+            <div class="nav-button-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="20px" width="20px" fill="white">
+                <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"></path>
+                <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"></path>
+              </svg>
+            </div>
+            <span>Volver</span>
+          </button>
+        </div>
+        
+        <h2 class="text-2xl font-bold mb-6 text-center">Procesar Pago</h2>
+        
+        <!-- cargar order id -->
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Número de Orden</label>
+          <input type="text" id="orderIdInput" placeholder="" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+        </div>
+        
+        <div id="paymentContent"></div>
+      </div>
+    </section>
+
+    <!-- apartado Page -->
+    <section id="apartado-page" class="mb-12 hidden">
+      <div class="max-w-2xl mx-auto px-4 py-8">
+        <div class="mb-6">
+          <button onclick="navigateToHome()" class="nav-button mb-4">
+            <div class="nav-button-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="20px" width="20px" fill="white">
+                <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"></path>
+                <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"></path>
+              </svg>
+            </div>
+            <span>Volver</span>
+          </button>
+        </div>
+        
+        <h2 class="text-2xl font-bold mb-6 text-center">Información de Apartado</h2>
+        
+        <!-- cargar orden-->
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Número de Orden (editable)</label>
+          <input type="text" id="apartadoOrderIdInput" placeholder="Ingresa tu número de orden" 
+                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+          <button onclick="loadApartadoOrderById()" class="mt-2 px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition">
+            Cargar Orden
+          </button>
+        </div>
+        
+        <div id="apartadoContent"></div>
+      </div>
+    </section>
+
+    <!-- Payment Success Page -->
+    <section id="payment-success-page" class="mb-12 hidden">
+      <div class="max-w-2xl mx-auto px-4 py-8">
+        <div class="mb-6">
+          <button onclick="navigateToHome()" class="nav-button mb-4">
+            <div class="nav-button-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="20px" width="20px" fill="white">
+                <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"></path>
+                <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"></path>
+              </svg>
+            </div>
+            <span>Volver</span>
+          </button>
+        </div>
+        
+        <h2 class="text-2xl font-bold mb-6 text-center">¡Pago Exitoso!</h2>
+        <div id="paymentSuccessContent"></div>
+      </div>
+    </section>
+
+    <!-- Payment Pending Page -->
+    <section id="payment-pending-page" class="mb-12 hidden">
+      <div class="max-w-2xl mx-auto px-4 py-8">
+        <div class="mb-6">
+          <button onclick="navigateToHome()" class="nav-button mb-4">
+            <div class="nav-button-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="20px" width="20px" fill="white">
+                <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"></path>
+                <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"></path>
+              </svg>
+            </div>
+            <span>Volver</span>
+          </button>
+        </div>
+        
+        <h2 class="text-2xl font-bold mb-6 text-center">Orden Pendiente</h2>
+        <div id="paymentPendingContent"></div>
+      </div>
+    </section>
+
+    <!-- Order Details Page -->
+    <section id="order-details-page" class="mb-12 hidden">
+      <div class="max-w-2xl mx-auto px-4 py-8">
+        <div class="mb-6">
+          <button onclick="showOrderHistoryModal()" class="nav-button mb-4">
+            <div class="nav-button-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="20px" width="20px" fill="white">
+                <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"></path>
+                <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"></path>
+              </svg>
+            </div>
+            <span>Volver</span>
+          </button>
+        </div>
+        
+        <h2 class="text-2xl font-bold mb-6 text-center">Detalles de la Orden</h2>
+        
+        <div id="orderDetailsContent"></div>
+      </div>
+    </section>
+    <!-- Nuevos Productos Page -->
+    <section id="new-products-page" class="mb-12 hidden">
+      <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="mb-6">
+          <button onclick="navigateToHome()" class="nav-button mb-4">
+            <div class="nav-button-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" height="20px" width="20px" fill="white">
+                <path d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"></path>
+                <path d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"></path>
+              </svg>
+            </div>
+            <span>Volver</span>
+          </button>
+        </div>
+        
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold text-gray-900 mb-4 font-kawaii">NUEVOS PRODUCTOS</h2>
+          <p class="text-gray-600 text-lg">¡Descubre nuestros últimos productos!</p>
+        </div>
+        
+        <div id="new-products-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+      </div>
+    </section>
+    </main>
+
+  <footer class="footer-kawaii text-center p-6 text-sm">
+    <p class="mb-2">Indigo Store - Todos los derechos reservados</p>
+  </footer>
+  <!-- scroll to top -->
+  <button id="scrollToTopBtn" style="display:none;position:fixed;bottom:32px;right:24px;z-index:1001;background:#ff6b9d;color:white;border:none;border-radius:50%;width:48px;height:48px;box-shadow:0 4px 15px rgba(255,107,157,0.3);font-size:2rem;align-items:center;justify-content:center;transition:opacity 0.3s;">
+    ↑
+  </button>
+  <!-- cart Modal -->
+  <div id="cartModal" class="cart-modal-overlay" style="display:none;">
+    <div class="cart-modal">
+      <button class="cart-modal-close" onclick="closeCartModal()">&times;</button>
+      <h2 class="cart-modal-title">Tu carrito</h2>
+      <div id="cartItemsContainer"></div>
+      <div id="cartSummaryContainer"></div>
+    </div>
+  </div>
+  
+  <!-- Logger utility - must load first to intercept console -->
+  <script src="assets/logger.js"></script>
+  <script src="assets/supabase-config.js"></script>
+  <script src="assets/supabase-save.js"></script>
+  <script src="assets/load-assets.js"></script>
+  <script src="assets/main.js"></script>
+  <script src="assets/mob.js"></script>
+  <script src="assets/checkout.js"></script>
+  <script src="assets/mercantil-modals.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('cartIconBtn')) {
+      document.getElementById('cartIconBtn').onclick = openCartModal;
+    }
+    if (document.getElementById('cartIconBtnMobile')) {
+      document.getElementById('cartIconBtnMobile').onclick = openCartModal;
+    }
+
+    const cartModalOverlay = document.getElementById('cartModal');
+    if (cartModalOverlay) {
+      cartModalOverlay.addEventListener('click', function(e) {
+        if (e.target === cartModalOverlay) {
+          closeCartModal();
+        }
+      });
+    }
+  });
+  </script>
+  <script>
+  const scrollBtn = document.getElementById('scrollToTopBtn');
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 200) {
+      scrollBtn.style.display = 'flex';
+    } else {
+      scrollBtn.style.display = 'none';
+    }
+  });
+  scrollBtn.onclick = function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+  const mobileMenuDrawer = document.getElementById('mobileMenuDrawer');
+  function openMobileMenu() {
+    if (mobileMenuOverlay) mobileMenuOverlay.style.display = 'block';
+    if (mobileMenuDrawer) mobileMenuDrawer.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMobileMenu() {
+    mobileMenuOverlay.style.display = 'none';
+    mobileMenuDrawer.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  if (hamburgerBtn) {
+    hamburgerBtn.onclick = openMobileMenu;
+    // Also try addEventListener as backup
+    hamburgerBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      openMobileMenu();
+    });
+  } else {
+  }
+  if (mobileMenuOverlay) {
+    mobileMenuOverlay.onclick = closeMobileMenu;
+  }
+  function updateMenuDisplay() {
+    const navMenu = document.querySelector('.nav-menu');
+    const searchIconBtn = document.getElementById('searchIconBtn');
+    const desktopSearchBar = document.getElementById('desktopSearchBar');
+    const cartIconBtnMobile = document.getElementById('cartIconBtnMobile');
+    const orderHistoryBtnMobile = document.getElementById('orderHistoryBtnMobile');
+    const desktopCartWrapper = document.getElementById('desktopCartWrapper');
+    
+    if (window.innerWidth < 768) {
+      // Mobile layout
+      if (navMenu) navMenu.style.display = 'none';
+      if (hamburgerBtn) {
+        hamburgerBtn.classList.remove('hidden');
+        hamburgerBtn.classList.add('block');
+      }
+      if (searchIconBtn) searchIconBtn.style.display = 'block';
+      if (desktopSearchBar) desktopSearchBar.style.display = 'none';
+      if (cartIconBtnMobile) cartIconBtnMobile.style.display = 'block';
+      if (orderHistoryBtnMobile) orderHistoryBtnMobile.style.display = 'block';
+      if (desktopCartWrapper) desktopCartWrapper.style.display = 'none';
+    } else {
+      // Desktop layout
+      if (navMenu) navMenu.style.display = '';
+      if (hamburgerBtn) {
+        hamburgerBtn.classList.remove('block');
+        hamburgerBtn.classList.add('hidden');
+      }
+      if (searchIconBtn) searchIconBtn.style.display = 'none';
+      if (desktopSearchBar) desktopSearchBar.style.display = '';
+      if (cartIconBtnMobile) cartIconBtnMobile.style.display = 'none';
+      if (orderHistoryBtnMobile) orderHistoryBtnMobile.style.display = 'none';
+      if (desktopCartWrapper) desktopCartWrapper.style.display = 'flex';
+      closeMobileMenu();
+    }
+  }
+  window.addEventListener('resize', updateMenuDisplay);
+  document.addEventListener('DOMContentLoaded', updateMenuDisplay);
+  const searchIconBtn = document.getElementById('searchIconBtn');
+  const desktopSearchBar = document.getElementById('desktopSearchBar');
+  const mobileSearchBar = document.getElementById('mobileSearchBar');
+  const mobileSearchInput = document.getElementById('search-mobile');
+  searchIconBtn.onclick = function(e) {
+    if (window.innerWidth < 768) {
+      if (mobileSearchBar.style.display === 'block') {
+        mobileSearchBar.style.display = 'none';
+        // Show main content when closing mobile search
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) mainContent.classList.remove('hidden');
+      } else {
+        mobileSearchBar.style.display = 'block';
+        // Hide main content when opening mobile search
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) mainContent.classList.add('hidden');
+        setTimeout(() => mobileSearchInput && mobileSearchInput.focus(), 100);
+      }
+      desktopSearchBar.style.display = 'none';
+      e.stopPropagation();
+    } else {
+      desktopSearchBar.style.display = (desktopSearchBar.style.display === 'block') ? 'none' : 'block';
+      if (desktopSearchBar.style.display === 'block') {
+        setTimeout(() => document.getElementById('search').focus(), 100);
+      }
+      e.stopPropagation();
+    }
+  };
+  function setupMobileSearchCloseHandler() {
+    document.addEventListener('click', function(e) {
+      if (window.innerWidth < 768 && mobileSearchBar.style.display === 'block') {
+        if (!mobileSearchBar.contains(e.target) && e.target !== searchIconBtn) {
+          mobileSearchBar.style.display = 'none';
+          // Show main content when closing mobile search
+          const mainContent = document.getElementById('main-content');
+          if (mainContent) mainContent.classList.remove('hidden');
+        }
+      }
+    });
+  }
+
+  function hideMobileSearchResults() {
+    const mobileSearchBar = document.getElementById('mobileSearchBar');
+    const mobileSearchResults = document.getElementById('mobile-search-results');
+    const mainContent = document.getElementById('main-content');
+    if (mobileSearchBar) {
+      mobileSearchBar.style.display = 'none';
+    }
+    if (mobileSearchResults) {
+      mobileSearchResults.innerHTML = '';
+    }
+    if (mainContent) {
+      mainContent.classList.remove('hidden');
+    }
+  }
+
+  window.hideMobileSearchResults = hideMobileSearchResults;
+
+  document.addEventListener('DOMContentLoaded', setupMobileSearchCloseHandler);
+  function toggleMobileSubmenu(id) {
+    const submenu = document.getElementById(id);
+    if (submenu) submenu.classList.toggle('active');
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    const copyDropdown = (desktopId, mobileId) => {
+      const desktop = document.getElementById(desktopId);
+      const mobile = document.getElementById(mobileId);
+      if (desktop && mobile) mobile.innerHTML = desktop.innerHTML;
+    };
+    copyDropdown('cat-dropdown', 'categorias-submenu-mobile');
+    copyDropdown('col-dropdown', 'colecciones-submenu-mobile');
+    copyDropdown('promo-dropdown', 'promociones-submenu-mobile');
+    copyDropdown('promo-dropdown', 'promociones-submenu-mobile');
+  });
+  let lastScrollY = window.scrollY;
+  let ticking = false;
+  const header = document.getElementById('main-header');
+  function updateHeaderOnScroll() {
+    if (window.innerWidth < 768) {
+      if (window.scrollY > lastScrollY && window.scrollY > 80) {
+        header.classList.add('mobile-hidden');
+      } else {
+        header.classList.remove('mobile-hidden');
+      }
+    } else {
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    }
+    lastScrollY = window.scrollY;
+    ticking = false;
+  }
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(updateHeaderOnScroll);
+      ticking = true;
+    }
+  });
+  window.addEventListener('resize', updateHeaderOnScroll);
+  function syncMobileMenus() {
+    const copyDropdown = (desktopId, mobileId) => {
+      const desktop = document.getElementById(desktopId);
+      const mobile = document.getElementById(mobileId);
+      if (desktop && mobile) mobile.innerHTML = desktop.innerHTML;
+    };
+    copyDropdown('cat-dropdown', 'categorias-submenu-mobile');
+    copyDropdown('col-dropdown', 'colecciones-submenu-mobile');
+    copyDropdown('promo-dropdown', 'promociones-submenu-mobile');
+
+    const catLinks = document.querySelectorAll('#categorias-submenu-mobile a');
+    catLinks.forEach(link => {
+      link.onclick = function(e) {
+        e.preventDefault();
+        const name = link.textContent.trim();
+        if (window.navigateToCategory) window.navigateToCategory(name);
+        if (window.closeMobileMenu) window.closeMobileMenu();
+      };
+    });
+    
+    const colLinks = document.querySelectorAll('#colecciones-submenu-mobile a');
+    colLinks.forEach(link => {
+      link.onclick = function(e) {
+        e.preventDefault();
+        const name = link.textContent.trim();
+        if (window.navigateToCollection) window.navigateToCollection(name);
+        if (window.closeMobileMenu) window.closeMobileMenu();
+      };
+    });
+    
+    const promoLinks = document.querySelectorAll('#promociones-submenu-mobile a');
+    promoLinks.forEach(link => {
+      link.onclick = function(e) {
+        e.preventDefault();
+        const name = link.textContent.trim();
+        if (name === 'Ofertas Especiales') {
+          if (window.navigateToOfertasEspeciales) window.navigateToOfertasEspeciales();
+        }
+        if (window.closeMobileMenu) window.closeMobileMenu();
+      };
+    });
+    
+  }
+  window.syncMobileMenus = syncMobileMenus;
+  document.addEventListener('DOMContentLoaded', syncMobileMenus);
+  function hideLoadingOverlay() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+      overlay.style.opacity = '0';
+      setTimeout(() => overlay.style.display = 'none', 400);
+    }
+  }
+
+  // iheck if cached data exist
+  function initSmartLoading() {
+    const CACHE_KEY = 'indigo_products_cache';
+    const CACHE_VERSION_KEY = 'indigo_cache_version';
+    const CACHE_TIMESTAMP_KEY = 'indigo_cache_timestamp';
+    const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+    const CURRENT_CACHE_VERSION = '2.7.1';
+    
+    const cachedVersion = localStorage.getItem(CACHE_VERSION_KEY);
+    const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    
+    // if valid cached data, hide loading immediately
+    if (cachedData && cachedTimestamp && cachedVersion) {
+      const now = Date.now();
+      const cacheAge = now - parseInt(cachedTimestamp);
+      
+      if (cachedVersion === CURRENT_CACHE_VERSION && cacheAge < CACHE_DURATION) {
+        hideLoadingOverlay();
+        return;
+      }
+    }
+    
+  }
+  
+  // initialize smart loading
+  initSmartLoading();
+
+  // fallback to hide loading overlay after 10 seconds if it doesn't hide automatically
+  setTimeout(() => {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay && overlay.style.display !== 'none') {
+      hideLoadingOverlay();
+    }
+  }, 10000);
+
+  if (window.innerWidth < 768) {
+    document.addEventListener('click', function(e) {
+      const drawer = document.getElementById('mobileMenuDrawer');
+      const overlay = document.getElementById('mobileMenuOverlay');
+      if (drawer && overlay && drawer.style.display === 'block' && overlay.style.display === 'block') {
+        if (!drawer.contains(e.target) && e.target !== document.getElementById('hamburgerBtn')) {
+          closeMobileMenu();
+        }
+      }
+    });
+  }
+
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('#mobile-search-results .product-card-kawaii') || 
+        e.target.closest('#mobile-search-results a')) {
+      hideMobileSearchResults();
+    }
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+User-agent: *
+Allow: /
+
+
+Disallow: /*_script.js
+Disallow: /assets/*_script.js
+
+
+https://www.indigostores.com/sitemap.xml
+
+User-agent: Googlebot
+Allow: /
+Disallow: /*_script.js
+Disallow: /assets/*_script.js
+
+User-agent: Bingbot
+Allow: /
+Disallow: /*_script.js
+Disallow: /assets/*_script.js
+
+User-agent: Slurp
+Allow: /
+Disallow: /*_script.js
+Disallow: /assets/*_script.js
+
+# Disallow: /admin/
+# Disallow: /private/
+
+Allow: /assets/
+Allow: /images/
+Allow: /css/
+Allow: /js/
+
+Crawl-delay: 1 

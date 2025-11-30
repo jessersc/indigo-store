@@ -1,0 +1,7 @@
+admin-dashboard/node_modules
+admin-dashboard/dist
+node_modules
+.env
+.env.local
+*.log
+

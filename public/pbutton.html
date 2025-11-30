@@ -1,0 +1,76 @@
+<div id="paypal-button-container"></div>
+<div id="paypal-error" style="display:none; padding: 20px; background: #fee; color: #c33; border-radius: 8px; margin: 20px 0;"></div>
+
+<!-- PayPal SDK should be loaded from server config -->
+<script>
+// Load PayPal client ID from server config
+fetch('/api/config/paypal')
+  .then(res => {
+    if (!res.ok) throw new Error(`Config endpoint returned ${res.status}`);
+    return res.json();
+  })
+  .then(config => {
+    if (!config.clientId) {
+      throw new Error('PayPal client ID not configured');
+    }
+    const script = document.createElement('script');
+    script.src = `https://www.paypal.com/sdk/js?client-id=${config.clientId}&currency=USD`;
+    script.onload = initPayPalButton;
+    script.onerror = () => {
+      showError('Failed to load PayPal SDK');
+    };
+    document.head.appendChild(script);
+  })
+  .catch(err => {
+    console.error('Failed to load PayPal config:', err);
+    showError('PayPal is not configured. Please contact the administrator.');
+  });
+
+function showError(message) {
+  const errorDiv = document.getElementById('paypal-error');
+  errorDiv.textContent = message;
+  errorDiv.style.display = 'block';
+  document.getElementById('paypal-button-container').style.display = 'none';
+}
+
+function initPayPalButton() {
+  paypal.Buttons({
+  createOrder: function(data, actions) {
+    return fetch('/api/paypal/paypal_create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: '10.00' }) // replace with total
+    }).then(res => res.json()).then(order => order.id);
+  },
+
+  onApprove: function(data, actions) {
+    return fetch('/api/paypal/paypal_capture', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderID: data.orderID })
+    }).then(res => res.json()).then(details => {
+      alert(`Pago completado por: ${details.payer.name.given_name}`);
+      // Use new tracker system for payment completion
+      const paymentData = {
+        action: 'savePaymentCompletion',
+        orderNumber: details.id, // PayPal order ID
+        paypalOrderId: details.id,
+        transactionId: details.purchase_units[0].payments?.captures?.[0]?.id || '',
+        totalUSD: details.purchase_units[0].amount.value,
+        totalBS: 0, // Not available in standalone pbutton
+        customerName: details.payer.name.given_name + ' ' + details.payer.name.surname,
+        customerEmail: details.payer.email_address,
+        customerPhone: details.payer.phone?.phone_number?.national_number || '',
+        products: 'Standalone PayPal Payment',
+        quantities: '1',
+        deliveryMethod: '',
+        customerAddress: '',
+        rawPayPalData: details
+      };
+      // Payment tracking removed - use server-side tracking instead
+      console.log('Payment completed:', paymentData);
+    });
+  }
+  }).render('#paypal-button-container');
+}
+</script>

@@ -1,0 +1,28 @@
+{
+  "name": "indigo2.5",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.mjs",
+    "dev:store": "nodemon server.mjs",
+    "dev:admin": "cd admin-dashboard && npm run dev",
+    "dev:all": "concurrently \"npm run dev:store\" \"npm run dev:admin\" --names \"STORE,ADMIN\" --prefix-colors \"blue,green\"",
+    "install:all": "npm install && cd admin-dashboard && npm install"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.10",
+    "tailwindcss": "^4.1.13"
+  }
+}
