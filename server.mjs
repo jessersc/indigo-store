@@ -15,18 +15,63 @@ dotenv.config();
 
 const app = express();
 
+// Handle OPTIONS requests FIRST for all API routes (critical for CORS preflight)
+// This MUST run before other middleware to catch preflight requests
+// Works for both localhost (development) and production (deployed domain)
+app.use('/api', (req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    const origin = req.headers.origin;
+    console.log('OPTIONS preflight request:', { 
+      path: req.path, 
+      origin: origin,
+      headers: req.headers 
+    });
+    
+    // Echo back the origin to allow cross-origin requests
+    // This works for: localhost:5173 -> production, admin.indigostores.com -> www.indigostores.com, etc.
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      console.log('CORS: Allowing origin:', origin);
+    } else {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      console.log('CORS: No origin header, using wildcard');
+    }
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hours
+    console.log('CORS: Preflight response sent');
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 // CORS configuration for admin dashboard
 app.use((req, res, next) => {
   const allowedOrigins = [
     process.env.ADMIN_DASHBOARD_URL,
     'http://localhost:5173',
     'http://localhost:3000',
+    'https://admin.indigostores.com',
     process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
     process.env.FRONTEND_URL
   ].filter(Boolean);
   
   const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin) || !origin) {
+  
+  // For API endpoints, always set CORS headers to allow cross-origin requests
+  // This is critical for webhook calls from admin dashboard (localhost or production)
+  if (req.path.startsWith('/api/')) {
+    // Always allow API requests - echo back the origin if provided, otherwise use wildcard
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    } else {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+    }
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hours
+  } else if (allowedOrigins.includes(origin) || !origin) {
+    // For non-API endpoints, respect allowed origins list
     res.setHeader('Access-Control-Allow-Origin', origin || '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -159,9 +204,24 @@ app.get('/api/cache-version', (req, res) => {
 app.post('/api/webhook/cache-refresh', async (req, res) => {
   try {
     // Set CORS headers explicitly for webhook endpoint
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Echo back the origin to allow cross-origin requests (works for localhost and production)
+    const origin = req.headers.origin;
+    console.log('Webhook POST request:', { 
+      origin: origin,
+      path: req.path,
+      method: req.method,
+      headers: req.headers 
+    });
+    
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      console.log('CORS: Allowing origin for POST:', origin);
+    } else {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      console.log('CORS: No origin header for POST, using wildcard');
+    }
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
     const { action, timestamp, source } = body;

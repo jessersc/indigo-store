@@ -336,37 +336,40 @@ async function loadAssetsFromSupabase() {
       window.shippingChargesMessage = 'Posibles cargos de envio: $4.00 - $8.00';
     }
     
-    // Update shipping messages in the DOM if they exist
-    try {
-      const shippingPriceElement = document.getElementById('shipping-price-message');
-      if (shippingPriceElement) {
-        if (window.shippingPriceMessage) {
-          shippingPriceElement.textContent = window.shippingPriceMessage;
-          shippingPriceElement.classList.remove('assets-loading');
-          shippingPriceElement.classList.add('assets-loaded');
-          console.log('Shipping price message updated in DOM');
-        } else {
-          // Hide if inactive
-          shippingPriceElement.style.display = 'none';
-          shippingPriceElement.classList.remove('assets-loading');
+    // Update shipping messages using the public function
+    if (typeof window.updateShippingMessages === 'function') {
+      window.updateShippingMessages();
+    } else {
+      // Fallback if function not available yet
+      try {
+        const shippingPriceElement = document.getElementById('shipping-price-message');
+        if (shippingPriceElement) {
+          if (window.shippingPriceMessage) {
+            shippingPriceElement.textContent = window.shippingPriceMessage;
+            shippingPriceElement.classList.remove('assets-loading');
+            shippingPriceElement.classList.add('assets-loaded');
+            console.log('Shipping price message updated in DOM');
+          } else {
+            shippingPriceElement.style.display = 'none';
+            shippingPriceElement.classList.remove('assets-loading');
+          }
         }
-      }
-      
-      const shippingChargesElement = document.getElementById('shipping-charges-message');
-      if (shippingChargesElement) {
-        if (window.shippingChargesMessage) {
-          shippingChargesElement.textContent = window.shippingChargesMessage;
-          shippingChargesElement.classList.remove('assets-loading');
-          shippingChargesElement.classList.add('assets-loaded');
-          console.log('Shipping charges message updated in DOM');
-        } else {
-          // Hide if inactive
-          shippingChargesElement.style.display = 'none';
-          shippingChargesElement.classList.remove('assets-loading');
+        
+        const shippingChargesElement = document.getElementById('shipping-charges-message');
+        if (shippingChargesElement) {
+          if (window.shippingChargesMessage) {
+            shippingChargesElement.textContent = window.shippingChargesMessage;
+            shippingChargesElement.classList.remove('assets-loading');
+            shippingChargesElement.classList.add('assets-loaded');
+            console.log('Shipping charges message updated in DOM');
+          } else {
+            shippingChargesElement.style.display = 'none';
+            shippingChargesElement.classList.remove('assets-loading');
+          }
         }
+      } catch (error) {
+        console.warn('Error updating shipping messages in DOM:', error);
       }
-    } catch (error) {
-      console.warn('Error updating shipping messages in DOM:', error);
     }
     
     // Show all assets after processing (either from Supabase or defaults)
@@ -378,28 +381,8 @@ async function loadAssetsFromSupabase() {
       });
       
       // Update shipping messages again after DOM is fully ready
-      const shippingPriceElement = document.getElementById('shipping-price-message');
-      if (shippingPriceElement) {
-        if (window.shippingPriceMessage) {
-          shippingPriceElement.textContent = window.shippingPriceMessage;
-          shippingPriceElement.classList.remove('assets-loading');
-          shippingPriceElement.classList.add('assets-loaded');
-        } else {
-          shippingPriceElement.style.display = 'none';
-          shippingPriceElement.classList.remove('assets-loading');
-        }
-      }
-      
-      const shippingChargesElement = document.getElementById('shipping-charges-message');
-      if (shippingChargesElement) {
-        if (window.shippingChargesMessage) {
-          shippingChargesElement.textContent = window.shippingChargesMessage;
-          shippingChargesElement.classList.remove('assets-loading');
-          shippingChargesElement.classList.add('assets-loaded');
-        } else {
-          shippingChargesElement.style.display = 'none';
-          shippingChargesElement.classList.remove('assets-loading');
-        }
+      if (typeof window.updateShippingMessages === 'function') {
+        window.updateShippingMessages();
       }
     }, 200);
     
@@ -439,6 +422,42 @@ async function waitForSupabaseClient(retries = 10) {
   console.log('Supabase client ready, loading assets...');
   await loadAssetsFromSupabase();
 }
+
+// Public function to update shipping messages - can be called after dynamic content is created
+function updateShippingMessages() {
+  try {
+    const shippingPriceElement = document.getElementById('shipping-price-message');
+    if (shippingPriceElement) {
+      if (window.shippingPriceMessage) {
+        shippingPriceElement.textContent = window.shippingPriceMessage;
+        shippingPriceElement.classList.remove('assets-loading');
+        shippingPriceElement.classList.add('assets-loaded');
+      } else {
+        shippingPriceElement.textContent = 'Precio de envio varia segun localidad';
+        shippingPriceElement.classList.remove('assets-loading');
+        shippingPriceElement.classList.add('assets-loaded');
+      }
+    }
+    
+    const shippingChargesElement = document.getElementById('shipping-charges-message');
+    if (shippingChargesElement) {
+      if (window.shippingChargesMessage) {
+        shippingChargesElement.textContent = window.shippingChargesMessage;
+        shippingChargesElement.classList.remove('assets-loading');
+        shippingChargesElement.classList.add('assets-loaded');
+      } else {
+        shippingChargesElement.textContent = 'Posibles cargos de envio: $4.00 - $8.00';
+        shippingChargesElement.classList.remove('assets-loading');
+        shippingChargesElement.classList.add('assets-loaded');
+      }
+    }
+  } catch (error) {
+    console.warn('Error updating shipping messages:', error);
+  }
+}
+
+// Make function globally available
+window.updateShippingMessages = updateShippingMessages;
 
 // Initialize assets
 initializeAssets();

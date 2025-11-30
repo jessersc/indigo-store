@@ -837,6 +837,11 @@ function renderCheckoutSummary() {
     </div>
     <div class="checkout-summary-charges assets-loading" id="shipping-charges-message">${window.shippingChargesMessage || 'Posibles cargos de envio: $4.00 - $8.00'}</div>
   `;
+  
+  // Update shipping messages if they've already loaded from Supabase
+  if (typeof window.updateShippingMessages === 'function') {
+    setTimeout(() => window.updateShippingMessages(), 100);
+  }
 }
 
 function setupPaymentMethods() {

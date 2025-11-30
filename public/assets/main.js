@@ -274,16 +274,16 @@ async function checkServerVersion() {
       // Check if it's a timestamp-based version (webhook trigger) or a real version change
       const isTimestampVersion = data.version.startsWith('2.7.1-');
       if (isTimestampVersion || data.version !== CURRENT_CACHE_VERSION) {
-        console.log('Version mismatch detected, refreshing cache...', {
-          serverVersion: data.version,
+      console.log('Version mismatch detected, refreshing cache...', {
+        serverVersion: data.version,
           cachedVersion: cachedVersion,
           clientVersion: CURRENT_CACHE_VERSION,
           isTimestampVersion: isTimestampVersion
-        });
-        clearCache();
+      });
+      clearCache();
         localStorage.setItem(CACHE_VERSION_KEY, data.version);
-        showDataUpdateNotification();
-        refreshCache();
+      showDataUpdateNotification();
+      refreshCache();
         return; // Exit early after triggering refresh
       }
     }
@@ -927,6 +927,11 @@ function renderProductDetail(product) {
       </div>
     </div>
   `;
+  
+  // Update shipping messages if they've already loaded from Supabase
+  if (typeof window.updateShippingMessages === 'function') {
+    window.updateShippingMessages();
+  }
   
   // Add related products section after the main content
   setTimeout(() => {
@@ -2518,10 +2523,10 @@ function setupSearch() {
         // Only update UI if results changed
         if (resultsKey !== previousKey) {
           searchLoading.classList.remove("hidden");
-          hideAllPages();
-          searchResults.classList.remove("hidden");
-          renderSearchResults(filtered, false);
-          searchLoading.classList.add("hidden");
+        hideAllPages();
+        searchResults.classList.remove("hidden");
+        renderSearchResults(filtered, false);
+        searchLoading.classList.add("hidden");
         }
       }, 300);
     });
@@ -2951,14 +2956,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // DO NOT save payment if it's not successful
             return;
           }
-          
+
           if (window.savePaymentCompletion) {
             try {
               // Ensure payment status is correct
               trackerPaymentData.status = 'completed';
               window.savePaymentCompletion(trackerPaymentData, function(response){
                 if (response && response.success) {
-                  console.log('Saved Cashea payment completion from success page.');
+              console.log('Saved Cashea payment completion from success page.');
                 } else {
                   console.error('Failed to save payment completion:', response);
                 }
@@ -3029,7 +3034,7 @@ function renderTagButtons(containerId, values, key, products, outputId, isCollec
   
   box.innerHTML = "";
   output.innerHTML = "";
- 
+
 
   values.forEach(name => {
     const trimmedName = name.trim();
@@ -3054,7 +3059,7 @@ function renderTagButtons(containerId, values, key, products, outputId, isCollec
         icon = iconMap[trimmedName];
       } else if (iconMap[name]) {
         icon = iconMap[name];
-      } else {
+        } else {
         // Try case-insensitive match with trimmed comparison
         const matchingKey = Object.keys(iconMap).find(key => {
           const keyTrimmed = key.trim();
@@ -3108,21 +3113,21 @@ function renderTagButtons(containerId, values, key, products, outputId, isCollec
     }
     
     card.innerHTML = `
-      <div class="bg-white rounded-xl p-4 text-center kawaii-shadow hover:shadow-lg transition-all">
-        <h3 class="font-medium text-sm text-gray-900">${name}</h3>
-      </div>
-    `;
+        <div class="bg-white rounded-xl p-4 text-center kawaii-shadow hover:shadow-lg transition-all">
+          <h3 class="font-medium text-sm text-gray-900">${name}</h3>
+        </div>
+      `;
     
     // Insert icon before the title
     const cardContent = card.querySelector('.bg-white');
     cardContent.insertBefore(iconContainer, cardContent.querySelector('h3'));
     card.onclick = () => {
-      if (isCollection) {
-        navigateToCollection(name);
-      } else {
-        navigateToCategory(name);
-      }
-    };
+        if (isCollection) {
+          navigateToCollection(name);
+        } else {
+          navigateToCategory(name);
+        }
+      };
     box.appendChild(card);
   });
 }
@@ -3970,7 +3975,7 @@ async function initializeCasheaButton(order) {
       alert('Error: No hay productos válidos para procesar con Cashea.');
       return;
     }
-    
+
     const payload = {
       identificationNumber: String(idNumber),
       externalClientId: String(cfg.externalClientId || ''),
@@ -4297,7 +4302,7 @@ function handleSuccessfulPayPalPayment(paypalDetails, originalOrder) {
               orderId = newOrder.id;
               localStorage.setItem(`order_${orderNumber}_supabase_id`, orderId);
               console.log('Order created in Supabase after successful PayPal payment:', orderId);
-            } else {
+      } else {
               throw new Error('Order creation returned no ID');
             }
           } catch (orderError) {
@@ -4306,7 +4311,7 @@ function handleSuccessfulPayPalPayment(paypalDetails, originalOrder) {
             alert('Error: No se pudo crear la orden. Por favor, contacta soporte con tu número de orden: ' + orderNumber);
             return;
           }
-        } else {
+  } else {
           console.error('saveOrderToSupabase function not available!');
           window.paypalOrdersBeingCreated.delete(orderNumber);
           alert('Error: Sistema no disponible. Por favor, contacta soporte.');
@@ -4325,7 +4330,7 @@ function handleSuccessfulPayPalPayment(paypalDetails, originalOrder) {
           const orderWithPayment = {
             ...originalOrder,
             status: 'completed', // Show as completed to customer
-            paymentMethod: 'PayPal',
+    paymentMethod: 'PayPal',
             supabaseOrderId: orderId
           };
           window.saveOrderToHistory(orderWithPayment);
@@ -4369,7 +4374,7 @@ function handleSuccessfulPayPalPayment(paypalDetails, originalOrder) {
           savePaymentCompletion(trackerPaymentData, function(trackerResponse) {
             if (trackerResponse && trackerResponse.success) {
               console.log('Payment saved to Supabase successfully:', trackerResponse);
-            } else {
+    } else {
               console.error('Failed to save payment to Supabase:', trackerResponse);
             }
             resolve(trackerResponse);
@@ -4379,14 +4384,14 @@ function handleSuccessfulPayPalPayment(paypalDetails, originalOrder) {
         // Wait for payment save but with a timeout - don't block redirect too long
         const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 2000)); // 2 second max wait
         await Promise.race([paymentSavePromise, timeoutPromise]);
-      } else {
+  } else {
         console.error('savePaymentCompletion function not available! Check if checkout.js is loaded.');
       }
       
       // Redirect to success page - order data is already in sessionStorage so page can render immediately
       const successUrl = `${window.location.origin}/?page=payment_success&idNumber=${orderNumber}&method=paypal`;
       console.log('Redirecting to PayPal payment success page:', successUrl);
-      window.location.href = successUrl;
+    window.location.href = successUrl;
       
     } catch (error) {
       console.error('Error in createOrderAndSavePayment:', error);
@@ -4658,29 +4663,29 @@ async function handleSuccessfulCasheaPayment(casheaDetails, originalOrder) {
         window.casheaOrdersBeingCreated.delete(orderNumber);
         return;
       }
-      
-      if (window.savePaymentCompletion) {
+  
+  if (window.savePaymentCompletion) {
         console.log('Saving payment with order ID:', orderId);
         // Ensure payment status is 'completed' since we validated it above
         trackerPaymentData.status = 'completed';
         await new Promise((resolve) => {
-          savePaymentCompletion(trackerPaymentData, function(trackerResponse) {
+    savePaymentCompletion(trackerPaymentData, function(trackerResponse) {
             if (trackerResponse && trackerResponse.success) {
               console.log('Payment saved to Supabase successfully!', trackerResponse);
               paymentSaved = true;
-            } else {
+      } else {
               console.error('Failed to save payment to Supabase:', trackerResponse);
               // Don't block redirect, but log the error
-            }
+      }
             resolve(trackerResponse);
-          });
+    });
         });
         
         if (!paymentSaved) {
           console.warn('Payment save may have failed, but continuing to success page');
         }
-      } else {
-        console.error('savePaymentCompletion function not available! Check if checkout.js is loaded.');
+  } else {
+    console.error('savePaymentCompletion function not available! Check if checkout.js is loaded.');
         alert('Error: Sistema de pago no disponible. Por favor, contacta soporte.');
         window.casheaOrdersBeingCreated.delete(orderNumber);
         return;
@@ -4773,13 +4778,13 @@ async function handleSuccessfulCasheaPayment(casheaDetails, originalOrder) {
   };
   
   try {
-    sendToGoogleSheets(orderUpdateData, function(updateResponse) {
-      if (updateResponse.success) {
-        console.log('Order status updated in old system successfully');
-      } else {
-        console.log('Error updating order status in old system (ignored):', updateResponse.error);
-      }
-    });
+  sendToGoogleSheets(orderUpdateData, function(updateResponse) {
+    if (updateResponse.success) {
+      console.log('Order status updated in old system successfully');
+    } else {
+      console.log('Error updating order status in old system (ignored):', updateResponse.error);
+    }
+  });
   } catch (error) {
     console.warn('Google Sheets update failed (expected during migration):', error);
   }
@@ -6539,9 +6544,9 @@ async function loadProductsData() {
           // Clear cache and continue to Supabase load
           clearCache();
         } else {
-          if (window.hideLoadingOverlay) window.hideLoadingOverlay();
-          resolve(cachedData);
-          return;
+        if (window.hideLoadingOverlay) window.hideLoadingOverlay();
+        resolve(cachedData);
+        return;
         }
       }
     }
@@ -6982,8 +6987,8 @@ async function loadProductsData() {
       
       console.log('Products transformed successfully:', {
         productCount: transformedProducts.length,
-        timestamp: new Date().toISOString()
-      });
+          timestamp: new Date().toISOString()
+        });
       
       // Log summary of icon maps
       console.log('Icon Maps Summary:', {
