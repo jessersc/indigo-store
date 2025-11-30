@@ -113,7 +113,7 @@ app.get('/api/cache-version', (req, res) => {
     } else {
       globalThis.lastForceRefresh = now;
     }
-    console.log('📝 Force refresh requested via query parameter, updating timestamp');
+    console.log('Force refresh requested via query parameter, updating timestamp');
   }
   
   // Force refresh if explicitly requested OR if there was a recent force refresh (within 60 seconds - increased from 30)
@@ -158,6 +158,11 @@ app.get('/api/cache-version', (req, res) => {
 // Webhook endpoint for cache refresh
 app.post('/api/webhook/cache-refresh', async (req, res) => {
   try {
+    // Set CORS headers explicitly for webhook endpoint
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
     const { action, timestamp, source } = body;
 

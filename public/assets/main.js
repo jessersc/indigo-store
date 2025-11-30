@@ -3048,29 +3048,49 @@ function renderTagButtons(containerId, values, key, products, outputId, isCollec
     
     // Get icon - try exact match first, then case-insensitive
     let icon = '♡';
-    if (iconMap) {
-      // Try exact match first
+    if (iconMap && Object.keys(iconMap).length > 0) {
+      // Try exact match first (trimmed)
       if (iconMap[trimmedName]) {
         icon = iconMap[trimmedName];
       } else if (iconMap[name]) {
         icon = iconMap[name];
       } else {
-        // Try case-insensitive match
-        const matchingKey = Object.keys(iconMap).find(key => 
-          key.trim().toLowerCase() === trimmedName.toLowerCase()
-        );
+        // Try case-insensitive match with trimmed comparison
+        const matchingKey = Object.keys(iconMap).find(key => {
+          const keyTrimmed = key.trim();
+          const nameTrimmed = trimmedName.trim();
+          return keyTrimmed.toLowerCase() === nameTrimmed.toLowerCase();
+        });
         if (matchingKey) {
           icon = iconMap[matchingKey];
+        } else {
+          // Last attempt: check if any key contains the name or vice versa (for partial matches)
+          const partialMatch = Object.keys(iconMap).find(key => {
+            const keyLower = key.trim().toLowerCase();
+            const nameLower = trimmedName.trim().toLowerCase();
+            return keyLower.includes(nameLower) || nameLower.includes(keyLower);
+          });
+          if (partialMatch) {
+            icon = iconMap[partialMatch];
+          }
         }
       }
     }
     
-    if (!iconMap || icon === '♡') {
-      console.warn(`Icon not found for ${isCollection ? 'collection' : 'category'}: "${trimmedName}"`, {
-        availableKeys: iconMap ? Object.keys(iconMap).slice(0, 10) : 'map not initialized',
-        mapExists: !!iconMap,
-        searchedFor: [trimmedName, name]
-      });
+    // Only warn if icon map exists but is empty, or if we have a map with keys but still can't find it
+    // Don't warn if the map just doesn't exist yet (it will be populated)
+    if (iconMap && Object.keys(iconMap).length > 0 && icon === '♡') {
+      // Only warn once per collection/category name to reduce console spam
+      if (!window._iconWarned) window._iconWarned = {};
+      const warnKey = `${isCollection ? 'col' : 'cat'}_${trimmedName.toLowerCase()}`;
+      if (!window._iconWarned[warnKey]) {
+        window._iconWarned[warnKey] = true;
+        console.warn(`Icon not found for ${isCollection ? 'collection' : 'category'}: "${trimmedName}"`, {
+          availableKeys: Object.keys(iconMap).slice(0, 10),
+          mapSize: Object.keys(iconMap).length,
+          searchedFor: [trimmedName, name]
+        });
+      }
     }
     
     // Create card (works for both categories and collections)
@@ -6727,8 +6747,10 @@ async function loadProductsData() {
           if (!cat || !cat.name) return;
           
           categoryMap[cat.id] = cat.name;
-          // Store icon/image for this category by name (trim name to handle whitespace)
-          const catName = cat.name.trim();
+          // Store icon/image for this category by name (normalize: trim and ensure consistent formatting)
+          const catName = (cat.name || '').trim();
+          if (!catName) return; // Skip empty names
+          
           let iconHtml = '♡'; // Default fallback
           
           // Priority: svg_code > image_url (regardless of display_type for now)
@@ -6738,6 +6760,7 @@ async function loadProductsData() {
             iconHtml = `<img src="${cat.image_url}" alt="${catName}" class="w-8 h-8 object-contain" />`;
           }
           
+          // Store with normalized key (trimmed)
           window.categoryIconsMap[catName] = iconHtml;
           console.log(`Category icon loaded: "${catName}"`, { 
             hasIcon: iconHtml !== '♡', 
@@ -6764,8 +6787,10 @@ async function loadProductsData() {
           if (!col || !col.name) return;
           
           collectionMap[col.id] = col.name;
-          // Store icon/image for this collection by name (trim name to handle whitespace)
-          const colName = col.name.trim();
+          // Store icon/image for this collection by name (normalize: trim and ensure consistent formatting)
+          const colName = (col.name || '').trim();
+          if (!colName) return; // Skip empty names
+          
           let iconHtml = '♡'; // Default fallback
           
           // Priority: svg_code > image_url (regardless of display_type for now)
@@ -6775,6 +6800,7 @@ async function loadProductsData() {
             iconHtml = `<img src="${col.image_url}" alt="${colName}" class="w-8 h-8 object-contain" />`;
           }
           
+          // Store with normalized key (trimmed)
           window.collectionIconsMap[colName] = iconHtml;
           console.log(`📦 Collection icon loaded: "${colName}"`, { 
             hasIcon: iconHtml !== '♡', 
